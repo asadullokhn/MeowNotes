@@ -8,6 +8,7 @@
 
 /* Begin PBXFileReference section */
 		11111111111111111111A001 /* MeowNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeowNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		11111111111111111111B001 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +33,7 @@
 		11111111111111111111A004 = {
 			isa = PBXGroup;
 			children = (
+				11111111111111111111B001 /* Signing.xcconfig */,
 				11111111111111111111A002 /* MeowNotes */,
 				11111111111111111111A005 /* Products */,
 			);
@@ -126,10 +128,10 @@
 /* Begin XCBuildConfiguration section */
 		11111111111111111111A00C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 11111111111111111111B001 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MeowNotes/Preview Content\"";
 				DEVELOPMENT_TEAM = XFJU5ZLRLC;
@@ -157,10 +159,10 @@
 		};
 		11111111111111111111A00D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 11111111111111111111B001 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MeowNotes/Preview Content\"";
 				DEVELOPMENT_TEAM = XFJU5ZLRLC;

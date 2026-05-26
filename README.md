@@ -31,6 +31,8 @@ MeowNotes_CH3/
 ├── .gitattributes
 ├── .swift-version
 ├── README.md                 ← this file
+├── Signing.xcconfig          ← shared signing defaults (see §7)
+├── Local.xcconfig.example    ← copy → Local.xcconfig for personal device builds
 ├── MeowNotes.xcodeproj/      ← Xcode project, committed
 └── MeowNotes/                ← Synchronized Folder — all source code lives here
     ├── MeowNotesApp.swift    ← app entry point (@main)
@@ -117,14 +119,25 @@ If you ever see one of these in `git status`, double-check your `.gitignore`.
 
 ## 7. Running on a real iPhone (no paid account)
 
-1. Plug in your iPhone via USB. Trust the computer.
-2. In Xcode top bar, select your iPhone as the run target.
-3. Click the project in the navigator → target **MeowNotes** → **Signing & Capabilities** → **Team:** *Add an Account…* and log in with your personal Apple ID.
-4. Change the **Bundle Identifier** to something unique to you, e.g. `com.aziz.MeowNotes` (Apple won't let two people use the same bundle ID with free accounts).
-5. ⌘R → on the phone, go to **Settings ▸ General ▸ VPN & Device Management** → trust your Apple ID.
-6. App runs for **7 days**, then re-run from Xcode to extend.
+Apple won't let two free Apple IDs use the same bundle identifier, so each teammate needs their own. We solve this with a **per-developer `Local.xcconfig`** that's gitignored — set it once, never worry again, no merge conflicts.
 
-> Don't commit your personal bundle ID change to `main`. Either keep it as a local-only edit, or we'll add per-developer signing config later.
+**One-time setup:**
+
+1. Copy the template:
+   ```bash
+   cp Local.xcconfig.example Local.xcconfig
+   ```
+2. Open `Local.xcconfig` and edit two values:
+   - `PRODUCT_BUNDLE_IDENTIFIER` — pick something unique, e.g. `com.lenny.MeowNotes`
+   - `DEVELOPMENT_TEAM` — find it in Xcode: *Settings ▸ Accounts ▸ Manage Certificates* → the 10-character string next to "Personal Team"
+3. In Xcode: project → target **MeowNotes** → **Signing & Capabilities** → **Team:** *Add an Account…* and log in with your personal Apple ID.
+4. Plug in your iPhone, trust the computer, select it as the run target.
+5. ⌘R → on the phone: **Settings ▸ General ▸ VPN & Device Management** → trust your Apple ID.
+6. App runs for **7 days**; re-run from Xcode to extend.
+
+**Important:** `Local.xcconfig` is in `.gitignore` and will never be committed. Your personal bundle ID / team ID stay on your machine only. **Do NOT edit `Signing.xcconfig` for your personal setup** — it's the shared default for everyone.
+
+How it works: `Signing.xcconfig` (committed) holds safe defaults. Its last line is `#include? "Local.xcconfig"` — the `?` means "include if it exists, otherwise skip silently." If your `Local.xcconfig` exists, its values override the defaults. No pbxproj edits, no conflicts, ever.
 
 ---
 

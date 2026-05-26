@@ -1,0 +1,11 @@
+// Shared signing defaults — committed to git.
+// Every teammate uses these unless they create their own Local.xcconfig.
+// Simulator builds work with just these defaults.
+
+PRODUCT_BUNDLE_IDENTIFIER = com.adap.MeowNotes
+DEVELOPMENT_TEAM =
+CODE_SIGN_STYLE = Automatic
+
+// Optional per-developer overrides. Local.xcconfig is gitignored.
+// The "?" means Xcode won't error if the file doesn't exist.
+#include? "Local.xcconfig"

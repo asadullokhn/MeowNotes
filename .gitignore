@@ -27,6 +27,11 @@ Packages/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcworkspace/xcuserdata/
 
+# --- Per-developer signing overrides (NEVER commit) ---
+# Bundle ID and team ID live here so each dev can run on their own iPhone
+# without breaking everyone else.
+Local.xcconfig
+
 # --- CocoaPods (we are not using it, but just in case) ---
 Pods/
 

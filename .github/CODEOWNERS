@@ -1,0 +1,4 @@
+# Every change in this repo requires review from @asadullokhn before merging.
+# Combined with branch protection on main, this means no PR can be merged
+# without an approval from the owner.
+*       @asadullokhn

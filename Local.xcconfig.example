@@ -1,0 +1,15 @@
+// Copy this file to Local.xcconfig (which is gitignored) and edit
+// for your personal Apple ID + bundle identifier.
+//
+//   cp Local.xcconfig.example Local.xcconfig
+//
+// You only need this if you want to run on a physical iPhone.
+// Simulator builds work without it.
+
+// Use your own reverse-DNS identifier — Apple won't let two free accounts
+// share a bundle ID. Pattern: com.<yourname>.MeowNotes
+PRODUCT_BUNDLE_IDENTIFIER = com.YOURNAME.MeowNotes
+
+// Find this in Xcode: Settings ▸ Accounts ▸ select your Apple ID ▸ Manage Certificates.
+// The 10-char string in parentheses next to "Personal Team" is your team ID.
+DEVELOPMENT_TEAM = YOUR_TEAM_ID

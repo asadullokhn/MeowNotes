@@ -1,0 +1,23 @@
+# Normalize line endings
+* text=auto eol=lf
+
+# Swift source as text
+*.swift  text diff=swift
+
+# Xcode project files — union merge as a safety net.
+# With Xcode 26 Synchronized Folders these almost never change,
+# but if two PRs touch them the union strategy auto-merges both sides
+# instead of throwing a conflict marker.
+*.pbxproj       merge=union -text
+*.xcworkspacedata merge=union
+*.xcscheme      merge=union
+
+# Treat asset binaries as binary (no diff)
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.pdf  binary
+*.heic binary
+*.mp3  binary
+*.mp4  binary
+*.mov  binary

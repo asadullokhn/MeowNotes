@@ -164,3 +164,42 @@ xcodebuild -project MeowNotes.xcodeproj \
 ```
 
 You should see `** BUILD SUCCEEDED **` at the end.
+
+---
+
+## 10. Who owns which view
+
+Every view is a separate file under `MeowNotes/Views/` so two people can never edit the same file at the same time. Pick one, write your name on the `Owner:` comment at the top of the file, and you own it.
+
+**Navigation is already wired** — you don't need to touch `ContentView.swift` or `HomeView.swift`. Just open the file with your name on it, replace the placeholder body, and your view will be reachable from the home screen.
+
+### Top-level screens
+
+| View | File | Owner |
+|---|---|---|
+| Home dashboard | [MeowNotes/Views/HomeView.swift](MeowNotes/Views/HomeView.swift) | TBD |
+| Login | [MeowNotes/Views/LoginView.swift](MeowNotes/Views/LoginView.swift) | TBD |
+| Account / profile | [MeowNotes/Views/AccountView.swift](MeowNotes/Views/AccountView.swift) | TBD |
+| Sitter Guide (public) | [MeowNotes/Views/GuideView.swift](MeowNotes/Views/GuideView.swift) | TBD |
+
+### Modal edit sheets (opened from Home)
+
+| Sheet | File | Owner |
+|---|---|---|
+| Personality | [MeowNotes/Views/Sheets/EditPersonalityView.swift](MeowNotes/Views/Sheets/EditPersonalityView.swift) | TBD |
+| Routine | [MeowNotes/Views/Sheets/EditRoutineView.swift](MeowNotes/Views/Sheets/EditRoutineView.swift) | TBD |
+| Basic Care | [MeowNotes/Views/Sheets/EditBasicCareView.swift](MeowNotes/Views/Sheets/EditBasicCareView.swift) | TBD |
+| Preferences | [MeowNotes/Views/Sheets/EditPreferencesView.swift](MeowNotes/Views/Sheets/EditPreferencesView.swift) | TBD |
+| Caution | [MeowNotes/Views/Sheets/EditCautionView.swift](MeowNotes/Views/Sheets/EditCautionView.swift) | TBD |
+| Medical | [MeowNotes/Views/Sheets/EditMedicalView.swift](MeowNotes/Views/Sheets/EditMedicalView.swift) | TBD |
+| Notes | [MeowNotes/Views/Sheets/EditNotesView.swift](MeowNotes/Views/Sheets/EditNotesView.swift) | TBD |
+| New Cat | [MeowNotes/Views/Sheets/NewCatView.swift](MeowNotes/Views/Sheets/NewCatView.swift) | TBD |
+| Share | [MeowNotes/Views/Sheets/ShareView.swift](MeowNotes/Views/Sheets/ShareView.swift) | TBD |
+
+### Rules
+
+- **Do not edit `ContentView.swift` or `HomeView.swift`** unless you're adding/removing a whole screen — wiring is centralized there for a reason.
+- **Do not delete the `onSignIn` / `onSignOut` callbacks** in `LoginView` and `HomeView` — `ContentView` depends on them.
+- **Each sheet already has a working "Done" button** that dismisses it. Don't remove it.
+- **Use SwiftUI preview** (`#Preview { … }` at the bottom of each file) to iterate fast without running the full app.
+- When you claim a view: edit the `// Owner: TBD` line at the top of your file, commit on a branch named `feat/<yourname>-<view>`, open a PR.

@@ -123,13 +123,13 @@ struct HomeView: View {
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .newCat:      NewCatView()
-            case .personality: EditPersonalityView()
+            case .personality: PersonalityFlowSheet()
             case .routine:     EditRoutineView()
             case .basicCare:   EditBasicCareView()
             case .preferences: EditPreferencesView()
             case .caution:     EditCautionView()
             case .medical:     EditMedicalView()
-            case .notes:       EditNotesView()
+            case .notes:       AdditionalPageView()
             case .share:       ShareView()
             case .editCat:       EditCatProfileView()
             }

@@ -28,7 +28,7 @@ struct EditBasicCareView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color("bg").ignoresSafeArea()
+                Color("AppBg").ignoresSafeArea()
                 
                 Form {
                     VStack(alignment: .leading, spacing: 8) {
@@ -78,7 +78,7 @@ struct EditBasicCareView: View {
                                 .foregroundStyle(textColor)
                         }
                     }
-                    .listRowBackground(Color(.bg2))
+                    .listRowBackground(Color("BubbleBg"))
 
                     Section {
                         VStack(alignment: .leading, spacing: 16) {

@@ -1,5 +1,5 @@
 //
-//  AdditionalPageTest.swift
+//  AdditionalPageView.swift
 //  MeowNotes
 //
 //  Created by Orenz on 28/05/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AdditionalPageTest: View {
+struct AdditionalPageView: View {
     @State private var vm = AdditionalViewModel()
     @Environment(\.dismiss) private var dismiss
     
@@ -147,10 +147,9 @@ struct AdditionalPageTest: View {
                                                 Text(tag)
                                                     .padding(.horizontal, 14)
                                                     .padding(.vertical, 8)
-                                                    .foregroundColor(Color("TextColor"))
-                                                    .background(Color("BubbleBg"))
+                                                    .background(isSelected ? Color.gray.opacity(0.4) : Color("BubbleBg"))
+                                                    .foregroundColor(isSelected ? Color.gray.opacity(0.8) : Color("TextColor"))
                                                     .clipShape(Capsule())
-                                                    .opacity(isSelected ? 0.4 : 1)
                                             }
                                             .buttonStyle(.plain)
                                         }
@@ -205,5 +204,5 @@ struct AdditionalPageTest: View {
 }
 
 #Preview{
-    AdditionalPageTest()
+    AdditionalPageView()
 }

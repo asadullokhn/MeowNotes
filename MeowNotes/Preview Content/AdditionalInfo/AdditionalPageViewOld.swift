@@ -1,5 +1,5 @@
 //
-//  AdditionalPageView.swift
+//  AdditionalPageViewOld.swift
 //  MeowNotes
 //
 //  Created by Orenz on 28/05/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AdditionalPageView: View {
+struct AdditionalPageViewOld: View {
     @State private var vm = AdditionalViewModel()
     @Environment(\.dismiss) private var dismiss
     
@@ -190,7 +190,7 @@ struct AdditionalPageView: View {
 
 #Preview {
     NavigationStack {
-        AdditionalPageView()
+        AdditionalPageViewOld()
     }
 }
 

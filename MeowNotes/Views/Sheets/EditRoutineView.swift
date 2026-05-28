@@ -46,8 +46,8 @@ struct EditRoutineView: View {
                     
                     Section {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Tap to add")
-                                .font(.title2)
+                            Text("TAP TO ADD")
+                                .font(.headline)
                                 .bold()
                                 .foregroundStyle(textColor)
 

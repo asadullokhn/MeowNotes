@@ -23,6 +23,7 @@ struct EditBasicCareView: View {
         "Give meds"
     ]
     private let textColor = Color(red: 61.0 / 255.0, green: 51.0 / 255.0, blue: 41.0 / 255.0)
+    private let commonOnesBackground = Color(red: 243.0 / 255.0, green: 236.0 / 255.0, blue: 226.0 / 255.0)
 
     var body: some View {
         NavigationStack {
@@ -79,26 +80,36 @@ struct EditBasicCareView: View {
                     }
                     .listRowBackground(Color(.bg2))
 
-                    Section("Common Ones") {
-                        FlowLayout(spacing: 12) {
-                            ForEach(commonChecklistItems, id: \.self) { item in
-                                let isAdded = isCommonItemAdded(item)
-                                Button {
-                                    addCommonChecklistItem(item)
-                                } label: {
-                                    ViewThatFits(in: .horizontal) {
-                                        commonItemLabel(item, expanded: false)
-                                        commonItemLabel(item, expanded: true)
+                    Section {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("COMMON ONES")
+                                .font(.headline)
+                                .bold()
+                                .foregroundStyle(textColor)
+                            
+                            FlowLayout(spacing: 12) {
+                                ForEach(commonChecklistItems, id: \.self) { item in
+                                    let isAdded = isCommonItemAdded(item)
+                                    Button {
+                                        addCommonChecklistItem(item)
+                                    } label: {
+                                        ViewThatFits(in: .horizontal) {
+                                            commonItemLabel(item, expanded: false)
+                                            commonItemLabel(item, expanded: true)
+                                        }
                                     }
+                                    .buttonStyle(.plain)
+                                    .disabled(isAdded)
+                                    .opacity(isAdded ? 0.4 : 1)
                                 }
-                                .buttonStyle(.plain)
-                                .disabled(isAdded)
-                                .opacity(isAdded ? 0.4 : 1)
                             }
+                            .padding(.vertical, 4)
                         }
-                        .padding(.vertical, 4)
+                        
+                        
+                        
                     }
-                    .listRowBackground(Color("bg2"))
+                    .listRowBackground(commonOnesBackground)
                 }
                 .scrollContentBackground(.hidden)
                 .navigationTitle("Basic Care")

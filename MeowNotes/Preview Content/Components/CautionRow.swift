@@ -104,7 +104,6 @@ struct CautionRow: View {
             
             // Delete Button
             Button {
-                
                 if editingCautionID == caution.id {
                     editingCautionID = nil
                     focusedCautionID.wrappedValue = nil
@@ -112,23 +111,17 @@ struct CautionRow: View {
                 
                 let cautionText = caution.text
                 
-                if !savedCommonCautions.contains(where: {
-                    $0.text == cautionText
-                }) {
+                let isPredefined = CautionModel.predefined.contains(where: { $0.text == cautionText })
+                
+                if !isPredefined && !savedCommonCautions.contains(where: { $0.text == cautionText }) {
                     savedCommonCautions.append(caution)
                 }
                 
-                withAnimation(
-                    .spring(
-                        response: 0.3,
-                        dampingFraction: 0.8
-                    )
-                ) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     cautions.removeAll { item in
                         item.id == caution.id
                     }
                 }
-                
             } label: {
                 
                 Circle()

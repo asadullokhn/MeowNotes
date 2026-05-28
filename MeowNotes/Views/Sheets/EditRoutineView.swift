@@ -25,7 +25,7 @@ struct EditRoutineView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color("bg").ignoresSafeArea()
+                Color("AppBg").ignoresSafeArea()
 
                 Form {
                     VStack(alignment: .leading, spacing: 8) {
@@ -65,7 +65,7 @@ struct EditRoutineView: View {
                                                 .padding(.horizontal, 6)
                                                 .background(
                                                     RoundedRectangle(cornerRadius: 6)
-                                                        .fill(Color("bg2"))
+                                                        .fill(Color("BubbleBg"))
                                                 )
                                             Text(routine.title)
                                                 .lineLimit(1)
@@ -75,7 +75,7 @@ struct EditRoutineView: View {
                                         .padding(.horizontal, 10)
                                         .background(
                                             Capsule()
-                                                .fill(Color("bg2"))
+                                                .fill(Color("BubbleBg"))
                                         )
                                     }
                                     .buttonStyle(.plain)
@@ -147,7 +147,7 @@ struct EditRoutineView: View {
                             }
                         }
                     }
-                    .listRowBackground(Color("bg2"))
+                    .listRowBackground(Color("BubbleBg"))
 
                     Section {
                         Button {
@@ -159,14 +159,14 @@ struct EditRoutineView: View {
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     RoundedRectangle(cornerRadius: 32)
-                                        .fill(Color("bg2"))
+                                        .fill(Color("BubbleBg"))
                                 )
                         }
                         .buttonStyle(.plain)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                     }
-                    .listRowBackground(Color("bg2"))
+                    .listRowBackground(Color("BubbleBg"))
                 }
                 .scrollContentBackground(.hidden)
                 .navigationTitle("Routine")

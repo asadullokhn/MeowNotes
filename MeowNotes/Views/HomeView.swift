@@ -87,22 +87,24 @@ struct HomeView: View {
                     }
                     
                     // MARK: - Share Banner
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .frame(width: 370, height: 75)
-                            .foregroundStyle(Color.brown)
-                        
-                        HStack(spacing: 10) {
-                            Image(systemName: "square.and.arrow.up")
-                                .foregroundColor(.white)
-                            Text("Share Mochi's Care Guide")
-                                .font(.caption)
-                                .foregroundColor(.white)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.white)
+                    Button(action: { activeSheet = .share }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .frame(width: 370, height: 75)
+                                .foregroundStyle(Color.brown)
+                            
+                            HStack(spacing: 10) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .foregroundColor(.white)
+                                Text("Share Mochi's Care Guide")
+                                    .font(.caption)
+                                    .foregroundColor(.white)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 40)
                         }
-                        .padding(.horizontal, 40) // Fixed padding so text stays inside banner
                     }
                     
                     // MARK: - 2-Column Grid

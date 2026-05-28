@@ -14,10 +14,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		11111111111111111111A002 /* MeowNotes */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
 			path = MeowNotes;
 			sourceTree = "<group>";
 		};

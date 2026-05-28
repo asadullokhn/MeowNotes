@@ -39,7 +39,7 @@ struct HomeView: View {
                         .padding(.leading,10)
                         Spacer()
                         Button {
-                            print("Button tapped")
+                            showAccount = true
                         } label: {
                             HStack{
                                 Image(systemName: "person.crop.circle")
@@ -133,6 +133,9 @@ struct HomeView: View {
             case .share:       ShareView()
             case .editCat:       EditCatProfileView()
             }
+        }
+        .sheet(isPresented: $showAccount) {
+            AccountView()
         }
     }
 }

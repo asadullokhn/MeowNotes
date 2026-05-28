@@ -1,14 +1,4 @@
-// Owner: TBD (claim by editing this line)
-//
-// Home screen — main dashboard. Shows a grid/list of cards that open sheets.
-// The sheet wiring is centralized here via `activeSheet` so individual
-// sheet files (EditPersonalityView, EditRoutineView, etc.) stay isolated.
-//
-// To wire a NEW sheet:
-//   1. Add a case to HomeSheet enum below
-//   2. Add a `Card(...)` row in the body
-//   3. Add a `case .yourSheet: YourSheetView()` in the .sheet modifier
-// That's it — no other file needs editing.
+
 
 import SwiftUI
 

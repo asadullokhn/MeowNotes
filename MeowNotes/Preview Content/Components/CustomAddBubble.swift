@@ -30,7 +30,7 @@ struct CustomAddBubble: View {
                     .font(.system(size: 10, weight: .bold))
             }
         }
-        .foregroundColor(Color("TextColor"))
+        .foregroundColor(Color("BubbleText"))
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(Color("BubbleBg"))

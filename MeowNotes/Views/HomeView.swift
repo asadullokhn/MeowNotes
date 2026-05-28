@@ -44,7 +44,7 @@ struct HomeView: View {
             .sheet(item: $activeSheet) { sheet in
                 switch sheet {
                 case .newCat:      NewCatView()
-                case .personality: PersonalityPageView()
+                case .personality: PersonalityFlowSheet()
                 case .routine:     EditRoutineView()
                 case .basicCare:   EditBasicCareView()
                 case .preferences: EditPreferencesView()

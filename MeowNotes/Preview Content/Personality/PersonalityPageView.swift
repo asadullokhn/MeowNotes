@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PersonalityPageView: View {
-    @State private var vm = PersonalityViewModel()
+    @State var vm: PersonalityViewModel
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -139,6 +139,7 @@ struct PersonalityPageView: View {
                 // MARK: Bottom Buttons
                 HStack(spacing: 16) {
                     Button {
+                        dismiss()
                     } label: {
                         Text("Cancel")
                             .fontWeight(.semibold)
@@ -149,7 +150,8 @@ struct PersonalityPageView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 30))
                     }
                     
-                    Button {
+                    NavigationLink {
+                        PersonalityPageView2(vm: vm)
                     } label: {
                         Text("Continue")
                             .fontWeight(.semibold)
@@ -163,13 +165,16 @@ struct PersonalityPageView: View {
                 .padding()
             }
             .background(Color("AppBg"))
+            
+            //to show sheet handle
+            .presentationDragIndicator(.visible)
         }
     }
 }
 
-#Preview {
-    NavigationStack {
-        PersonalityPageView()
-    }
-}
+//#Preview {
+//    NavigationStack {
+//        PersonalityPageView()
+//    }
+//}
 

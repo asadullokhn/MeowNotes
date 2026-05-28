@@ -5,7 +5,6 @@
 //  Created by Orenz on 28/05/26.
 //
 
-
 import SwiftUI
 
 struct AdditionalPageView: View {
@@ -48,6 +47,7 @@ struct AdditionalPageView: View {
                                 .font(.system(size: 14))
                                 .foregroundColor(Color("TextColor"))
                         }
+                        
                         // MARK: Add Custom
                         VStack(alignment: .leading, spacing: 12) {
                             Text("ADD YOUR OWN")
@@ -94,7 +94,7 @@ struct AdditionalPageView: View {
                                     .foregroundColor(Color("TextColor"))
                                 
                                 ForEach(vm.selectedTags, id: \.self) { tag in
-                                    SelectedBubbleLongEdit(
+                                    SelectedBubbleEdit(
                                         text: tag,
                                         onRemove: {
                                             vm.removeTag(tag)
@@ -108,37 +108,35 @@ struct AdditionalPageView: View {
                         }
                         
                         // MARK: Available
-                        if !vm.availableTags.isEmpty || !vm.customAvailableTags.isEmpty {
-                            
                             VStack(alignment: .leading, spacing: 14) {
                                 Text("NEED A NUDGE?")
                                     .font(.caption)
                                     .fontWeight(.bold)
                                     .foregroundColor(Color("TextColor"))
                                 
-                                Section {
-                                    ForEach(vm.availableTags, id: \.self) { tag in
-                                        AddBubble(text: tag) {
+                                ForEach(vm.availableTags, id: \.self) { tag in
+                                    DisableAddBubble(
+                                        text: tag,
+                                        onAdd: {
                                             vm.addTag(tag)
-                                        }
-                                    }
+                                        },
+                                        disabled: vm.selectedTags.contains(tag)
+                                    )
                                 }
                                 
-                                Section {
-                                    ForEach(vm.customAvailableTags, id: \.self) { tag in
-                                        CustomAddBubble(
-                                            text: tag,
-                                            onAdd: {
-                                                vm.addCustomAvailableTag(tag)
-                                            },
-                                            onDelete: {
-                                                vm.deleteCustomTag(tag)
-                                            }
-                                        )
-                                    }
+                                ForEach(vm.customAvailableTags, id: \.self) { tag in
+                                    CustomAddBubble(
+                                        text: tag,
+                                        onAdd: {
+                                            vm.addCustomAvailableTag(tag)
+                                        },
+                                        onDelete: {
+                                            vm.deleteCustomTag(tag)
+                                        }
+                                    )
                                 }
                             }
-                        }
+                        
                     }
                     .padding()
                 }
@@ -147,6 +145,7 @@ struct AdditionalPageView: View {
                 // MARK: Bottom Buttons
                 HStack(spacing: 16) {
                     Button {
+                        dismiss()
                     } label: {
                         Text("Cancel")
                             .fontWeight(.semibold)
@@ -171,6 +170,9 @@ struct AdditionalPageView: View {
                 .padding()
             }
             .background(Color("AppBg"))
+            
+            //to show sheet handle
+            .presentationDragIndicator(.visible)
         }
     }
 }

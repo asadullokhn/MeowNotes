@@ -30,7 +30,6 @@ final class AdditionalViewModel {
     
     // MARK: - Functions
     func addTag(_ tag: String) {
-        availableTags.removeAll { $0 == tag }
         selectedTags.append(tag)
     }
     

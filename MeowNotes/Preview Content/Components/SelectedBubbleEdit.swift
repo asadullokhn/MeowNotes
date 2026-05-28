@@ -1,5 +1,5 @@
 //
-//  SelectedBubbleLongEdit.swift
+//  SelectedBubbleEdit.swift
 //  MeowNotes
 //
 //  Created by Orenz on 28/05/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SelectedBubbleLongEdit: View {
+struct SelectedBubbleEdit: View {
     @State private var isEditing = false
     @State private var editedText: String
     @FocusState private var isFocused: Bool

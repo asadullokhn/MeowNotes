@@ -43,6 +43,8 @@ final class PersonalityViewModel {
     var customAvailableTags: [String] = []
 
     var newTag: String = ""
+    
+    var notes: String = "To keep me comfortable: Leave a sunny window spot within reach; still watch the door so they don’t slip out; set aside a little one-on-one time each visit; a dawn yowl usually just means breakfast; keep a wand toy handy for a few minutes of play each visit; don’t worry if you find them up high — it’s normal; keep things quiet and give space during anything sudden or loud; expect plenty of meows — talking back is welcome."
 
     // MARK: - Functions
     func addTag(_ tag: String) {
@@ -79,5 +81,10 @@ final class PersonalityViewModel {
 
     func deleteCustomTag(_ tag: String) {
         customAvailableTags.removeAll { $0 == tag }
+    }
+    
+    func generateAgain() {
+        // your regeneration logic here
+        notes = "New generated text..."
     }
 }

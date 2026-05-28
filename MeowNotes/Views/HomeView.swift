@@ -22,7 +22,7 @@ struct HomeView: View {
                     Card(title: "Preferences")  { activeSheet = .preferences }
                     Card(title: "Caution")      { activeSheet = .caution }
                     Card(title: "Medical")      { activeSheet = .medical }
-                    Card(title: "Notes")        { activeSheet = .notes }
+                    Card(title: "Additional Info")        { activeSheet = .notes }
                 }
                 Section("Actions") {
                     Card(title: "Add new cat")  { activeSheet = .newCat }
@@ -44,13 +44,13 @@ struct HomeView: View {
             .sheet(item: $activeSheet) { sheet in
                 switch sheet {
                 case .newCat:      NewCatView()
-                case .personality: EditPersonalityView()
+                case .personality: PersonalityPageView()
                 case .routine:     EditRoutineView()
                 case .basicCare:   EditBasicCareView()
                 case .preferences: EditPreferencesView()
                 case .caution:     EditCautionView()
                 case .medical:     EditMedicalView()
-                case .notes:       EditNotesView()
+                case .notes:       AdditionalPageView()
                 case .share:       ShareView()
                 }
             }

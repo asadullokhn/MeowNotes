@@ -16,7 +16,7 @@ struct FlowLayout: Layout {
         cache: inout ()
     ) -> CGSize {
 
-        let width = proposal.width ?? 0
+        let maxWidth = proposal.width ?? .infinity
 
         var x: CGFloat = 0
         var y: CGFloat = 0
@@ -25,7 +25,7 @@ struct FlowLayout: Layout {
         for view in subviews {
             let size = view.sizeThatFits(.unspecified)
 
-            if x + size.width > width {
+            if x > 0, x + size.width > maxWidth {
                 x = 0
                 y += rowHeight + spacing
                 rowHeight = 0
@@ -35,7 +35,10 @@ struct FlowLayout: Layout {
             x += size.width + spacing
         }
 
-        return CGSize(width: width, height: y + rowHeight)
+        return CGSize(
+            width: proposal.width ?? 0,
+            height: y + rowHeight
+        )
     }
 
     func placeSubviews(
@@ -49,10 +52,12 @@ struct FlowLayout: Layout {
         var y = bounds.minY
         var rowHeight: CGFloat = 0
 
+        let maxWidth = bounds.width
+
         for view in subviews {
             let size = view.sizeThatFits(.unspecified)
 
-            if x + size.width > bounds.maxX {
+            if x > bounds.minX, x + size.width > bounds.minX + maxWidth {
                 x = bounds.minX
                 y += rowHeight + spacing
                 rowHeight = 0
@@ -60,7 +65,7 @@ struct FlowLayout: Layout {
 
             view.place(
                 at: CGPoint(x: x, y: y),
-                proposal: ProposedViewSize(size)
+                proposal: ProposedViewSize(width: size.width, height: size.height)
             )
 
             x += size.width + spacing

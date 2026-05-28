@@ -6,51 +6,45 @@
 //
 
 import SwiftUI
+import Observation
 
-class PersonalityViewModel: ObservableObject {
-    // MARK: - Predefined
+@Observable
+final class PersonalityViewModel {
     let predefinedTags = [
         "shy with strangers",
         "playful",
-        "loves brushing",
         "clingy",
         "territorial",
-        "hates loud noises",
         "sun bather",
         "window-watcher",
         "climbs everything",
         "talkative",
         "sleeps a lot",
-        "attention-seeker",
         "fearless",
-        "dignified",
         "greets visitors"
     ]
 
-    // MARK: - Published State
-    @Published var selectedTags: [String] = []
-    @Published var availableTags: [String] = [
+    var selectedTags: [String] = []
+
+    var availableTags: [String] = [
         "shy with strangers",
         "playful",
-        "loves brushing",
         "clingy",
         "territorial",
-        "hates loud noises",
         "sun bather",
         "window-watcher",
         "climbs everything",
         "talkative",
         "sleeps a lot",
-        "attention-seeker",
         "fearless",
-        "dignified",
         "greets visitors"
     ]
-    
-    @Published var customAvailableTags: [String] = []
-    @Published var newTag = ""
 
-    // MARK: - Actions
+    var customAvailableTags: [String] = []
+
+    var newTag: String = ""
+
+    // MARK: - Functions
     func addTag(_ tag: String) {
         availableTags.removeAll { $0 == tag }
         selectedTags.append(tag)
@@ -58,6 +52,7 @@ class PersonalityViewModel: ObservableObject {
 
     func removeTag(_ tag: String) {
         selectedTags.removeAll { $0 == tag }
+
         if predefinedTags.contains(tag) {
             if !availableTags.contains(tag) {
                 availableTags.append(tag)
@@ -70,10 +65,9 @@ class PersonalityViewModel: ObservableObject {
     }
 
     func addCustomTag() {
-        let trimmed = newTag
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        
+        let trimmed = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+
         selectedTags.append(trimmed)
         newTag = ""
     }

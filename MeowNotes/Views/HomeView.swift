@@ -23,11 +23,9 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     HStack {
-                        Button {
-                            print("Button tapped")
-                        } label: {
+                        Button(action : { activeSheet = .newCat}) {
                             HStack{
-                                Image(systemName: "pencil")
+                                Image(systemName: "cat")
                                 Text("Mochi")
                                 Image(systemName: "chevron.down")
                             }
@@ -55,7 +53,7 @@ struct HomeView: View {
                     
                     // MARK: - Hero Image
                     ZStack(alignment: .bottomLeading) {
-                        Image(systemName: "tortoise.fill") // Placeholder
+                        Image("Cat") // Placeholder
                             .frame(width: 350, height: 200)
                             .background(Color.gray.opacity(0.3))
                             .clipShape(RoundedRectangle(cornerRadius: 30))
@@ -77,9 +75,12 @@ struct HomeView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Mochi")
                                 .font(.headline)
+                                .foregroundColor(.white)
                             
                             Text("British Shorthair, 2")
                                 .font(.subheadline)
+                                .foregroundColor(.white)
+                            
                         }
                         .foregroundColor(.black)
                         .padding(.horizontal, 30)
@@ -92,7 +93,7 @@ struct HomeView: View {
                             RoundedRectangle(cornerRadius: 20)
                                 .frame(width: 370, height: 75)
                                 .foregroundStyle(Color.brown)
-                            
+
                             HStack(spacing: 10) {
                                 Image(systemName: "square.and.arrow.up")
                                     .foregroundColor(.white)
@@ -106,7 +107,7 @@ struct HomeView: View {
                             .padding(.horizontal, 40)
                         }
                     }
-                    
+
                     // MARK: - 2-Column Grid
                     LazyVGrid(columns: columns, spacing: 16) {
                         GridCard(icon: "pawprint", title: "Personality", subtitle: "7 traits") { activeSheet = .personality }
@@ -120,7 +121,7 @@ struct HomeView: View {
                 }
                 .padding(.top, 10)
             }
-            .background(Color(red: 0.96, green: 0.95, blue: 0.93)) // Full screen background
+            .background(Color(red: 0.96, green: 0.95, blue: 0.93))
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
@@ -133,8 +134,7 @@ struct HomeView: View {
             case .medical:     EditMedicalView()
             case .notes:       AdditionalPageView()
             case .share:       ShareView()
-            case .editCat:       EditCatProfileView()
-            }
+            case .editCat:       EditCatProfileView()            }
         }
         .sheet(isPresented: $showAccount) {
             AccountView()

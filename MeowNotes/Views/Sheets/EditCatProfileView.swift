@@ -8,6 +8,7 @@ import SwiftUI
 
 struct EditCatProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthManager.self) private var auth
     @State private var catName: String = ""
     @State private var photoLink: String = "https://placecats.com/neo/600/600"
     @State private var age: String = "3"
@@ -187,8 +188,15 @@ struct EditCatProfileView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle("Luna . Basics")
+        .navigationTitle("\(auth.currentCat?.name ?? "Cat") · Basics")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            guard let cat = auth.currentCat else { return }
+            if catName.isEmpty { catName = cat.name }
+            if let breed = cat.breed { selectedBreed = breed }
+            if let age = cat.age { self.age = "\(age)" }
+            if let photo = cat.photo { photoLink = photo }
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { dismiss() } label:{ Image(systemName: "xmark") }
@@ -198,4 +206,4 @@ struct EditCatProfileView: View {
         .background(Color(red: 0.96, green: 0.95, blue: 0.93))    }
 }
 
-#Preview { EditCatProfileView() }
+#Preview { EditCatProfileView().environment(AuthManager()) }

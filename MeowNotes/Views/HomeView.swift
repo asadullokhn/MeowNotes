@@ -20,35 +20,6 @@ struct HomeView: View {
             // Using a ScrollView so the grid can scroll on smaller screens
             ScrollView {
                 VStack(spacing: 20) {
-                    HStack {
-                        Button(action : { activeSheet = .newCat}) {
-                            HStack{
-                                Image(systemName: "cat")
-                                Text("Mochi")
-                                Image(systemName: "chevron.down")
-                            }
-                            .padding(10)
-                            .background(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .foregroundColor(.brown)
-                        }
-                        .padding(.leading,10)
-                        Spacer()
-                        Button {
-                            activeSheet = .account
-                        } label: {
-                            HStack{
-                                Image(systemName: "person.crop.circle")
-                            }
-                            .padding(10)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .foregroundColor(.brown)
-                        }
-                        .padding(.trailing,20)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
                     // MARK: - Hero Image
                     ZStack(alignment: .bottomLeading) {
                         Image("Cat") // Placeholder
@@ -120,6 +91,37 @@ struct HomeView: View {
                 .padding(.top, 10)
             }
             .background(Color(red: 0.96, green: 0.95, blue: 0.93))
+            .toolbar(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .top) {
+                HStack {
+                    Button(action: { activeSheet = .newCat }) {
+                        HStack {
+                            Image(systemName: "cat")
+                            Text("Mochi")
+                            Image(systemName: "chevron.down")
+                        }
+                        .padding(10)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .foregroundColor(.brown)
+                    }
+                    .padding(.leading, 10)
+                    Spacer()
+                    Button {
+                        activeSheet = .account
+                    } label: {
+                        Image(systemName: "person.crop.circle")
+                            .padding(10)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .foregroundColor(.brown)
+                    }
+                    .padding(.trailing, 20)
+                }
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .background(Color(red: 0.96, green: 0.95, blue: 0.93))
+            }
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {

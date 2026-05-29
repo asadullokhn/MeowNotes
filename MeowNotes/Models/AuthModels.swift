@@ -19,6 +19,20 @@ struct Cat: Codable, Identifiable, Equatable {
     let age: Int?
     let photo: String?
     let personalitySummary: String?
+    let sharedLinks: [SharedLink]?
+
+    // First active share link, if any — used to build the sitter guide URL.
+    var shareToken: String? {
+        (sharedLinks?.first { $0.status == "active" } ?? sharedLinks?.first)?.token
+    }
+}
+
+// Subset of a cat's share link (server sends more fields, which decoding ignores).
+struct SharedLink: Codable, Identifiable, Equatable {
+    let id: String
+    let token: String
+    let label: String?
+    let status: String?
 }
 
 // GET /api/me  and  POST /api/auth/{login,register}

@@ -13,8 +13,15 @@ let columns = [
 
 struct HomeView: View {
     var onSignOut: () -> Void
+    @Environment(AuthManager.self) private var auth
     @State private var activeSheet: HomeSheet?
-    
+
+    private var cat: Cat? { auth.currentCat }
+    private var catName: String { cat?.name ?? "Your cat" }
+    private var catSubtitle: String {
+        [cat?.breed, cat?.age.map { "\($0)" }].compactMap { $0 }.joined(separator: ", ")
+    }
+
     var body: some View {
         NavigationStack {
             // Using a ScrollView so the grid can scroll on smaller screens
@@ -22,11 +29,15 @@ struct HomeView: View {
                 VStack(spacing: 20) {
                     // MARK: - Hero Image
                     ZStack(alignment: .bottomLeading) {
-                        Image("Cat") // Placeholder
-                            .frame(width: 350, height: 200)
-                            .background(Color.gray.opacity(0.3))
-                            .clipShape(RoundedRectangle(cornerRadius: 30))
-                        
+                        AsyncImage(url: URL(string: cat?.photo ?? "")) { image in
+                            image.resizable().scaledToFill()
+                        } placeholder: {
+                            Image("Cat").resizable().scaledToFill()
+                        }
+                        .frame(width: 350, height: 200)
+                        .background(Color.gray.opacity(0.3))
+                        .clipShape(RoundedRectangle(cornerRadius: 30))
+
                         Button(action: { activeSheet = .editCat }) {
                             HStack{
                                 Image(systemName: "pencil")
@@ -42,14 +53,15 @@ struct HomeView: View {
                         .frame(width: 350, height: 200, alignment: .topTrailing)
                         
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Mochi")
+                            Text(catName)
                                 .font(.headline)
                                 .foregroundColor(.white)
-                            
-                            Text("British Shorthair, 2")
-                                .font(.subheadline)
-                                .foregroundColor(.white)
-                            
+
+                            if !catSubtitle.isEmpty {
+                                Text(catSubtitle)
+                                    .font(.subheadline)
+                                    .foregroundColor(.white)
+                            }
                         }
                         .foregroundColor(.black)
                         .padding(.horizontal, 30)
@@ -66,7 +78,7 @@ struct HomeView: View {
                             HStack(spacing: 10) {
                                 Image(systemName: "square.and.arrow.up")
                                     .foregroundColor(.white)
-                                Text("Share Mochi's Care Guide")
+                                Text("Share \(catName)'s Care Guide")
                                     .font(.caption)
                                     .foregroundColor(.white)
                                 Spacer()
@@ -94,10 +106,28 @@ struct HomeView: View {
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top) {
                 HStack {
-                    Button(action: { activeSheet = .newCat }) {
+                    Menu {
+                        ForEach(auth.cats) { c in
+                            Button {
+                                auth.selectCat(c.id)
+                            } label: {
+                                if c.id == cat?.id {
+                                    Label(c.name, systemImage: "checkmark")
+                                } else {
+                                    Text(c.name)
+                                }
+                            }
+                        }
+                        Divider()
+                        Button {
+                            activeSheet = .newCat
+                        } label: {
+                            Label("Add new cat", systemImage: "plus")
+                        }
+                    } label: {
                         HStack {
                             Image(systemName: "cat")
-                            Text("Mochi")
+                            Text(catName)
                             Image(systemName: "chevron.down")
                         }
                         .padding(10)
@@ -194,4 +224,5 @@ struct GridCard: View {
 
 #Preview {
     HomeView(onSignOut: {})
+        .environment(AuthManager())
 }

@@ -1,0 +1,26 @@
+name: Signing guard
+
+# Signing identity lives in Signing.xcconfig (with per-developer Local.xcconfig
+# overrides), never hardcoded in the project file. Branches cut from old history
+# keep re-introducing it, so fail fast when it shows up.
+
+on:
+  pull_request:
+    paths:
+      - "MeowNotes.xcodeproj/project.pbxproj"
+  push:
+    branches: [main]
+
+jobs:
+  no-hardcoded-signing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject hardcoded signing in project.pbxproj
+        run: |
+          pbxproj="MeowNotes.xcodeproj/project.pbxproj"
+          if grep -nE 'DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER|MeowRy' "$pbxproj"; then
+            echo "::error::Hardcoded signing found in $pbxproj. Move DEVELOPMENT_TEAM / PRODUCT_BUNDLE_IDENTIFIER to Signing.xcconfig (or Local.xcconfig) and remove these lines."
+            exit 1
+          fi
+          echo "OK — no hardcoded signing in $pbxproj."

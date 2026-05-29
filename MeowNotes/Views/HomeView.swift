@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum HomeSheet: String, Identifiable {
-    case newCat, personality, routine, basicCare, preferences, caution, medical, notes, share, editCat
+    case newCat, personality, routine, basicCare, preferences, caution, medical, notes, share, editCat, account
     var id: String { rawValue }
 }
 
@@ -14,8 +14,6 @@ let columns = [
 struct HomeView: View {
     var onSignOut: () -> Void
     @State private var activeSheet: HomeSheet?
-    @State private var showAccount = false
-    @State private var showGuide = false
     
     var body: some View {
         NavigationStack {
@@ -37,7 +35,7 @@ struct HomeView: View {
                         .padding(.leading,10)
                         Spacer()
                         Button {
-                            showAccount = true
+                            activeSheet = .account
                         } label: {
                             HStack{
                                 Image(systemName: "person.crop.circle")
@@ -134,10 +132,9 @@ struct HomeView: View {
             case .medical:     EditMedicalView()
             case .notes:       AdditionalPageView()
             case .share:       ShareView()
-            case .editCat:       EditCatProfileView()            }
-        }
-        .sheet(isPresented: $showAccount) {
-            AccountView()
+            case .editCat:     EditCatProfileView()
+            case .account:     AccountView()
+            }
         }
     }
 }

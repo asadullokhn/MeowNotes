@@ -195,4 +195,5 @@ struct GridCard: View {
 
 #Preview {
     HomeView(onSignOut: {})
+//        .preferredColorScheme(.dark)
 }

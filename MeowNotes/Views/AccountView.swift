@@ -26,7 +26,7 @@ struct AccountView: View {
                             auth.logout()
                         }
                     }
-                    .background(Color.white)
+                    .background(Color("BubbleBg"))
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .overlay(
                         RoundedRectangle(cornerRadius: 18)

@@ -10,22 +10,14 @@ struct EditMedicalView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
 
-    // Local editing state — not yet persisted (matches the other Edit sheets).
-    // Seeded with the sample data the web reference ships with.
-    @State private var vet = VetContact(
-        name: "Dr. Wijaya",
-        clinic: "Bali Pet Clinic",
-        phone: "+62 812 5555 0100",
-        address: "Jl. Sunset Rd 88, Kuta"
-    )
-    @State private var vaccines: [Vaccine] = [
-        Vaccine(name: "FVRCP", last: "Feb 12, 2026", next: "Feb 2027"),
-        Vaccine(name: "Rabies", last: "May 25, 2025", next: "May 25, 2026")
-    ]
-    @State private var medications: [Medication] = [
-        Medication(name: "Joint vitamin", dose: "½ tab", schedule: "Daily, with breakfast")
-    ]
+    // Local editing copies of the cat's medical record, hydrated from the
+    // server in `load()` and PATCHed back in `save()`.
+    @State private var vet = VetContact(name: "", clinic: "", phone: "", address: "")
+    @State private var vaccines: [Vaccine] = []
+    @State private var medications: [Medication] = []
     @State private var openRow: Row?
+    @State private var saving = false
+    @State private var errorMessage: String?
 
     private let commonVaccines = ["FVRCP", "Rabies", "FeLV"]
     private var catName: String { auth.currentCat?.name ?? "your cat" }
@@ -83,6 +75,11 @@ struct EditMedicalView: View {
                             }
                         }
                         .animation(.spring(response: 0.32, dampingFraction: 0.85), value: openRow)
+
+                        if let errorMessage {
+                            AuthErrorBanner(message: errorMessage)
+                                .padding(.top, 12)
+                        }
                     }
                     .padding()
                 }
@@ -91,6 +88,7 @@ struct EditMedicalView: View {
             }
             .background(Color(.background))
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear(perform: load)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Text(catName.uppercased() + " · MEDICAL")
@@ -111,6 +109,47 @@ struct EditMedicalView: View {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - Load / Save
+
+    private func load() {
+        guard let medical = auth.currentCat?.medical else { return }
+        vet = VetContact(
+            name: medical.vet.name,
+            clinic: medical.vet.clinic,
+            phone: medical.vet.phone,
+            address: medical.vet.address
+        )
+        vaccines = medical.vaccines.map { Vaccine(name: $0.name, last: $0.last, next: $0.next) }
+        medications = medical.medications.map { Medication(name: $0.name, dose: $0.dose, schedule: $0.schedule) }
+    }
+
+    private func save() {
+        guard let catID = auth.currentCat?.id, !saving else { return }
+        saving = true
+        errorMessage = nil
+
+        // Drop rows the user left blank, mirroring the web reference.
+        let payload = Medical(
+            vet: Medical.Vet(name: vet.name, clinic: vet.clinic, phone: vet.phone, address: vet.address),
+            vaccines: vaccines
+                .filter { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }
+                .map { Medical.Vaccine(name: $0.name, last: $0.last, next: $0.next) },
+            medications: medications
+                .filter { !$0.name.trimmingCharacters(in: .whitespaces).isEmpty }
+                .map { Medical.Medication(name: $0.name, dose: $0.dose, schedule: $0.schedule) }
+        )
+
+        Task {
+            do {
+                try await auth.updateMedical(catID: catID, payload)
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            saving = false
         }
     }
 
@@ -286,16 +325,23 @@ struct EditMedicalView: View {
                 }
 
                 Button {
-                    dismiss()
+                    save()
                 } label: {
-                    Text("Save medical")
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Color(.saveBg))
-                        .clipShape(RoundedRectangle(cornerRadius: 26))
+                    Group {
+                        if saving {
+                            ProgressView().tint(.white)
+                        } else {
+                            Text("Save medical").fontWeight(.semibold)
+                        }
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(Color(.saveBg))
+                    .clipShape(RoundedRectangle(cornerRadius: 26))
+                    .opacity(saving ? 0.6 : 1)
                 }
+                .disabled(saving || auth.currentCat == nil)
             }
             .padding(.horizontal)
             .padding(.vertical, 12)

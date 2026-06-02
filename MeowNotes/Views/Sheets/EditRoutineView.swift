@@ -1,11 +1,56 @@
 import SwiftUI
 
+//struct CustomTimePicker: View {
+//    @Binding var selectedTime: Date
+//    var backgroundColor: Color
+//    
+//    var body: some View {
+//        ZStack {
+//            HStack {
+//                // 1. Your Custom Visual UI
+//                Text(selectedTime, style: .time)
+//                    .font(.system(size: 16, weight: .medium))
+//                    .foregroundColor(.primary)
+//                
+//                Spacer()
+//                
+//                Image(systemName: "clock")
+//                    .foregroundColor(.secondary)
+//                    .font(.system(size: 16))
+//            }
+//            .padding(.horizontal, 16)
+//            .padding(.vertical, 12)
+//            .background(
+//                RoundedRectangle(cornerRadius: 12)
+//                    .fill(backgroundColor) // Transparency won't matter anymore
+//            )
+//            // 2. The Invisible Overlay
+//            .overlay {
+//                DatePicker("", selection: $selectedTime, displayedComponents: .hourAndMinute)
+//                    .labelsHidden()
+//                    // Force the invisible picker to fill the entire HStack area
+//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                    // Scale it up slightly just to ensure the internal native button reaches the edges
+//                    .scaleEffect(x: 2, y: 2)
+//                    // 0.02 is the magic number. Invisible to the eye, but registers as a solid tap in iOS 17+.
+//                    .opacity(0.02)
+//            }
+//            // 3. Chop off anything that extends past your background
+//            .clipShape(RoundedRectangle(cornerRadius: 12))
+//        }
+//    }
+//}
+
 struct EditRoutineView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthManager.self) private var auth
+
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
 
     @State private var routines: [CustomRoutine] = []
-    private let textColor = Color(red: 61.0 / 255.0, green: 51.0 / 255.0, blue: 41.0 / 255.0)
-    private let tapToAddBackground = Color(red: 243.0 / 255.0, green: 236.0 / 255.0, blue: 226.0 / 255.0)
+    
+    private let textColor = Color("TextColor")
+    private let tapToAddBackground = Color(.backgroundPredefined)
     private let timeChipColor = Color(red: 167.0 / 255.0, green: 154.0 / 255.0, blue: 137.0 / 255.0)
     private let backgroundFieldColor = Color(red: 240.0 / 255.0, green: 233.0 / 255.0, blue: 219.0 / 255.0)
 
@@ -29,15 +74,11 @@ struct EditRoutineView: View {
                 Form {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("What does your cat day look like?")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .multilineTextAlignment(.leading)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .foregroundStyle(textColor)
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(Color("TextColor"))
                         Text("Add the regular things — food, play, litter. Sitters will follow this as today's checklist.")
-                            .font(.subheadline)
-                            .foregroundStyle(textColor)
+                            .font(.system(size: 14))
+                            .foregroundColor(Color("TextColor"))
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
                     .listRowBackground(Color.clear)
@@ -81,7 +122,7 @@ struct EditRoutineView: View {
                                     .disabled(isAdded)
                                     .opacity(isAdded ? 0.8 : 1)
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
+                                        RoundedRectangle(cornerRadius: 32)
                                             .stroke(textColor.opacity(0.1), lineWidth: 2)
                                     )
                                 }
@@ -93,9 +134,7 @@ struct EditRoutineView: View {
                     
                     Section {
                         if routines.isEmpty {
-                            Text("No routines yet")
-                                .foregroundStyle(textColor)
-                                .opacity(0.6)
+                            // Nothing here based on the prototype
                         } else {
                             ForEach(sortedRoutines) { routine in
                                 let routineBinding = binding(for: routine.id)
@@ -103,29 +142,27 @@ struct EditRoutineView: View {
                                     HStack(spacing: 10) {
                                         DatePicker("", selection: routineBinding.time, displayedComponents: .hourAndMinute)
                                             .labelsHidden()
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .fill(backgroundFieldColor)
-                                            )
+                                        
                                         
                                         TextField("Routine", text: routineBinding.title)
                                             .textInputAutocapitalization(.sentences)
-                                            .foregroundStyle(textColor)
-                                            .padding(.vertical, 6)
-                                            .padding(.horizontal, 8)
+                                            .foregroundStyle(Color("TextColor"))
                                             .fontWeight(.semibold)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .fill(backgroundFieldColor)
-                                            )
-
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 9)
+                                            .background(Color(.bubbleSectionBg), in: RoundedRectangle(cornerRadius: 12))
+                                        
                                         Button {
                                             removeRoutine(id: routine.id)
                                         } label: {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .foregroundStyle(.secondary)
-                                                .padding(.vertical, 6)
-                                                .padding(.horizontal, 4)
+                                            ZStack {
+                                                Circle()
+                                                    .fill(Color(.backgroundPredefined))
+                                                Image(systemName: "xmark")
+                                                    .font(.system(size: 16, weight: .bold))
+                                                    .foregroundStyle(Color(.xIcon).opacity(0.5))
+                                            }
+                                            .frame(width: 40, height: 40)
                                         }
                                         .buttonStyle(.plain)
                                         .accessibilityLabel("Remove routine")
@@ -136,8 +173,10 @@ struct EditRoutineView: View {
                                         TextField("Description", text: routineBinding.details, axis: .vertical)
                                             .lineLimit(2...4)
                                             .textInputAutocapitalization(.sentences)
-                                            .foregroundStyle(textColor)
-                                            .padding(8)
+                                            .foregroundStyle(Color("TextColor"))
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 9)
+                                            .background(Color(.bubbleSectionBg), in: RoundedRectangle(cornerRadius: 12))
                                     }
                                     .background(
                                         RoundedRectangle(cornerRadius: 12)
@@ -145,6 +184,7 @@ struct EditRoutineView: View {
                                     )
                                 }
                                 .padding(.vertical, 4)
+                                
                             }
                         }
                     }
@@ -186,17 +226,17 @@ struct EditRoutineView: View {
                             } label: {
                                 Text("Cancel")
                                     .fontWeight(.semibold)
-                                    .foregroundColor(Color(.text))
+                                    .foregroundColor(.primary)
                                     .frame(maxWidth: 100)
                                     .frame(height: 54)
-                                    .background(Color(.white))
+                                    .background(Color(.systemGray5))
                                     .clipShape(RoundedRectangle(cornerRadius: 30))
                             }
-                            
+
                             Button {
                                 dismiss()
                             } label: {
-                                Text("Save Caution")
+                                Text("Save routine")
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
@@ -205,10 +245,8 @@ struct EditRoutineView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 30))
                             }
                         }
-                        .padding(.horizontal)
                     }
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
+                    .padding(8)
                     .background(Color("AppBg").ignoresSafeArea(edges: .bottom))
                 }
                 .navigationBarTitleDisplayMode(.inline)
@@ -289,4 +327,7 @@ private struct CommonRoutine: Identifiable, Hashable {
     let details: String
 }
 
-#Preview { EditRoutineView() }
+#Preview {
+    EditRoutineView()
+        .environment(AuthManager())
+}

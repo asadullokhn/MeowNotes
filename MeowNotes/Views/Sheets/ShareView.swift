@@ -316,21 +316,6 @@ struct ShareView: View {
                         }
                         
 
-                        // DONE
-                        Button {
-                            dismiss()
-                        } label: {
-                            Text("Done")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 18)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(Color(.saveBg))
-                                )
-                        }
-                        .frame(alignment: .bottom)
                     }
                     .padding()
                 }

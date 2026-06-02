@@ -1,7 +1,29 @@
 import SwiftUI
 
+// App-wide appearance preference, set from the profile screen and persisted in
+// UserDefaults. `system` follows the device setting (the default).
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system, light, dark
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .system: return "System"
+        case .light:  return "Light"
+        case .dark:   return "Dark"
+        }
+    }
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light:  return .light
+        case .dark:   return .dark
+        }
+    }
+}
+
 struct ContentView: View {
     @State private var auth = AuthManager()
+    @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
 
     var body: some View {
         Group {
@@ -19,6 +41,7 @@ struct ContentView: View {
             }
         }
         .environment(auth)
+        .preferredColorScheme(AppAppearance(rawValue: appearance)?.colorScheme)
         .task { await auth.boot() }
     }
 }

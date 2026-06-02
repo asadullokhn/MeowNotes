@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum HomeSheet: String, Identifiable {
-    case newCat, personality, routine, basicCare, caution, medical, notes, share, editCat, account
+    case newCat, personality, routine, basicCare, caution, medical, notes, share, editCat
     var id: String { rawValue }
 }
 
@@ -15,6 +15,10 @@ struct HomeView: View {
     var onSignOut: () -> Void
     @Environment(AuthManager.self) private var auth
     @State private var activeSheet: HomeSheet?
+    @State private var showAccount = false
+    // Setup-hint visibility. Unlike the web (dismissed forever in localStorage),
+    // we only hide it for this session so it gently returns next launch.
+    @State private var hintDismissed = false
 
     private var cat: Cat? { auth.currentCat }
     private var catName: String { cat?.name ?? "Your cat" }
@@ -46,6 +50,62 @@ struct HomeView: View {
     private var notesSubtitle: String {
         let n = cat?.noteCount ?? 0
         return n > 0 ? "\(n) note\(n == 1 ? "" : "s")" : "Not set yet"
+    }
+
+    // What's still empty for this cat — drives the setup hint (mirrors Home.vue).
+    private var missingSections: [MissingSection] {
+        guard let cat else { return [] }
+        var out: [MissingSection] = []
+        if cat.traitCount == 0   { out.append(.init(title: "Personality", sheet: .personality)) }
+        if cat.routineCount == 0 { out.append(.init(title: "Routine", sheet: .routine)) }
+        if cat.checkCount == 0   { out.append(.init(title: "Basic Care", sheet: .basicCare)) }
+        if cat.cautionCount == 0 { out.append(.init(title: "Caution", sheet: .caution)) }
+        if cat.vetName == nil    { out.append(.init(title: "Medical", sheet: .medical)) }
+        if cat.noteCount == 0    { out.append(.init(title: "Additions", sheet: .notes)) }
+        return out
+    }
+
+    // Soft, dismissible banner of the sections still to fill in. Tapping a pill
+    // opens that section's editor.
+    private var setupHint: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 14))
+                    .foregroundColor(.brown)
+                Text("Still to add for \(catName)'s guide — tap to fill in:")
+                    .font(.footnote)
+                    .foregroundColor(.brown)
+            }
+            .padding(.trailing, 28)
+
+            FlowLayout(spacing: 8) {
+                ForEach(missingSections) { section in
+                    Button { activeSheet = section.sheet } label: {
+                        Text("+ \(section.title)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.brown)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 7)
+                            .background(Color.white, in: Capsule())
+                            .overlay(Capsule().stroke(Color.brown.opacity(0.15), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.brown.opacity(0.08), in: RoundedRectangle(cornerRadius: 20))
+        .overlay(alignment: .topTrailing) {
+            Button { withAnimation { hintDismissed = true } } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.brown.opacity(0.5))
+                    .frame(width: 28, height: 28)
+            }
+        }
+        .padding(.horizontal, 20)
     }
 
     var body: some View {
@@ -115,6 +175,11 @@ struct HomeView: View {
                         }
                     }
 
+                    // MARK: - Setup hint — sections still to fill in
+                    if !hintDismissed && !missingSections.isEmpty {
+                        setupHint
+                    }
+
                     // MARK: - 2-Column Grid
                     LazyVGrid(columns: columns, spacing: 16) {
                         GridCard(icon: "pawprint", title: "Personality", subtitle: personalitySubtitle) { activeSheet = .personality }
@@ -164,7 +229,7 @@ struct HomeView: View {
                     .padding(.leading, 10)
                     Spacer()
                     Button {
-                        activeSheet = .account
+                        showAccount = true
                     } label: {
                         Image(systemName: "person.crop.circle")
                             .padding(10)
@@ -178,10 +243,11 @@ struct HomeView: View {
                 .frame(maxWidth: .infinity)
                 .background(Color(red: 0.96, green: 0.95, blue: 0.93))
             }
+            .navigationDestination(isPresented: $showAccount) { AccountView() }
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
-            case .newCat:      NewCatView()
+            case .newCat:      WelcomeView(isAdditional: true)
             case .personality: PersonalityFlowSheet(onSaved: { activeSheet = nil })
             case .routine:     EditRoutineView()
             case .basicCare:   EditBasicCareView()
@@ -190,10 +256,16 @@ struct HomeView: View {
             case .notes:       AdditionalPageView()
             case .share:       ShareView()
             case .editCat:     EditCatProfileView()
-            case .account:     AccountView()
             }
         }
     }
+}
+
+// One still-empty section surfaced in the setup hint.
+private struct MissingSection: Identifiable {
+    let id = UUID()
+    let title: String
+    let sheet: HomeSheet
 }
 
 // MARK: - Reusable GridCard Component (Fixes your error!)

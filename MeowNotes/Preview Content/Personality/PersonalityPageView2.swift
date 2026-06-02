@@ -52,7 +52,7 @@ struct PersonalityPageView2: View {
                             TextEditor(text: $vm.notes)
                                 .padding(8)
                                 .frame(height: 200)
-                                .background(Color(.white))
+                                .background(Color(.systemBackground))
                                 .cornerRadius(12)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)

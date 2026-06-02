@@ -11,8 +11,6 @@ struct AdditionalPageView: View {
     @State private var vm = AdditionalViewModel()
     @Environment(\.dismiss) private var dismiss
     
-    private let commonOnesBackground = Color(red: 243/255, green: 236/255, blue: 226/255)
-    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -77,7 +75,7 @@ struct AdditionalPageView: View {
                                         .frame(height: 48)
                                         .background(
                                             RoundedRectangle(cornerRadius: 20)
-                                                .fill(Color.white)
+                                                .fill(Color("AddBg"))
                                         )
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 20)
@@ -164,7 +162,7 @@ struct AdditionalPageView: View {
                                     }
                                     .padding(.vertical, 6)
                                 }
-                                .listRowBackground(commonOnesBackground)
+                                .listRowBackground(Color("BubbleSectionBg"))
                             }
                             .scrollContentBackground(.hidden)
                             

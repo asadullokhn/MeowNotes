@@ -31,8 +31,8 @@ struct CatPhotoWell: View {
 
                 if let pickedImage {
                     pickedImage.resizable().scaledToFill()
-                } else if !existingPhotoURL.isEmpty, let url = URL(string: existingPhotoURL) {
-                    AsyncImage(url: url) { image in
+                } else if !existingPhotoURL.isEmpty {
+                    CachedCatImage(existingPhotoURL) { image in
                         image.resizable().scaledToFill()
                     } placeholder: {
                         Color.clear

@@ -9,9 +9,16 @@ import SwiftUI
 
 struct PersonalityPageView2: View {
     @State var vm = PersonalityViewModel()
+    var onSaved: () -> Void = {}
+    @State private var saving = false
+    @State private var saveError: String?
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
     private var catName: String { auth.currentCat?.name ?? "your cat" }
+
+    private var saveErrorBinding: Binding<Bool> {
+        Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
+    }
     
     var body: some View {
         NavigationStack{
@@ -85,15 +92,19 @@ struct PersonalityPageView2: View {
                     }
                     
                     Button {
+                        save()
                     } label: {
-                        Text("Save")
-                            .fontWeight(.semibold)
+                        Group {
+                            if saving { ProgressView().tint(.white) }
+                            else { Text("Save").fontWeight(.semibold) }
+                        }
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 54)
                             .background(Color("SaveBg"))
                             .clipShape(RoundedRectangle(cornerRadius: 30))
                     }
+                    .disabled(saving)
                 }
                 .padding()
                 
@@ -124,6 +135,26 @@ struct PersonalityPageView2: View {
             //to show sheet handle
             .presentationDragIndicator(.visible)
             .navigationBarBackButtonHidden(true)
+            .alert("Couldn't save", isPresented: saveErrorBinding) {
+                Button("OK", role: .cancel) {}
+            } message: { Text(saveError ?? "") }
+        }
+    }
+
+    private func save() {
+        guard !saving, let catID = auth.currentCat?.id else { return }
+        saving = true
+        saveError = nil
+        let traits = vm.selectedTags
+        let summary = vm.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        Task {
+            do {
+                try await auth.updatePersonality(catID: catID, traits: traits, summary: summary)
+                onSaved()
+            } catch {
+                saveError = error.localizedDescription
+            }
+            saving = false
         }
     }
 }

@@ -14,7 +14,14 @@ struct EditBasicCareView: View {
         "Brushed"
     ]
     @State private var newChecklistItem = ""
-    
+    @State private var saving = false
+    @State private var saveError: String?
+    @State private var loaded = false
+
+    private var saveErrorBinding: Binding<Bool> {
+        Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
+    }
+
     private let commonChecklistItems = [
         "Fresh water",
         "Food served",
@@ -162,16 +169,19 @@ struct EditBasicCareView: View {
                             }
 
                             Button {
-                                dismiss()
+                                save()
                             } label: {
-                                Text("Save")
-                                    .fontWeight(.semibold)
+                                Group {
+                                    if saving { ProgressView().tint(.white) }
+                                    else { Text("Save").fontWeight(.semibold) }
+                                }
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 54)
                                     .background(Color("SaveBg"))
                                     .clipShape(RoundedRectangle(cornerRadius: 30))
                             }
+                            .disabled(saving)
                         }
                     }
                     .padding(8)
@@ -199,6 +209,37 @@ struct EditBasicCareView: View {
                     }
                 }
             }
+            .onAppear(perform: loadChecks)
+            .alert("Couldn't save", isPresented: saveErrorBinding) {
+                Button("OK", role: .cancel) {}
+            } message: { Text(saveError ?? "") }
+        }
+    }
+
+    private func loadChecks() {
+        guard !loaded else { return }
+        loaded = true
+        if let items = auth.currentCat?.checks {
+            checklistItems = items.map { $0.label }
+        }
+    }
+
+    private func save() {
+        guard !saving, let catID = auth.currentCat?.id else { return }
+        saving = true
+        saveError = nil
+        let items = checklistItems
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+            .map { CheckItem(label: $0) }
+        Task {
+            do {
+                try await auth.updateChecks(catID: catID, items)
+                dismiss()
+            } catch {
+                saveError = error.localizedDescription
+            }
+            saving = false
         }
     }
 

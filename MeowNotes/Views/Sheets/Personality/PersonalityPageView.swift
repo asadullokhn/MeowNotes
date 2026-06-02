@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PersonalityPageView: View {
     @State var vm: PersonalityViewModel
+    var onSaved: () -> Void = {}
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
     private var catName: String { auth.currentCat?.name ?? "your cat" }
@@ -143,7 +144,7 @@ struct PersonalityPageView: View {
                     }
                     
                     NavigationLink {
-                        PersonalityPageView2(vm: vm)
+                        PersonalityPageView2(vm: vm, onSaved: onSaved)
                     } label: {
                         Text("Continue")
                             .fontWeight(.semibold)

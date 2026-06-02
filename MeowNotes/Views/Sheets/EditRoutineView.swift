@@ -7,7 +7,13 @@ struct EditRoutineView: View {
     private var catName: String { auth.currentCat?.name ?? "your cat" }
 
     @State private var routines: [CustomRoutine] = []
-    
+    @State private var saving = false
+    @State private var saveError: String?
+
+    private var saveErrorBinding: Binding<Bool> {
+        Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
+    }
+
     private let textColor = Color("TextColor")
     private let tapToAddBackground = Color(.backgroundPredefined)
     private let timeChipColor = Color(red: 167.0 / 255.0, green: 154.0 / 255.0, blue: 137.0 / 255.0)
@@ -193,16 +199,19 @@ struct EditRoutineView: View {
                             }
 
                             Button {
-                                dismiss()
+                                save()
                             } label: {
-                                Text("Save")
-                                    .fontWeight(.semibold)
+                                Group {
+                                    if saving { ProgressView().tint(.white) }
+                                    else { Text("Save").fontWeight(.semibold) }
+                                }
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 54)
                                     .background(Color("SaveBg"))
                                     .clipShape(RoundedRectangle(cornerRadius: 30))
                             }
+                            .disabled(saving)
                         }
                     }
                     .padding(8)
@@ -230,6 +239,46 @@ struct EditRoutineView: View {
                     }
                 }
             }
+            .onAppear(perform: loadRoutines)
+            .alert("Couldn't save", isPresented: saveErrorBinding) {
+                Button("OK", role: .cancel) {}
+            } message: { Text(saveError ?? "") }
+        }
+    }
+
+    private func loadRoutines() {
+        guard routines.isEmpty, let items = auth.currentCat?.feedingRoutine, !items.isEmpty else { return }
+        routines = items.map {
+            CustomRoutine(time: parseTime($0.time), title: $0.title, details: $0.detail)
+        }
+    }
+
+    private func parseTime(_ string: String) -> Date {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "h:mm a"
+        return f.date(from: string) ?? Date()
+    }
+
+    private func save() {
+        guard !saving, let catID = auth.currentCat?.id else { return }
+        saving = true
+        saveError = nil
+        let items = sortedRoutines
+            .filter { !$0.title.trimmingCharacters(in: .whitespaces).isEmpty }
+            .map {
+                RoutineItem(time: formatTime($0.time),
+                            title: $0.title.trimmingCharacters(in: .whitespaces),
+                            detail: $0.details.trimmingCharacters(in: .whitespaces))
+            }
+        Task {
+            do {
+                try await auth.updateRoutine(catID: catID, items)
+                dismiss()
+            } catch {
+                saveError = error.localizedDescription
+            }
+            saving = false
         }
     }
 

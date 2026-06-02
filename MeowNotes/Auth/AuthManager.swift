@@ -184,6 +184,41 @@ final class AuthManager {
         }
     }
 
+    // MARK: - Care sections
+    // Each PATCHes a single section's full array; the server only touches the
+    // keys it receives, and the response replaces the cached cat so the home
+    // grid counts and other views reflect the save immediately.
+
+    func updateRoutine(catID: String, _ feedingRoutine: [RoutineItem]) async throws {
+        let updated: Cat = try await API.patch("/api/cats/\(catID)", RoutinePatch(feedingRoutine: feedingRoutine))
+        replaceCachedCat(updated)
+    }
+
+    func updateChecks(catID: String, _ checks: [CheckItem]) async throws {
+        let updated: Cat = try await API.patch("/api/cats/\(catID)", ChecksPatch(checks: checks))
+        replaceCachedCat(updated)
+    }
+
+    // Caution and Additions both live in `notes` (split by `urgent`), so callers
+    // pass the full recombined array to avoid clobbering the other half.
+    func updateNotes(catID: String, _ notes: [Note]) async throws {
+        let updated: Cat = try await API.patch("/api/cats/\(catID)", NotesPatch(notes: notes))
+        replaceCachedCat(updated)
+    }
+
+    func updatePersonality(catID: String, traits: [String], summary: String) async throws {
+        let updated: Cat = try await API.patch(
+            "/api/cats/\(catID)",
+            PersonalityPatch(personality: traits, personalitySummary: summary)
+        )
+        replaceCachedCat(updated)
+    }
+
+    private struct RoutinePatch: Encodable { let feedingRoutine: [RoutineItem] }
+    private struct ChecksPatch: Encodable { let checks: [CheckItem] }
+    private struct NotesPatch: Encodable { let notes: [Note] }
+    private struct PersonalityPatch: Encodable { let personality: [String]; let personalitySummary: String }
+
     // MARK: - Sharing
 
     // GET /api/cats/:id/share — fetch the cat's active sitter-guide link,

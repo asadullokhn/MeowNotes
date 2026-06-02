@@ -11,7 +11,14 @@ struct EditCautionView: View {
     @Environment(AuthManager.self) private var auth
     
     @State private var vm = CautionModel()
-    
+    @State private var saving = false
+    @State private var saveError: String?
+    @State private var loaded = false
+
+    private var saveErrorBinding: Binding<Bool> {
+        Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
+    }
+
     private var catName: String { auth.currentCat?.name ?? "your cat" }
     
     var body: some View {
@@ -171,16 +178,19 @@ struct EditCautionView: View {
                             }
                             
                             Button {
-                                dismiss()
+                                save()
                             } label: {
-                                Text("Save")
-                                    .fontWeight(.semibold)
+                                Group {
+                                    if saving { ProgressView().tint(.white) }
+                                    else { Text("Save").fontWeight(.semibold) }
+                                }
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 54)
                                     .background(Color("SaveBg"))
                                     .clipShape(RoundedRectangle(cornerRadius: 30))
                             }
+                            .disabled(saving)
                         }
                         .listRowBackground(Color.clear)
                         .listRowInsets(.init())
@@ -213,6 +223,40 @@ struct EditCautionView: View {
                             }
                         }
                 )
+                .onAppear(perform: loadCautions)
+                .alert("Couldn't save", isPresented: saveErrorBinding) {
+                    Button("OK", role: .cancel) {}
+                } message: { Text(saveError ?? "") }
+        }
+    }
+
+    private func loadCautions() {
+        guard !loaded else { return }
+        loaded = true
+        vm.selectedTags = (auth.currentCat?.notes ?? [])
+            .filter { $0.urgent == true }
+            .map { $0.text }
+    }
+
+    private func save() {
+        guard !saving, let catID = auth.currentCat?.id else { return }
+        saving = true
+        saveError = nil
+        // Keep the non-urgent (Additions) notes; replace only the urgent half.
+        let others = (auth.currentCat?.notes ?? []).filter { $0.urgent != true }
+        let urgent = vm.selectedTags
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+            .map { Note(text: $0, urgent: true) }
+        let combined = others + urgent
+        Task {
+            do {
+                try await auth.updateNotes(catID: catID, combined)
+                dismiss()
+            } catch {
+                saveError = error.localizedDescription
+            }
+            saving = false
         }
     }
 }

@@ -25,8 +25,8 @@ struct Cat: Codable, Identifiable, Equatable {
     let sharedLinks: [SharedLink]?
     let medical: Medical?
     let personality: [String]?
-    let feedingRoutine: [CountItem]?
-    let checks: [CountItem]?
+    let feedingRoutine: [RoutineItem]?
+    let checks: [CheckItem]?
     let notes: [Note]?
     let deceased: Bool?
     let deceasedDate: String?
@@ -75,14 +75,66 @@ struct CatAge: Codable, Equatable {
     }
 }
 
-// Opaque array element: lets us decode (and count) lists whose item shape we
-// don't otherwise model, like feedingRoutine and checks.
-struct CountItem: Codable, Equatable {}
+// A feeding/routine entry. Server stores `time` as a display string ("7:00 AM").
+// Decoding tolerates missing keys so legacy/partial rows stay valid.
+struct RoutineItem: Codable, Equatable, Identifiable {
+    var id: String
+    var time: String
+    var title: String
+    var detail: String
+
+    init(id: String = UUID().uuidString, time: String = "", title: String = "", detail: String = "") {
+        self.id = id; self.time = time; self.title = title; self.detail = detail
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? c.decode(String.self, forKey: .id)) ?? UUID().uuidString
+        time = (try? c.decode(String.self, forKey: .time)) ?? ""
+        title = (try? c.decode(String.self, forKey: .title)) ?? ""
+        detail = (try? c.decode(String.self, forKey: .detail)) ?? ""
+    }
+
+    enum CodingKeys: String, CodingKey { case id, time, title, detail }
+}
+
+// A "quick check" item (basic care). Server stores `{ id, label }`.
+struct CheckItem: Codable, Equatable, Identifiable {
+    var id: String
+    var label: String
+
+    init(id: String = UUID().uuidString, label: String = "") {
+        self.id = id; self.label = label
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? c.decode(String.self, forKey: .id)) ?? UUID().uuidString
+        label = (try? c.decode(String.self, forKey: .label)) ?? ""
+    }
+
+    enum CodingKeys: String, CodingKey { case id, label }
+}
 
 // A care-guide note. `urgent` notes are surfaced as "Caution"; the rest are
-// "Additions" — matching the web's split of the single notes array.
-struct Note: Codable, Equatable {
-    let urgent: Bool?
+// "Additions" — both halves live in the single `notes` array server-side.
+struct Note: Codable, Equatable, Identifiable {
+    var id: String
+    var text: String
+    var urgent: Bool?
+
+    init(id: String = UUID().uuidString, text: String = "", urgent: Bool? = nil) {
+        self.id = id; self.text = text; self.urgent = urgent
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? c.decode(String.self, forKey: .id)) ?? UUID().uuidString
+        text = (try? c.decode(String.self, forKey: .text)) ?? ""
+        urgent = try? c.decode(Bool.self, forKey: .urgent)
+    }
+
+    enum CodingKeys: String, CodingKey { case id, text, urgent }
 }
 
 // A cat's medical record. Stored server-side as the JSON `medical` blob and

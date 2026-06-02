@@ -51,7 +51,7 @@ struct PersonalityPageView: View {
                                 .frame(height: 48)
                                 .background(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color.white)
+                                        .fill(Color("AddBg"))
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20)

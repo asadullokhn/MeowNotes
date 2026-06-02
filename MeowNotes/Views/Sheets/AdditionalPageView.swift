@@ -205,4 +205,5 @@ struct AdditionalPageView: View {
 #Preview{
     AdditionalPageView()
         .environment(AuthManager())
+        .preferredColorScheme(.dark)
 }

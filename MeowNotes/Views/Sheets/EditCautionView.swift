@@ -241,7 +241,6 @@ struct EditCautionView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                
                 ToolbarItem(placement: .topBarLeading) {
                     Text(catName.uppercased() + " · CAUTION")
                         .fixedSize()

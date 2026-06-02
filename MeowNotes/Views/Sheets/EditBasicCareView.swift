@@ -11,7 +11,7 @@ struct EditBasicCareView: View {
         "Brushed"
     ]
     @State private var newChecklistItem = ""
-
+    
     private let commonChecklistItems = [
         "Fresh water",
         "Food served",
@@ -105,21 +105,66 @@ struct EditBasicCareView: View {
                             }
                             .padding(.vertical, 4)
                         }
-                        
-                        
-                        
                     }
                     .listRowBackground(commonOnesBackground)
                 }
                 .scrollContentBackground(.hidden)
-                .navigationTitle("Basic Care")
+                .safeAreaInset(edge: .bottom) {
+                    VStack(spacing: 16) {
+                        Rectangle()
+                            .fill(Color(.bubbleBorder))
+                            .frame(height: 2)
+                        
+                        HStack {
+                            Button {
+                                dismiss()
+                            } label: {
+                                Text("Cancel")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(Color(.text))
+                                    .frame(maxWidth: 100)
+                                    .frame(height: 54)
+                                    .background(Color(.white))
+                                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                            }
+                            
+                            Button {
+                                dismiss()
+                            } label: {
+                                Text("Save Caution")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 54)
+                                    .background(Color("SaveBg"))
+                                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
+                    .background(Color("AppBg").ignoresSafeArea(edges: .bottom))
+                }
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        Button("Cancel") { dismiss() }
+                        Text("YOUR CAT" + " · ROUTINE")
+                            .fixedSize()
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color(.text))
                     }
+                    .sharedBackgroundVisibility(.hidden)
+                    
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Done") { dismiss() }
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .resizable()
+                                .frame(width: 12, height: 12)
+                        }
                     }
                 }
             }

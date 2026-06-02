@@ -2,6 +2,9 @@ import SwiftUI
 
 struct EditBasicCareView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthManager.self) private var auth
+
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
 
     @State private var checklistItems: [String] = [
         "Fresh water",
@@ -124,14 +127,14 @@ struct EditBasicCareView: View {
                                     .foregroundColor(Color(.text))
                                     .frame(maxWidth: 100)
                                     .frame(height: 54)
-                                    .background(Color(.white))
+                                    .background(Color(.bubbleBg))
                                     .clipShape(RoundedRectangle(cornerRadius: 30))
                             }
-                            
+
                             Button {
                                 dismiss()
                             } label: {
-                                Text("Save Caution")
+                                Text("Save")
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
@@ -149,7 +152,7 @@ struct EditBasicCareView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        Text("YOUR CAT" + " · ROUTINE")
+                        Text(catName.uppercased() + " · BASIC CARE")
                             .fixedSize()
                             .font(.headline)
                             .fontWeight(.semibold)
@@ -219,4 +222,7 @@ struct EditBasicCareView: View {
     }
 }
 
-#Preview { EditBasicCareView() }
+#Preview {
+    EditBasicCareView()
+        .environment(AuthManager())
+}

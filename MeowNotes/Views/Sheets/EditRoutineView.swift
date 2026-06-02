@@ -2,6 +2,9 @@ import SwiftUI
 
 struct EditRoutineView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthManager.self) private var auth
+
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
 
     @State private var routines: [CustomRoutine] = []
     private let textColor = Color(red: 61.0 / 255.0, green: 51.0 / 255.0, blue: 41.0 / 255.0)
@@ -189,14 +192,14 @@ struct EditRoutineView: View {
                                     .foregroundColor(Color(.text))
                                     .frame(maxWidth: 100)
                                     .frame(height: 54)
-                                    .background(Color(.white))
+                                    .background(Color(.bubbleBg))
                                     .clipShape(RoundedRectangle(cornerRadius: 30))
                             }
-                            
+
                             Button {
                                 dismiss()
                             } label: {
-                                Text("Save Caution")
+                                Text("Save")
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
@@ -214,7 +217,7 @@ struct EditRoutineView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        Text("YOUR CAT" + " · ROUTINE")
+                        Text(catName.uppercased() + " · ROUTINE")
                             .fixedSize()
                             .font(.headline)
                             .fontWeight(.semibold)
@@ -289,4 +292,7 @@ private struct CommonRoutine: Identifiable, Hashable {
     let details: String
 }
 
-#Preview { EditRoutineView() }
+#Preview {
+    EditRoutineView()
+        .environment(AuthManager())
+}

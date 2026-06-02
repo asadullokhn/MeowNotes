@@ -137,7 +137,7 @@ struct CautionRow: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white.opacity(0.5))
+                .fill(Color(.bubbleBg).opacity(0.5))
                 .overlay(
                     RoundedRectangle(cornerRadius: 24)
                         .stroke(

@@ -5,12 +5,18 @@ import Foundation
 enum API {
     static let baseURL = URL(string: "https://meownotes.teztun.uz")!
 
+    // Gates anonymous guest sign-in. Ships in the binary; the server keeps the
+    // matching value in its env.
+    static let appKey = "d3c0123bf1172fe5e01b1c95ee49c0399dc38ada6e19d318687a4bbbf950a5e2"
+
     static func get<Response: Decodable>(_ path: String) async throws -> Response {
         try await request("GET", path, body: Optional<Empty>.none)
     }
 
-    static func post<Body: Encodable, Response: Decodable>(_ path: String, _ body: Body) async throws -> Response {
-        try await request("POST", path, body: body)
+    static func post<Body: Encodable, Response: Decodable>(
+        _ path: String, _ body: Body, headers: [String: String] = [:]
+    ) async throws -> Response {
+        try await request("POST", path, body: body, headers: headers)
     }
 
     static func patch<Body: Encodable, Response: Decodable>(_ path: String, _ body: Body) async throws -> Response {
@@ -22,13 +28,16 @@ enum API {
     }
 
     private static func request<Body: Encodable, Response: Decodable>(
-        _ method: String, _ path: String, body: Body?
+        _ method: String, _ path: String, body: Body?, headers: [String: String] = [:]
     ) async throws -> Response {
         var req = URLRequest(url: baseURL.appendingPathComponent(path))
         req.httpMethod = method
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if let token = TokenStore.token {
             req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        for (field, value) in headers {
+            req.setValue(value, forHTTPHeaderField: field)
         }
         if let body {
             req.httpBody = try JSONEncoder().encode(body)

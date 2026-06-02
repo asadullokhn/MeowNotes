@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum HomeSheet: String, Identifiable {
-    case newCat, personality, routine, basicCare, preferences, caution, medical, notes, share, editCat, account
+    case newCat, personality, routine, basicCare, caution, medical, notes, share, editCat, account
     var id: String { rawValue }
 }
 
@@ -185,7 +185,6 @@ struct HomeView: View {
             case .personality: PersonalityFlowSheet(onSaved: { activeSheet = nil })
             case .routine:     EditRoutineView()
             case .basicCare:   EditBasicCareView()
-            case .preferences: EditPreferencesView()
             case .caution:     EditCautionView()
             case .medical:     EditMedicalView()
             case .notes:       AdditionalPageView()

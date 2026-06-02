@@ -16,7 +16,7 @@ struct Cat: Codable, Identifiable, Equatable {
     let id: String
     let name: String
     let breed: String?
-    let age: Int?
+    let age: CatAge?
     let photo: String?
     let personalitySummary: String?
     let sharedLinks: [SharedLink]?
@@ -25,6 +25,8 @@ struct Cat: Codable, Identifiable, Equatable {
     let feedingRoutine: [CountItem]?
     let checks: [CountItem]?
     let notes: [Note]?
+    let deceased: Bool?
+    let deceasedDate: String?
 
     // First active share link, if any — used to build the sitter guide URL.
     var shareToken: String? {
@@ -40,6 +42,33 @@ struct Cat: Codable, Identifiable, Equatable {
     var vetName: String? {
         guard let name = medical?.vet.name, !name.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
         return name
+    }
+}
+
+// Age is stored loosely server-side: legacy cats have an integer (years), but
+// we now also accept free text like "8 months". Decodes either into a display
+// string and re-encodes as a string.
+struct CatAge: Codable, Equatable {
+    let display: String
+
+    init(_ display: String) { self.display = display }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        if let s = try? c.decode(String.self) {
+            display = s
+        } else if let i = try? c.decode(Int.self) {
+            display = i > 0 ? String(i) : ""
+        } else if let d = try? c.decode(Double.self) {
+            display = d > 0 ? String(Int(d)) : ""
+        } else {
+            display = ""
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        try c.encode(display)
     }
 }
 

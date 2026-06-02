@@ -17,6 +17,10 @@ enum API {
         try await request("PATCH", path, body: body)
     }
 
+    static func delete(_ path: String) async throws {
+        let _: Empty = try await request("DELETE", path, body: Optional<Empty>.none)
+    }
+
     private static func request<Body: Encodable, Response: Decodable>(
         _ method: String, _ path: String, body: Body?
     ) async throws -> Response {

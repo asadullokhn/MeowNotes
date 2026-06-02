@@ -38,7 +38,7 @@ struct EditCautionView: View {
                                         .fixedSize(horizontal: false, vertical: true)
                                         .foregroundStyle(Color("TextColor"))
                                     
-                                    Text("The must-reads — foods \(catName.capitalized) can't eat, warnings, medication. Sitters see these pinned to the top of the guide.")
+                                    Text("The must-reads — foods your cat can't eat, warnings, medication. Sitters see these pinned to the top of the guide.")
                                         .font(.subheadline)
                                         .foregroundStyle(Color("TextColor"))
                                 }
@@ -149,77 +149,23 @@ struct EditCautionView: View {
                             .listRowBackground(Color("BubbleSectionBg"))
                         }
                         .scrollContentBackground(.hidden)
-                        
-                        //Divider
-                        Rectangle()
-                            .fill(Color(.bubbleBorder))
-                            .frame(height: 2)
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(.init())
-                            .padding()
-                        
-                        //Cancel and Save
-                        HStack {
-                            
-                            Button {
-                                dismiss()
-                            } label: {
-                                Text("Cancel")
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(Color(.text))
-                                    .frame(maxWidth: 100)
-                                    .frame(height: 54)
-                                    .background(Color(.bubbleBg))
-                                    .clipShape(RoundedRectangle(cornerRadius: 30))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 30)
-                                            .stroke(Color(.bubbleBorder), lineWidth: 1)
-                                    )
-                            }
-                            
-                            Button {
-                                save()
-                            } label: {
-                                Group {
-                                    if saving { ProgressView().tint(.white) }
-                                    else { Text("Save").fontWeight(.semibold) }
-                                }
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 54)
-                                    .background(Color("SaveBg"))
-                                    .clipShape(RoundedRectangle(cornerRadius: 30))
-                            }
-                            .disabled(saving)
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(.init())
-                        .padding()
-                        
                     }
                         .padding(1)
                         .background(Color(.background))
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
-                            
                             ToolbarItem(placement: .topBarLeading) {
-                                Text(catName.uppercased() + " · CAUTION")
-                                    .fixedSize()
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
+                                Button("Cancel") { dismiss() }
                                     .foregroundStyle(Color(.text))
                             }
-                            .sharedBackgroundVisibility(.hidden)
-                            
                             ToolbarItem(placement: .topBarTrailing) {
-                                Button {
-                                    dismiss()
-                                } label: {
-                                    Image(systemName: "xmark")
-                                        .resizable()
-                                        .frame(width: 12, height: 12)
+                                Button(action: save) {
+                                    if saving { ProgressView() }
+                                    else { Text("Save").fontWeight(.semibold) }
                                 }
+                                .foregroundStyle(Color(.text))
+                                .disabled(saving)
                             }
                         }
                 )

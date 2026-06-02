@@ -22,7 +22,7 @@ struct PersonalityPageView: View {
                     VStack(alignment: .leading, spacing: 28) {
                         // MARK: Description
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Describe "+catName.uppercased()+" in a few words.")
+                            Text("Describe your cat in a few words.")
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
                                 .multilineTextAlignment(.leading)
@@ -127,59 +127,23 @@ struct PersonalityPageView: View {
                     }
                     .padding()
                 }
-                Divider()
-                
-                // MARK: Bottom Buttons
-                HStack(spacing: 16) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("Cancel")
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                            .frame(maxWidth: 100)
-                            .frame(height: 54)
-                            .background(Color(.systemGray5))
-                            .clipShape(RoundedRectangle(cornerRadius: 30))
-                    }
-                    
+            }
+            .background(Color("AppBg"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                        .foregroundStyle(Color(.text))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
                         PersonalityPageView2(vm: vm, onSaved: onSaved)
                     } label: {
-                        Text("Continue")
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 54)
-                            .background(Color("SaveBg"))
-                            .clipShape(RoundedRectangle(cornerRadius: 30))
+                        Text("Next").fontWeight(.semibold)
                     }
-                }
-                .padding()
-                
-                //MARK: HEADER
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Text(catName.uppercased() + " • PERSONALITY")
-                            .fixedSize()
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(Color(.text))
-                    }
-                    .sharedBackgroundVisibility(.hidden)
-                    
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .resizable()
-                                .frame(width: 12, height: 12)
-                        }
-                    }
+                    .foregroundStyle(Color(.text))
                 }
             }
-            .background(Color("AppBg"))
             
             //to show sheet handle
             .presentationDragIndicator(.visible)

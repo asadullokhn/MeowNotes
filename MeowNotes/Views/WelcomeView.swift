@@ -7,7 +7,11 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    // `true` when adding another cat later (shown as a sheet from Home) vs. the
+    // first-launch onboarding. Adds a close button and dismisses on success.
+    var isAdditional: Bool = false
     @Environment(AuthManager.self) private var auth
+    @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""
     @State private var pickedDataURL: String?
@@ -30,11 +34,21 @@ struct WelcomeView: View {
                         Text("MeowNotes")
                             .font(.system(size: 22, weight: .bold))
                             .foregroundStyle(Color(.text))
+                        if isAdditional {
+                            Spacer()
+                            Button { dismiss() } label: {
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(Color(.text).opacity(0.6))
+                                    .frame(width: 36, height: 36)
+                                    .background(Color(.bubbleBg), in: Circle())
+                            }
+                        }
                     }
                     .padding(.top, 12)
                     .padding(.bottom, 28)
 
-                    Text("Let's meet your cat.")
+                    Text(isAdditional ? "Add another cat." : "Let's meet your cat.")
                         .font(.system(size: 30, weight: .bold))
                         .foregroundStyle(Color(.text))
                     Text("Start with a name and a photo — you can add routine, quirks, medical and the rest from the home screen.")
@@ -113,8 +127,10 @@ struct WelcomeView: View {
         errorMessage = nil
         Task {
             do {
-                // On success, auth.cats becomes non-empty and ContentView shows HomeView.
                 try await auth.addCat(name: trimmedName, photo: pickedDataURL)
+                // First launch: cats becomes non-empty and ContentView shows Home
+                // (dismiss is a no-op). Adding another: closes the sheet.
+                dismiss()
             } catch {
                 errorMessage = error.localizedDescription
             }

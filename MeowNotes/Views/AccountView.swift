@@ -7,17 +7,16 @@ import SwiftUI
 
 struct AccountView: View {
     @Environment(AuthManager.self) private var auth
-    @Environment(\.dismiss) private var dismiss
     @State private var showChangePassword = false
     @State private var showClaim = false
     @State private var showProfileEdit = false
     @State private var showDeleteConfirm = false
     @State private var deleting = false
     @State private var deleteError: String?
+    @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
+        ScrollView {
                 VStack(spacing: 24) {
                     profileHeader
 
@@ -44,6 +43,8 @@ struct AccountView: View {
                             .stroke(Color("BubbleBorder"), lineWidth: 1)
                     )
 
+                    appearanceCard
+
                     if auth.isGuest {
                         guestCard
                     }
@@ -55,12 +56,6 @@ struct AccountView: View {
             .background(Color("AppBg").ignoresSafeArea())
             .navigationTitle("Account")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .foregroundColor(Color("TextColor"))
-                }
-            }
             .sheet(isPresented: $showChangePassword) {
                 ChangePasswordView()
             }
@@ -70,7 +65,7 @@ struct AccountView: View {
             .sheet(isPresented: $showProfileEdit) {
                 ProfileEditView()
             }
-            .alert("Delete account?", isPresented: $showDeleteConfirm) {
+            .alert(auth.isGuest ? "Delete data?" : "Delete account?", isPresented: $showDeleteConfirm) {
                 Button("Cancel", role: .cancel) {}
                 Button("Delete", role: .destructive) { performDelete() }
             } message: {
@@ -78,7 +73,28 @@ struct AccountView: View {
                     ? "This permanently deletes your cats and their care guides. As a guest there's no way to recover them — create an account first if you want to keep them."
                     : "This permanently deletes your account, your cats, and their care guides. This can't be undone.")
             }
+    }
+
+    private var appearanceCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Appearance")
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(Color("TextColor"))
+            Picker("Appearance", selection: $appearance) {
+                ForEach(AppAppearance.allCases) { option in
+                    Text(option.label).tag(option.rawValue)
+                }
+            }
+            .pickerStyle(.segmented)
         }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color("BubbleBg"))
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color("BubbleBorder"), lineWidth: 1)
+        )
     }
 
     private var dangerCard: some View {
@@ -93,7 +109,7 @@ struct AccountView: View {
                         .frame(width: 40, height: 40)
                         .background(Color("AppBg"))
                         .clipShape(Circle())
-                    Text(deleting ? "Deleting…" : "Delete account")
+                    Text(deleting ? "Deleting…" : (auth.isGuest ? "Delete data" : "Delete account"))
                         .font(.body.weight(.medium))
                         .foregroundColor(Color(red: 0.79, green: 0.44, blue: 0.42))
                     Spacer()

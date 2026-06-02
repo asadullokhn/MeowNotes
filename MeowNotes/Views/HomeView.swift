@@ -115,7 +115,7 @@ struct HomeView: View {
                 VStack(spacing: 20) {
                     // MARK: - Hero Image
                     ZStack(alignment: .bottomLeading) {
-                        AsyncImage(url: URL(string: cat?.photo ?? "")) { image in
+                        CachedCatImage(cat?.photo) { image in
                             image.resizable().scaledToFill()
                         } placeholder: {
                             Image("Cat").resizable().scaledToFill()

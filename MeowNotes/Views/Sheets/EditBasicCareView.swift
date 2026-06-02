@@ -25,8 +25,6 @@ struct EditBasicCareView: View {
         "Clean bowls",
         "Give meds"
     ]
-    private let textColor = Color(red: 61.0 / 255.0, green: 51.0 / 255.0, blue: 41.0 / 255.0)
-    private let commonOnesBackground = Color(red: 243.0 / 255.0, green: 236.0 / 255.0, blue: 226.0 / 255.0)
 
     var body: some View {
         NavigationStack {
@@ -34,61 +32,93 @@ struct EditBasicCareView: View {
                 Color("AppBg").ignoresSafeArea()
                 
                 Form {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 16) {
                         Text("What needs a quick check?")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .multilineTextAlignment(.leading)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .foregroundStyle(textColor)
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(Color("TextColor"))
+                        
                         Text("Cat-care tasks with no fixed time. Your sitter ticks these off in their guide — you just list them here.")
-                            .font(.subheadline)
-                            .foregroundStyle(textColor)
+                            .font(.system(size: 14))
+                            .foregroundColor(Color("TextColor"))
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
 
                     Section {
-                        ForEach(checklistItems.indices, id: \.self) { index in
-                            HStack(spacing: 12) {
-                                TextField("Check", text: binding(for: index))
-                                    .textInputAutocapitalization(.sentences)
-                                    .foregroundStyle(textColor)
-                                Spacer(minLength: 8)
-                                Image(systemName: "pencil")
-                                    .foregroundStyle(.secondary)
-                                    .accessibilityHidden(true)
-                                    .opacity(0.5)
-                                Button {
-                                    removeChecklistItem(at: index)
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
+                        VStack(spacing: 12) {
+                            ForEach(checklistItems.indices, id: \.self) { index in
+                                HStack(spacing: 12) {
+                                    Circle()
+                                        .fill(Color(.bubbleSelectedBg))
+                                        .frame(width: 6, height: 6)
+                                    TextField("Check", text: binding(for: index))
+                                        .textInputAutocapitalization(.sentences)
+                                        .font(.callout.weight(.semibold))
+                                        .foregroundStyle(Color(.text))
+                                    Spacer(minLength: 8)
+                                    Image(systemName: "pencil")
                                         .foregroundStyle(.secondary)
+                                        .accessibilityHidden(true)
+                                        .opacity(0.5)
+                                    Button {
+                                        removeChecklistItem(at: index)
+                                    } label: {
+                                        ZStack {
+                                            Circle()
+                                                .fill(Color(.backgroundPredefined))
+                                            Image(systemName: "xmark")
+                                                .font(.system(size: 10, weight: .bold))
+                                                .foregroundStyle(Color(.xIcon).opacity(0.5))
+                                        }
+                                        .frame(width: 32, height: 32)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("Remove check")
                                 }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Remove check")
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 14)
+                                .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(Color(.bubbleBorder), lineWidth: 1)
+                                )
+                            }
+                            
+                            Spacer()
+
+                            HStack(spacing: 10) {
+                                TextField("Add your own - e.g. 'curtains open'", text: $newChecklistItem)
+                                    .textInputAutocapitalization(.sentences)
+                                    .foregroundStyle(Color(.text))
+                                    .padding(.vertical, 14)
+                                    .padding(.horizontal, 14)
+                                    .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 14))
+
+                                Button {
+                                    addChecklistItem()
+                                } label: {
+                                    Text("Add")
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(Color.white)
+                                        .padding(.vertical, 10)
+                                        .padding(.horizontal, 16)
+                                        .background(newChecklistItem != "" ? Color(.addButtonBasicCare) : Color(.addButtonBasicCare).opacity(0.5))
+                                        .clipShape(RoundedRectangle(cornerRadius: 120))
+                                }
+                                .disabled(newChecklistItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                             }
                         }
-
-                        HStack {
-                            TextField("Add your own - e.g. 'curtains open'", text: $newChecklistItem)
-                                .textInputAutocapitalization(.sentences)
-                                .foregroundStyle(textColor)
-                            Button("Add") { addChecklistItem() }
-                                .disabled(newChecklistItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                                .foregroundStyle(textColor)
-                        }
                     }
-                    .listRowBackground(Color("BubbleBg"))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
 
                     Section {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("COMMON ONES")
                                 .font(.headline)
                                 .bold()
-                                .foregroundStyle(textColor)
+                                .foregroundColor(Color("TextColor"))
                             
                             FlowLayout(spacing: 12) {
                                 ForEach(commonChecklistItems, id: \.self) { item in
@@ -109,7 +139,7 @@ struct EditBasicCareView: View {
                             .padding(.vertical, 4)
                         }
                     }
-                    .listRowBackground(commonOnesBackground)
+                    .listRowBackground(Color(.backgroundPredefined))
                 }
                 .scrollContentBackground(.hidden)
                 .safeAreaInset(edge: .bottom) {
@@ -124,17 +154,17 @@ struct EditBasicCareView: View {
                             } label: {
                                 Text("Cancel")
                                     .fontWeight(.semibold)
-                                    .foregroundColor(Color(.text))
+                                    .foregroundColor(.primary)
                                     .frame(maxWidth: 100)
                                     .frame(height: 54)
-                                    .background(Color(.bubbleBg))
+                                    .background(Color(.systemGray5))
                                     .clipShape(RoundedRectangle(cornerRadius: 30))
                             }
 
                             Button {
                                 dismiss()
                             } label: {
-                                Text("Save")
+                                Text("Save checks")
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
@@ -143,10 +173,8 @@ struct EditBasicCareView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 30))
                             }
                         }
-                        .padding(.horizontal)
                     }
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
+                    .padding(8)
                     .background(Color("AppBg").ignoresSafeArea(edges: .bottom))
                 }
                 .navigationBarTitleDisplayMode(.inline)
@@ -155,7 +183,7 @@ struct EditBasicCareView: View {
                         Text(catName.uppercased() + " · BASIC CARE")
                             .fixedSize()
                             .font(.headline)
-                            .fontWeight(.semibold)
+                            .fontWeight(.bold)
                             .foregroundStyle(Color(.text))
                     }
                     .sharedBackgroundVisibility(.hidden)
@@ -209,7 +237,7 @@ struct EditBasicCareView: View {
             Text(item)
                 .lineLimit(expanded ? nil : 1)
                 .multilineTextAlignment(.leading)
-                .foregroundStyle(textColor)
+                .foregroundStyle(Color("TextColor"))
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 10)

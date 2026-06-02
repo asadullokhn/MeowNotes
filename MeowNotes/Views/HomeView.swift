@@ -72,10 +72,10 @@ struct HomeView: View {
             HStack(spacing: 8) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 14))
-                    .foregroundColor(.brown)
+                    .foregroundStyle(Color(.saveBg))
                 Text("Still to add for \(catName)'s guide — tap to fill in:")
                     .font(.footnote)
-                    .foregroundColor(.brown)
+                    .foregroundStyle(Color(.text).opacity(0.7))
             }
             .padding(.trailing, 28)
 
@@ -84,11 +84,11 @@ struct HomeView: View {
                     Button { activeSheet = section.sheet } label: {
                         Text("+ \(section.title)")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.brown)
+                            .foregroundStyle(Color(.text))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 7)
-                            .background(Color.white, in: Capsule())
-                            .overlay(Capsule().stroke(Color.brown.opacity(0.15), lineWidth: 1))
+                            .background(Color(.bubbleBg), in: Capsule())
+                            .overlay(Capsule().stroke(Color(.bubbleBorder), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                 }
@@ -96,12 +96,12 @@ struct HomeView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.brown.opacity(0.08), in: RoundedRectangle(cornerRadius: 20))
+        .background(Color(.saveBg).opacity(0.1), in: RoundedRectangle(cornerRadius: 20))
         .overlay(alignment: .topTrailing) {
             Button { withAnimation { hintDismissed = true } } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.brown.opacity(0.5))
+                    .foregroundStyle(Color(.text).opacity(0.4))
                     .frame(width: 28, height: 28)
             }
         }
@@ -120,60 +120,57 @@ struct HomeView: View {
                         } placeholder: {
                             Image("Cat").resizable().scaledToFill()
                         }
-                        .frame(width: 350, height: 200)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 200)
                         .background(Color.gray.opacity(0.3))
                         .clipShape(RoundedRectangle(cornerRadius: 30))
 
-                        Button(action: { activeSheet = .editCat }) {
-                            HStack{
-                                Image(systemName: "pencil")
-                                Text("Edit Profile")
-                            }
-                            .padding(10)
-                            .background(Color.white.opacity(0.6))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .foregroundColor(.brown)
-                        }
-                        .padding(.trailing, 20)
-                        .padding(.top, 20)
-                        .frame(width: 350, height: 200, alignment: .topTrailing)
-                        
                         VStack(alignment: .leading, spacing: 2) {
                             Text(catName)
                                 .font(.headline)
                                 .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.3), radius: 3)
 
                             if !catSubtitle.isEmpty {
                                 Text(catSubtitle)
                                     .font(.subheadline)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.white.opacity(0.9))
+                                    .shadow(color: .black.opacity(0.3), radius: 3)
                             }
                         }
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 30)
-                        .padding(.vertical, 20)
+                        .padding(20)
                     }
+                    .overlay(alignment: .topTrailing) {
+                        Button(action: { activeSheet = .editCat }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "pencil")
+                                Text("Edit Profile")
+                            }
+                            .font(.subheadline)
+                            .padding(10)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                            .foregroundStyle(Color(.text))
+                        }
+                        .padding(12)
+                    }
+                    .padding(.horizontal, 20)
                     
                     // MARK: - Share Banner
                     Button(action: { activeSheet = .share }) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 20)
-                                .frame(width: 370, height: 75)
-                                .foregroundStyle(Color.brown)
-
-                            HStack(spacing: 10) {
-                                Image(systemName: "square.and.arrow.up")
-                                    .foregroundColor(.white)
-                                Text("Share \(catName)'s Care Guide")
-                                    .font(.caption)
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.horizontal, 40)
+                        HStack(spacing: 10) {
+                            Image(systemName: "square.and.arrow.up")
+                            Text("Share \(catName)'s Care Guide")
+                                .font(.caption)
+                            Spacer()
+                            Image(systemName: "chevron.right")
                         }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24)
+                        .frame(height: 75)
+                        .frame(maxWidth: .infinity)
+                        .background(Color(.saveBg), in: RoundedRectangle(cornerRadius: 20))
                     }
+                    .padding(.horizontal, 20)
 
                     // MARK: - Setup hint — sections still to fill in
                     if !hintDismissed && !missingSections.isEmpty {
@@ -193,7 +190,7 @@ struct HomeView: View {
                 }
                 .padding(.top, 10)
             }
-            .background(Color(red: 0.96, green: 0.95, blue: 0.93))
+            .background(Color("AppBg"))
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .top) {
                 HStack {
@@ -222,9 +219,9 @@ struct HomeView: View {
                             Image(systemName: "chevron.down")
                         }
                         .padding(10)
-                        .background(Color.white)
+                        .background(Color(.bubbleBg))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .foregroundColor(.brown)
+                        .foregroundStyle(Color(.text))
                     }
                     .padding(.leading, 10)
                     Spacer()
@@ -233,15 +230,15 @@ struct HomeView: View {
                     } label: {
                         Image(systemName: "person.crop.circle")
                             .padding(10)
-                            .background(Color.white)
+                            .background(Color(.bubbleBg))
                             .clipShape(Circle())
-                            .foregroundColor(.brown)
+                            .foregroundStyle(Color(.text))
                     }
                     .padding(.trailing, 20)
                 }
                 .padding(.vertical, 8)
                 .frame(maxWidth: .infinity)
-                .background(Color(red: 0.96, green: 0.95, blue: 0.93))
+                .background(Color("AppBg"))
             }
             .navigationDestination(isPresented: $showAccount) { AccountView() }
         }
@@ -279,39 +276,28 @@ struct GridCard: View {
         // 2. Wrap everything in a Button
         Button(action: action) {
             VStack(alignment: .leading) {
-                HStack(alignment: .top) {
-                    Image(systemName: icon)
-                        .font(.system(size: 18))
-                        .frame(width: 44, height: 44)
-                        .background(Color(red: 0.93, green: 0.90, blue: 0.85))
-                        .clipShape(Circle())
-                        .foregroundColor(.black) // Keeps icon black
-                    
-                    Spacer()
-                    
-                    Image(systemName: "pencil")
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
-                        .frame(width: 24, height: 24)
-                        .background(Color(red: 0.96, green: 0.95, blue: 0.93))
-                        .clipShape(Circle())
-                }
-                
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                    .frame(width: 44, height: 44)
+                    .background(Color("AppBg"))
+                    .clipShape(Circle())
+                    .foregroundStyle(Color(.text))
+
                 Spacer(minLength: 20)
-                
+
                 Text(title)
                     .font(.headline)
                     .fontWeight(.bold)
-                    .foregroundColor(.black.opacity(0.8))
-                
+                    .foregroundStyle(Color(.text))
+
                 Text(subtitle)
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(Color(.text).opacity(0.6))
                     .padding(.top, 2)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.white)
+            .background(Color(.bubbleBg))
             .cornerRadius(20)
         }
         // 3. This stops SwiftUI from turning all the text inside the button blue!

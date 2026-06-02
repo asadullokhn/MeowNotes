@@ -11,6 +11,9 @@ struct AdditionalPageView: View {
     @State private var vm = AdditionalViewModel()
     @Environment(\.dismiss) private var dismiss
     
+    @Environment(AuthManager.self) private var auth
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -19,29 +22,6 @@ struct AdditionalPageView: View {
                     .ignoresSafeArea()
                     .overlay(
                         VStack(spacing: 0) {
-                            // MARK: CUSTOM HEADER (VISIBLE FIXED)
-                            HStack {
-                                Text("CAT • ADDITIONAL INFO")
-                                    .font(.headline)
-                                    .fontWeight(.bold)
-                                
-                                Spacer()
-                                
-                                Button {
-                                    dismiss()
-                                } label: {
-                                    Image(systemName: "xmark")
-                                        .font(.system(size: 20, weight: .bold))
-                                        .foregroundColor(Color("TextColor"))
-                                        .padding(15)
-                                        .background(Color("BubbleBorder"))
-                                        .clipShape(Circle())
-                                }
-                            }
-                            .padding(.horizontal)
-                            .padding(.vertical, 12)
-                            .background(Color("AppBg"))
-                            
                             // MARK: FORM CONTENT
                             Form {
                                 //MARK: DESCRIPTION
@@ -54,7 +34,6 @@ struct AdditionalPageView: View {
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
                                             .foregroundStyle(Color("TextColor"))
-                                        
                                         Text("Quirks, habits, little tips - Anything else worth knowing. Must-read warning go under Caution.")
                                             .font(.subheadline)
                                             .foregroundStyle(Color("TextColor"))
@@ -194,6 +173,28 @@ struct AdditionalPageView: View {
                                 }
                             }
                             .padding()
+                            
+                            //MARK: HEADER
+                            .toolbar {
+                                ToolbarItem(placement: .topBarLeading) {
+                                    Text(catName.uppercased() + " • ADDITIONAL INFO")
+                                        .fixedSize()
+                                        .font(.headline)
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(Color(.text))
+                                }
+                                .sharedBackgroundVisibility(.hidden)
+                                
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    Button {
+                                        dismiss()
+                                    } label: {
+                                        Image(systemName: "xmark")
+                                            .resizable()
+                                            .frame(width: 12, height: 12)
+                                    }
+                                }
+                            }
                         }
                     )
             }
@@ -203,4 +204,5 @@ struct AdditionalPageView: View {
 
 #Preview{
     AdditionalPageView()
+        .environment(AuthManager())
 }

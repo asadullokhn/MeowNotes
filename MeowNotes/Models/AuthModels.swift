@@ -21,11 +21,36 @@ struct Cat: Codable, Identifiable, Equatable {
     let personalitySummary: String?
     let sharedLinks: [SharedLink]?
     let medical: Medical?
+    let personality: [String]?
+    let feedingRoutine: [CountItem]?
+    let checks: [CountItem]?
+    let notes: [Note]?
 
     // First active share link, if any — used to build the sitter guide URL.
     var shareToken: String? {
         (sharedLinks?.first { $0.status == "active" } ?? sharedLinks?.first)?.token
     }
+
+    // Per-section counts shown on the home grid (mirrors Home.vue).
+    var traitCount: Int { personality?.count ?? 0 }
+    var routineCount: Int { feedingRoutine?.count ?? 0 }
+    var checkCount: Int { checks?.count ?? 0 }
+    var cautionCount: Int { notes?.lazy.filter { $0.urgent == true }.count ?? 0 }
+    var noteCount: Int { notes?.lazy.filter { $0.urgent != true }.count ?? 0 }
+    var vetName: String? {
+        guard let name = medical?.vet.name, !name.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+        return name
+    }
+}
+
+// Opaque array element: lets us decode (and count) lists whose item shape we
+// don't otherwise model, like feedingRoutine and checks.
+struct CountItem: Codable, Equatable {}
+
+// A care-guide note. `urgent` notes are surfaced as "Caution"; the rest are
+// "Additions" — matching the web's split of the single notes array.
+struct Note: Codable, Equatable {
+    let urgent: Bool?
 }
 
 // A cat's medical record. Stored server-side as the JSON `medical` blob and

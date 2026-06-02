@@ -86,6 +86,19 @@ final class AuthManager {
 
     // MARK: - Cat updates
 
+    // POST /api/cats with a new cat draft, then add it to the cache and select
+    // it so it becomes the current cat (mirrors the web's addCat).
+    func addCat(name: String, photo: String?) async throws {
+        let created: Cat = try await API.post("/api/cats", CatDraft(name: name, photo: photo))
+        cats.append(created)
+        selectedCatID = created.id
+    }
+
+    private struct CatDraft: Encodable {
+        let name: String
+        let photo: String?
+    }
+
     // PATCH /api/cats/:id with the cat's medical record, then replace the cached
     // cat with the server's response so `currentCat` reflects the save.
     func updateMedical(catID: String, _ medical: Medical) async throws {

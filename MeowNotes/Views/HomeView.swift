@@ -22,6 +22,29 @@ struct HomeView: View {
         [cat?.breed, cat?.age.map { "\($0)" }].compactMap { $0 }.joined(separator: ", ")
     }
 
+    // Home-grid subtitles, derived from the current cat (mirrors Home.vue).
+    private var personalitySubtitle: String {
+        let n = cat?.traitCount ?? 0
+        return n > 0 ? "\(n) trait\(n == 1 ? "" : "s")" : "Not set yet"
+    }
+    private var routineSubtitle: String {
+        let n = cat?.routineCount ?? 0
+        return n > 0 ? "\(n) thing\(n == 1 ? "" : "s") a day" : "Not set yet"
+    }
+    private var basicCareSubtitle: String {
+        let n = cat?.checkCount ?? 0
+        return n > 0 ? "\(n) quick check\(n == 1 ? "" : "s")" : "Not set yet"
+    }
+    private var cautionSubtitle: String {
+        let n = cat?.cautionCount ?? 0
+        return n > 0 ? "\(n) thing\(n == 1 ? "" : "s") flagged" : "Nothing flagged"
+    }
+    private var medicalSubtitle: String { cat?.vetName ?? "No vet on file" }
+    private var notesSubtitle: String {
+        let n = cat?.noteCount ?? 0
+        return n > 0 ? "\(n) note\(n == 1 ? "" : "s")" : "Not set yet"
+    }
+
     var body: some View {
         NavigationStack {
             // Using a ScrollView so the grid can scroll on smaller screens
@@ -91,12 +114,12 @@ struct HomeView: View {
 
                     // MARK: - 2-Column Grid
                     LazyVGrid(columns: columns, spacing: 16) {
-                        GridCard(icon: "pawprint", title: "Personality", subtitle: "7 traits") { activeSheet = .personality }
-                        GridCard(icon: "clock", title: "Routine", subtitle: "5 things a day") { activeSheet = .routine }
-                        GridCard(icon: "list.bullet", title: "Basic Care", subtitle: "4 quick checks") { activeSheet = .basicCare }
-                        GridCard(icon: "exclamationmark.triangle", title: "Caution", subtitle: "2 things flagged") { activeSheet = .caution }
-                        GridCard(icon: "cross.case", title: "Medical", subtitle: "Dr. Wijaya") { activeSheet = .medical}
-                        GridCard(icon: "doc.text", title: "Additions", subtitle: "3 notes") { activeSheet = .notes }
+                        GridCard(icon: "pawprint", title: "Personality", subtitle: personalitySubtitle) { activeSheet = .personality }
+                        GridCard(icon: "clock", title: "Routine", subtitle: routineSubtitle) { activeSheet = .routine }
+                        GridCard(icon: "list.bullet", title: "Basic Care", subtitle: basicCareSubtitle) { activeSheet = .basicCare }
+                        GridCard(icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle) { activeSheet = .caution }
+                        GridCard(icon: "cross.case", title: "Medical", subtitle: medicalSubtitle) { activeSheet = .medical}
+                        GridCard(icon: "doc.text", title: "Additions", subtitle: notesSubtitle) { activeSheet = .notes }
                     }
                     .padding(.horizontal, 20)
                 }

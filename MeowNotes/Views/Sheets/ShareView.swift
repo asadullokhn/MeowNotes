@@ -14,13 +14,20 @@ struct ShareView: View {
 
     @State private var isQRExpanded = false
     @State private var copied = false
+    // Token fetched/created on appear. A brand-new cat (every guest's first cat)
+    // has no share row yet, so we lazily create one via the API instead of
+    // relying on a pre-existing link in the cached cat.
+    @State private var fetchedToken: String?
+    @State private var loadingLink = false
 
     @State private var selectedDetent: PresentationDetent = .fraction(0.70)
 
     private var cat: Cat? { auth.currentCat }
     private var catName: String { cat?.name ?? "Your cat" }
+    private var token: String? { fetchedToken ?? cat?.shareToken }
+    private var hasLink: Bool { token != nil }
     private var shareURLString: String {
-        if let token = cat?.shareToken {
+        if let token {
             return "https://meownotes.teztun.uz/#/g/\(token)"
         }
         return "https://meownotes.teztun.uz"
@@ -43,6 +50,25 @@ struct ShareView: View {
 
     private func enc(_ string: String) -> String {
         string.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+    }
+
+    // Fetch (creating if needed) the cat's share link the first time the sheet
+    // opens. No-op once we already have a token.
+    private func ensureLink() async {
+        guard fetchedToken == nil, cat?.shareToken == nil, let cat else { return }
+        loadingLink = true
+        fetchedToken = try? await auth.shareLink(catID: cat.id)
+        loadingLink = false
+    }
+
+    // Rotate to a fresh link (the "Refresh" action).
+    private func rotateLink() async {
+        guard let cat, !loadingLink else { return }
+        loadingLink = true
+        if let token = try? await auth.rotateShareLink(catID: cat.id) {
+            fetchedToken = token
+        }
+        loadingLink = false
     }
 
     var body: some View {
@@ -92,9 +118,9 @@ struct ShareView: View {
                                 .font(.system(size: 15))
                                 .foregroundColor(Color(.saveBg).opacity(0.5))
 
-                            Text(shareDisplayURL)
+                            Text(hasLink ? shareDisplayURL : "Generating link…")
                                 .font(.system(size: 14, design: .monospaced))
-                                .foregroundColor(Color(.saveBg))
+                                .foregroundColor(Color(.saveBg).opacity(hasLink ? 1 : 0.5))
                                 .lineLimit(1)
                                 .truncationMode(.tail)
 
@@ -127,6 +153,7 @@ struct ShareView: View {
                                             )
                                     )
                             }
+                            .disabled(!hasLink)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
@@ -264,11 +291,16 @@ struct ShareView: View {
                                 .fixedSize(horizontal: false, vertical: true)
 
                             Button {
-                                
+                                Task { await rotateLink() }
                             } label: {
-                                Text("Refresh")
-                                Image(systemName: "arrow.clockwise")
+                                if loadingLink {
+                                    ProgressView()
+                                } else {
+                                    Text("Refresh")
+                                    Image(systemName: "arrow.clockwise")
+                                }
                             }
+                            .disabled(loadingLink || !hasLink)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(Color(.saveBg))
                             .padding(.horizontal, 18)
@@ -312,6 +344,7 @@ struct ShareView: View {
                 .presentationDragIndicator(.visible)
             }
         }
+        .task { await ensureLink() }
     }
 }
 

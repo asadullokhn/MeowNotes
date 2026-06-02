@@ -164,7 +164,7 @@ struct EditBasicCareView: View {
                             Button {
                                 dismiss()
                             } label: {
-                                Text("Save checks")
+                                Text("Save")
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)

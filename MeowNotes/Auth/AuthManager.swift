@@ -86,18 +86,86 @@ final class AuthManager {
 
     // MARK: - Cat updates
 
+    // POST /api/cats with a new cat draft, then add it to the cache and select
+    // it so it becomes the current cat (mirrors the web's addCat).
+    func addCat(name: String, photo: String?) async throws {
+        let created: Cat = try await API.post("/api/cats", CatDraft(name: name, photo: photo))
+        cats.append(created)
+        selectedCatID = created.id
+    }
+
+    private struct CatDraft: Encodable {
+        let name: String
+        let photo: String?
+    }
+
     // PATCH /api/cats/:id with the cat's medical record, then replace the cached
     // cat with the server's response so `currentCat` reflects the save.
     func updateMedical(catID: String, _ medical: Medical) async throws {
         let updated: Cat = try await API.patch("/api/cats/\(catID)", CatPatch(medical: medical))
-        if let index = cats.firstIndex(where: { $0.id == updated.id }) {
-            cats[index] = updated
+        replaceCachedCat(updated)
+    }
+
+    // PATCH the cat's basics. Only non-nil fields are encoded, and the server
+    // only updates the keys it receives — so leaving a field blank preserves it
+    // instead of overwriting it with an empty value.
+    func updateBasics(catID: String, name: String, photo: String?, breed: String?, age: String?) async throws {
+        let updated: Cat = try await API.patch(
+            "/api/cats/\(catID)",
+            BasicsPatch(name: name, photo: photo, breed: breed, age: age)
+        )
+        replaceCachedCat(updated)
+    }
+
+    // Mark a cat as deceased (or undo). Reversible — un-marking clears the date.
+    func setDeceased(catID: String, deceased: Bool, date: String?) async throws {
+        let updated: Cat = try await API.patch(
+            "/api/cats/\(catID)",
+            DeceasedPatch(deceased: deceased, deceasedDate: date)
+        )
+        replaceCachedCat(updated)
+    }
+
+    // DELETE /api/cats/:id, then drop it from the cache and reselect another cat.
+    func deleteCat(catID: String) async throws {
+        try await API.delete("/api/cats/\(catID)")
+        cats.removeAll { $0.id == catID }
+        if selectedCatID == catID {
+            selectedCatID = cats.first?.id
         }
     }
 
-    // Partial cat update — only the keys we send are touched server-side.
+    private func replaceCachedCat(_ cat: Cat) {
+        if let index = cats.firstIndex(where: { $0.id == cat.id }) {
+            cats[index] = cat
+        }
+    }
+
+    // Partial cat updates — only the keys we send are touched server-side.
     private struct CatPatch: Encodable {
         let medical: Medical
+    }
+
+    private struct BasicsPatch: Encodable {
+        let name: String
+        let photo: String?
+        let breed: String?
+        let age: String?
+    }
+
+    // Custom encoding so `deceasedDate` is sent as an explicit null when nil
+    // (to clear it on un-mark) rather than being omitted.
+    private struct DeceasedPatch: Encodable {
+        let deceased: Bool
+        let deceasedDate: String?
+
+        enum CodingKeys: String, CodingKey { case deceased, deceasedDate }
+
+        func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(deceased, forKey: .deceased)
+            try c.encode(deceasedDate, forKey: .deceasedDate)
+        }
     }
 
     // MARK: - Helpers

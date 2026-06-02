@@ -3,7 +3,7 @@ import SwiftUI
 //struct CustomTimePicker: View {
 //    @Binding var selectedTime: Date
 //    var backgroundColor: Color
-//    
+//
 //    var body: some View {
 //        ZStack {
 //            HStack {
@@ -11,9 +11,9 @@ import SwiftUI
 //                Text(selectedTime, style: .time)
 //                    .font(.system(size: 16, weight: .medium))
 //                    .foregroundColor(.primary)
-//                
+//
 //                Spacer()
-//                
+//
 //                Image(systemName: "clock")
 //                    .foregroundColor(.secondary)
 //                    .font(.system(size: 16))

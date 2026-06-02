@@ -166,7 +166,7 @@ struct EditCautionView: View {
                                             if cautions.contains(where: { $0.text == tag.text }) {
                                                 cautions.removeAll { $0.text == tag.text }
                                             } else {
-                                                cautions.append(CautionModel(text: tag.text))       
+                                                cautions.append(CautionModel(text: tag.text))
                                             }
                                         }
                                     },

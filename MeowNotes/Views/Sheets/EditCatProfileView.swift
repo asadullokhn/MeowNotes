@@ -2,208 +2,340 @@
 //  EditCatProfileView.swift
 //  MeowNotes
 //
-//  Created by Gian Denggan Benjamin on 28/05/26.
+//  Modal editor for a cat's basics (name, photo, breed, age). Ported from
+//  MochiApp's EditBasicsSheet.vue. Save persists via PATCH /api/cats and only
+//  sends the fields that are set, so a blank field doesn't overwrite existing data.
 //
 import SwiftUI
 
 struct EditCatProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
-    @State private var catName: String = ""
-    @State private var photoLink: String = "https://placecats.com/neo/600/600"
-    @State private var age: String = "3"
-    let breed = [
+
+    @State private var name = ""
+    @State private var breed = ""
+    @State private var age = ""
+    @State private var existingPhoto = ""
+    @State private var pickedDataURL: String?
+    @State private var saving = false
+    @State private var errorMessage: String?
+    @State private var showingDeleteConfirm = false
+    @State private var deceasedDate = Date()
+
+    private let commonBreeds = [
         "Domestic Shorthair", "British Shorthair", "Maine Coon",
-        "Persian", "Siamese", "Bengal",
-        "Ragdoll", "Scottish Fold", "Mixed"
+        "Persian", "Siamese", "Bengal", "Ragdoll", "Scottish Fold", "Mixed"
     ]
-    @State private var selectedBreed: String = "British Shorthair"
-    
-    
+
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
+    private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
+    private var canSave: Bool { !trimmedName.isEmpty }
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                Text("A little more about them")
-                    .font(.title.bold())
-                Text("Name")
-                    .foregroundStyle(Color(.brown))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                    .font(Font.body.bold())
-                TextField(
-                    "Add a caution — e.g. 'Bolts for the door'",
-                    text: $catName
-                )
-                .padding()
-                .background(Color(.bubbleBg))
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule()
-                        .stroke(Color(.bubbleBorder), lineWidth: 2)
-                )
-                Text("Photo")
-                    .foregroundStyle(Color(.brown))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                    .font(Font.body.bold())
-                HStack {
-                    Image("Cat")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 100, height: 100)
-                    VStack(spacing: 8) {
-                        Button {
-                            print("Button tapped")
-                        } label: {
-                            HStack{
-                                Image(systemName: "square.and.arrow.up")
-                                Text("Upload from device")
-                            }
-                            .padding(10)
-                            .background(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .foregroundColor(.black)
-                            
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        Text("A little more about them.")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundStyle(Color(.text))
+
+                        field("Name") {
+                            textField("Mochi", $name)
+                                .textInputAutocapitalization(.words)
                         }
-                        TextField(
-                            "Insert Photo Link",
-                            text: $photoLink
-                        )
-                        .padding()
-                        .background(Color(.bubbleBg))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color(.bubbleBorder), lineWidth: 2)
-                        )
+
+                        field("Photo") {
+                            CatPhotoWell(
+                                existingPhotoURL: existingPhoto,
+                                dataURL: $pickedDataURL,
+                                errorMessage: $errorMessage,
+                                fillWidth: true,
+                                height: 190,
+                                cornerRadius: 22,
+                                showActionLabel: true
+                            )
+                        }
+
+                        HStack(alignment: .top, spacing: 12) {
+                            field("Breed") { textField("Mixed", $breed) }
+                            field("Age") { textField("e.g. 2 years, 8 months", $age) }
+                        }
+
+                        FlowLayout(spacing: 8) {
+                            ForEach(commonBreeds, id: \.self) { option in
+                                Button { breed = option } label: { breedChip(option) }
+                                    .buttonStyle(.plain)
+                            }
+                        }
+
+                        if let errorMessage {
+                            AuthErrorBanner(message: errorMessage)
+                        }
+
+                        lifecycleSection
+                    }
+                    .padding()
+                }
+
+                footer
+            }
+            .background(Color(.background))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Text(catName.uppercased() + " · BASICS")
+                        .fixedSize()
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color(.text))
+                }
+                .sharedBackgroundVisibility(.hidden)
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .resizable()
+                            .frame(width: 12, height: 12)
                     }
                 }
-                HStack {
-                    VStack(spacing :10){
-                        Text("Breed")
-                            .foregroundStyle(Color(.brown))
-                            .foregroundStyle(.secondary)
-                            .frame(alignment: .leading)
-                            .font(Font.body.bold())
-                        TextField(
-                            "",
-                            text: $selectedBreed
-                            
-                        )
-                        .padding()
-                        .background(Color(.bubbleBg))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color(.bubbleBorder), lineWidth: 2)
-                        )
-                        
+            }
+            .onAppear(perform: load)
+            .alert("Delete \(catName)?", isPresented: $showingDeleteConfirm) {
+                Button("Delete", role: .destructive) { deleteCat() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This permanently removes \(catName) and their care guide. This can't be undone.")
+            }
+        }
+    }
+
+    // MARK: - Delete / memorial
+
+    private var lifecycleSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Rectangle()
+                .fill(Color(.bubbleBorder))
+                .frame(height: 1)
+                .padding(.top, 4)
+
+            if auth.currentCat?.deceased == true {
+                HStack(spacing: 12) {
+                    Image(systemName: "pawprint.circle")
+                        .font(.system(size: 20))
+                        .foregroundStyle(Color(.text).opacity(0.6))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Marked as deceased")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color(.text))
+                        if let date = auth.currentCat?.deceasedDate, !date.isEmpty {
+                            Text(date)
+                                .font(.caption)
+                                .foregroundStyle(Color(.text).opacity(0.55))
+                        }
                     }
                     Spacer()
-                    VStack{
-                        Text("Age")
-                            .foregroundStyle(Color(.brown))
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity)
-                            .font(Font.body.bold())
-                        TextField(
-                            "Insert Photo Link",
-                            text: $age
-                        )
-                        .padding()
-                        .background(Color(.bubbleBg))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color(.bubbleBorder), lineWidth: 2)
-                        )
-                    }
+                    Button("Undo") { applyDeceased(false) }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color(.saveBg))
                 }
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 120))], spacing: 12) {
-                    
-                    // Loop through your list of breeds
-                    ForEach(breed, id: \.self) { breed in
-                        
-                        Button(action: {
-                            // 3. The Action: Update the state variable when tapped
-                            selectedBreed = breed
-                        }) {
-                            Text(breed)
-                                .font(.system(size: 14, weight: .medium))
-                                .padding(.vertical, 10)
-                                .padding(.horizontal, 16)
-                            // 4. The Styling: Check if THIS chip is the selected one
-                                .background(selectedBreed == breed ? Color(red: 0.5, green: 0.6, blue: 0.5) : Color.white)
-                                .foregroundColor(selectedBreed == breed ? .white : .black.opacity(0.8))
-                                .cornerRadius(25) // Makes the pill shape
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 25)
-                                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                                )
+                .padding(14)
+                .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 16))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color(.bubbleBorder), lineWidth: 1)
+                )
+            } else {
+                HStack(spacing: 10) {
+                    DatePicker("", selection: $deceasedDate, in: ...Date(), displayedComponents: .date)
+                        .labelsHidden()
+                    Spacer()
+                    Button { applyDeceased(true) } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "pawprint.circle")
+                            Text("Mark as deceased")
                         }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color(.text).opacity(0.7))
                     }
                 }
-                .padding(.horizontal)
-                
-                Spacer() // Pushes everything to the top
             }
-            .padding(.top)
-            // A light gray background so the white chips pop
-            .background(Color(UIColor.systemGroupedBackground).ignoresSafeArea())
-            HStack {
+
+            Button(role: .destructive) { showingDeleteConfirm = true } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "trash")
+                    Text("Delete cat")
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.red)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(Color.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func applyDeceased(_ deceased: Bool) {
+        guard let catID = auth.currentCat?.id else { return }
+        errorMessage = nil
+        let dateString: String?
+        if deceased {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            dateString = formatter.string(from: deceasedDate)
+        } else {
+            dateString = nil
+        }
+        Task {
+            do {
+                try await auth.setDeceased(catID: catID, deceased: deceased, date: dateString)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func deleteCat() {
+        guard let catID = auth.currentCat?.id else { return }
+        errorMessage = nil
+        Task {
+            do {
+                try await auth.deleteCat(catID: catID)
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    // MARK: - Footer
+
+    private var footer: some View {
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(Color(.bubbleBorder))
+                .frame(height: 1)
+
+            HStack(spacing: 10) {
                 Button {
                     dismiss()
                 } label: {
                     Text("Cancel")
                         .fontWeight(.semibold)
-                        .foregroundColor(Color(.text))
-                        .frame(maxWidth: 100)
-                        .frame(height: 54)
-                        .background(Color(.white))
-                        .clipShape(RoundedRectangle(cornerRadius: 30))
+                        .foregroundStyle(Color(.text))
+                        .frame(maxWidth: 110)
+                        .frame(height: 52)
+                        .background(Color(.bubbleBg))
+                        .clipShape(RoundedRectangle(cornerRadius: 26))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 26)
+                                .stroke(Color(.bubbleBorder), lineWidth: 1)
+                        )
                 }
-                
+
                 Button {
-                    dismiss()
+                    save()
                 } label: {
-                    Text("Save")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 54)
-                        .background(Color("SaveBg"))
-                        .clipShape(RoundedRectangle(cornerRadius: 30))
+                    Group {
+                        if saving {
+                            ProgressView().tint(.white)
+                        } else {
+                            Text("Save").fontWeight(.semibold)
+                        }
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(Color(.saveBg))
+                    .clipShape(RoundedRectangle(cornerRadius: 26))
+                    .opacity(canSave && !saving ? 1 : 0.5)
                 }
+                .disabled(!canSave || saving)
             }
+            .padding(.horizontal)
+            .padding(.vertical, 12)
         }
         .background(Color(.background))
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
+    }
 
-            
-            Spacer()
+    // MARK: - Field helpers
+
+    private func field<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title.uppercased())
+                .font(.caption2.weight(.semibold))
+                .tracking(0.5)
+                .foregroundStyle(Color(.text).opacity(0.5))
+            content()
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle("\(auth.currentCat?.name ?? "Cat") · Basics")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            guard let cat = auth.currentCat else { return }
-            if catName.isEmpty { catName = cat.name }
-            if let breed = cat.breed { selectedBreed = breed }
-            if let age = cat.age { self.age = "\(age)" }
-            if let photo = cat.photo { photoLink = photo }
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { dismiss() } label:{ Image(systemName: "xmark") }
+    }
+
+    private func textField(_ placeholder: String, _ text: Binding<String>) -> some View {
+        TextField(placeholder, text: text)
+            .font(.system(size: 16))
+            .foregroundStyle(Color(.text))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color(.bubbleBorder), lineWidth: 1)
+            )
+    }
+
+    private func breedChip(_ option: String) -> some View {
+        let selected = breed == option
+        return Text(option)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(selected ? .white : Color(.text).opacity(0.75))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(selected ? Color(.saveBg) : Color(.bubbleBg), in: Capsule())
+            .overlay(Capsule().stroke(Color(.bubbleBorder), lineWidth: 1))
+    }
+
+    // MARK: - Load / Save
+
+    private func load() {
+        guard let cat = auth.currentCat else { return }
+        name = cat.name
+        breed = cat.breed ?? ""
+        age = cat.age?.display ?? ""
+        existingPhoto = cat.photo ?? ""
+    }
+
+    private func save() {
+        guard let catID = auth.currentCat?.id, canSave, !saving else { return }
+        saving = true
+        errorMessage = nil
+        let trimmedBreed = breed.trimmingCharacters(in: .whitespaces)
+        let trimmedAge = age.trimmingCharacters(in: .whitespaces)
+        Task {
+            do {
+                try await auth.updateBasics(
+                    catID: catID,
+                    name: trimmedName,
+                    photo: pickedDataURL,                          // nil unless a new image was picked
+                    breed: trimmedBreed.isEmpty ? nil : trimmedBreed,
+                    age: trimmedAge.isEmpty ? nil : trimmedAge
+                )
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
             }
+            saving = false
         }
-        
-        .background(Color(red: 0.96, green: 0.95, blue: 0.93))    }
+    }
 }
 
-#Preview { EditCatProfileView().environment(AuthManager()) }
+#Preview {
+    EditCatProfileView()
+        .environment(AuthManager())
+}

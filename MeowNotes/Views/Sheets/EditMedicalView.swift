@@ -55,13 +55,9 @@ struct EditMedicalView: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        (
-                            Text("Health & ")
-                            + Text("vet").italic().font(.system(size: 30, weight: .bold, design: .serif))
-                            + Text(".")
-                        )
-                        .font(.system(size: 30, weight: .bold))
-                        .foregroundStyle(Color(.text))
+                        Text("Health & vet.")
+                            .font(.system(size: 30, weight: .bold))
+                            .foregroundStyle(Color(.text))
 
                         Text("Tap a row to fill it in — one thing at a time.")
                             .font(.subheadline)

@@ -19,7 +19,10 @@ struct HomeView: View {
     private var cat: Cat? { auth.currentCat }
     private var catName: String { cat?.name ?? "Your cat" }
     private var catSubtitle: String {
-        [cat?.breed, cat?.age.map { "\($0)" }].compactMap { $0 }.joined(separator: ", ")
+        [cat?.breed, cat?.age?.display]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .joined(separator: ", ")
     }
 
     // Home-grid subtitles, derived from the current cat (mirrors Home.vue).

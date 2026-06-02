@@ -1,8 +1,10 @@
-
 import SwiftUI
 
 struct EditRoutineView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthManager.self) private var auth
+
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
 
     @State private var routines: [CustomRoutine] = []
     private let textColor = Color(red: 61.0 / 255.0, green: 51.0 / 255.0, blue: 41.0 / 255.0)
@@ -81,6 +83,10 @@ struct EditRoutineView: View {
                                     .buttonStyle(.plain)
                                     .disabled(isAdded)
                                     .opacity(isAdded ? 0.8 : 1)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(textColor.opacity(0.1), lineWidth: 2)
+                                    )
                                 }
                             }
                             .padding(.vertical, 4)
@@ -100,11 +106,8 @@ struct EditRoutineView: View {
                                     HStack(spacing: 10) {
                                         DatePicker("", selection: routineBinding.time, displayedComponents: .hourAndMinute)
                                             .labelsHidden()
-                                            .tint(textColor)
-                                            .padding(.vertical, 6)
-                                            .padding(.horizontal, 8)
                                             .background(
-                                                RoundedRectangle(cornerRadius: 32)
+                                                RoundedRectangle(cornerRadius: 12)
                                                     .fill(backgroundFieldColor)
                                             )
                                         
@@ -113,8 +116,9 @@ struct EditRoutineView: View {
                                             .foregroundStyle(textColor)
                                             .padding(.vertical, 6)
                                             .padding(.horizontal, 8)
+                                            .fontWeight(.semibold)
                                             .background(
-                                                RoundedRectangle(cornerRadius: 32)
+                                                RoundedRectangle(cornerRadius: 12)
                                                     .fill(backgroundFieldColor)
                                             )
 
@@ -139,7 +143,7 @@ struct EditRoutineView: View {
                                             .padding(8)
                                     }
                                     .background(
-                                        RoundedRectangle(cornerRadius: 32)
+                                        RoundedRectangle(cornerRadius: 12)
                                             .fill(backgroundFieldColor)
                                     )
                                 }
@@ -158,8 +162,12 @@ struct EditRoutineView: View {
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 32)
+                                    RoundedRectangle(cornerRadius: 12)
                                         .fill(Color("BubbleBg"))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(textColor.opacity(0.1), lineWidth: 2)
                                 )
                         }
                         .buttonStyle(.plain)
@@ -169,14 +177,62 @@ struct EditRoutineView: View {
                     .listRowBackground(Color("BubbleBg"))
                 }
                 .scrollContentBackground(.hidden)
-                .navigationTitle("Routine")
+                .safeAreaInset(edge: .bottom) {
+                    VStack(spacing: 16) {
+                        Rectangle()
+                            .fill(Color(.bubbleBorder))
+                            .frame(height: 2)
+                        
+                        HStack {
+                            Button {
+                                dismiss()
+                            } label: {
+                                Text("Cancel")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(Color(.text))
+                                    .frame(maxWidth: 100)
+                                    .frame(height: 54)
+                                    .background(Color(.bubbleBg))
+                                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                            }
+
+                            Button {
+                                dismiss()
+                            } label: {
+                                Text("Save")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 54)
+                                    .background(Color("SaveBg"))
+                                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
+                    .background(Color("AppBg").ignoresSafeArea(edges: .bottom))
+                }
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        Button("Cancel") { dismiss() }
+                        Text(catName.uppercased() + " · ROUTINE")
+                            .fixedSize()
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color(.text))
                     }
+                    .sharedBackgroundVisibility(.hidden)
+                    
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Done") { dismiss() }
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .resizable()
+                                .frame(width: 12, height: 12)
+                        }
                     }
                 }
             }
@@ -192,7 +248,6 @@ struct EditRoutineView: View {
     }
 
     private func isCommonRoutineAdded(_ routine: CommonRoutine) -> Bool {
-        // Compares by title so that if the user manually typed "Breakfast", it would also disable the button
         let trimmedTitle = routine.title.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         return routines.contains {
             $0.title.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == trimmedTitle
@@ -237,4 +292,7 @@ private struct CommonRoutine: Identifiable, Hashable {
     let details: String
 }
 
-#Preview { EditRoutineView() }
+#Preview {
+    EditRoutineView()
+        .environment(AuthManager())
+}

@@ -10,6 +10,9 @@ import SwiftUI
 struct AdditionalPageView: View {
     @State private var vm = AdditionalViewModel()
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthManager.self) private var auth
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
+    @FocusState private var isFocused: Bool
     
     var body: some View {
         NavigationStack {
@@ -19,29 +22,6 @@ struct AdditionalPageView: View {
                     .ignoresSafeArea()
                     .overlay(
                         VStack(spacing: 0) {
-                            // MARK: CUSTOM HEADER (VISIBLE FIXED)
-                            HStack {
-                                Text("CAT • ADDITIONAL INFO")
-                                    .font(.headline)
-                                    .fontWeight(.bold)
-                                
-                                Spacer()
-                                
-                                Button {
-                                    dismiss()
-                                } label: {
-                                    Image(systemName: "xmark")
-                                        .font(.system(size: 20, weight: .bold))
-                                        .foregroundColor(Color("TextColor"))
-                                        .padding(15)
-                                        .background(Color("BubbleBorder"))
-                                        .clipShape(Circle())
-                                }
-                            }
-                            .padding(.horizontal)
-                            .padding(.vertical, 12)
-                            .background(Color("AppBg"))
-                            
                             // MARK: FORM CONTENT
                             Form {
                                 //MARK: DESCRIPTION
@@ -54,7 +34,6 @@ struct AdditionalPageView: View {
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
                                             .foregroundStyle(Color("TextColor"))
-                                        
                                         Text("Quirks, habits, little tips - Anything else worth knowing. Must-read warning go under Caution.")
                                             .font(.subheadline)
                                             .foregroundStyle(Color("TextColor"))
@@ -71,6 +50,7 @@ struct AdditionalPageView: View {
                                             "e.g 'Will run if you let the window open'",
                                             text: $vm.newTag
                                         )
+                                        .focused($isFocused)
                                         .padding(.horizontal, 14)
                                         .frame(height: 48)
                                         .background(
@@ -79,8 +59,10 @@ struct AdditionalPageView: View {
                                         )
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 20)
-                                                .stroke(Color("BubbleBorder"), lineWidth: 1)
+                                                .stroke(Color("BubbleSelectedBg"), lineWidth: 1)
+                                                .opacity(isFocused ? 1 : 0)
                                         )
+                                        .animation(.easeInOut, value: isFocused)
                                         
                                         Button {
                                             vm.addCustomTag()
@@ -194,6 +176,28 @@ struct AdditionalPageView: View {
                                 }
                             }
                             .padding()
+                            
+                            //MARK: HEADER
+                            .toolbar {
+                                ToolbarItem(placement: .topBarLeading) {
+                                    Text(catName.uppercased() + " • ADDITIONAL INFO")
+                                        .fixedSize()
+                                        .font(.headline)
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(Color(.text))
+                                }
+                                .sharedBackgroundVisibility(.hidden)
+                                
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    Button {
+                                        dismiss()
+                                    } label: {
+                                        Image(systemName: "xmark")
+                                            .resizable()
+                                            .frame(width: 12, height: 12)
+                                    }
+                                }
+                            }
                         }
                     )
             }
@@ -203,4 +207,6 @@ struct AdditionalPageView: View {
 
 #Preview{
     AdditionalPageView()
+        .environment(AuthManager())
+        .preferredColorScheme(.dark)
 }

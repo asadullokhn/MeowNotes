@@ -1,46 +1,5 @@
 import SwiftUI
 
-//struct CustomTimePicker: View {
-//    @Binding var selectedTime: Date
-//    var backgroundColor: Color
-//
-//    var body: some View {
-//        ZStack {
-//            HStack {
-//                // 1. Your Custom Visual UI
-//                Text(selectedTime, style: .time)
-//                    .font(.system(size: 16, weight: .medium))
-//                    .foregroundColor(.primary)
-//
-//                Spacer()
-//
-//                Image(systemName: "clock")
-//                    .foregroundColor(.secondary)
-//                    .font(.system(size: 16))
-//            }
-//            .padding(.horizontal, 16)
-//            .padding(.vertical, 12)
-//            .background(
-//                RoundedRectangle(cornerRadius: 12)
-//                    .fill(backgroundColor) // Transparency won't matter anymore
-//            )
-//            // 2. The Invisible Overlay
-//            .overlay {
-//                DatePicker("", selection: $selectedTime, displayedComponents: .hourAndMinute)
-//                    .labelsHidden()
-//                    // Force the invisible picker to fill the entire HStack area
-//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                    // Scale it up slightly just to ensure the internal native button reaches the edges
-//                    .scaleEffect(x: 2, y: 2)
-//                    // 0.02 is the magic number. Invisible to the eye, but registers as a solid tap in iOS 17+.
-//                    .opacity(0.02)
-//            }
-//            // 3. Chop off anything that extends past your background
-//            .clipShape(RoundedRectangle(cornerRadius: 12))
-//        }
-//    }
-//}
-
 struct EditRoutineView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
@@ -252,7 +211,7 @@ struct EditRoutineView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        Text("YOUR CAT" + " · ROUTINE")
+                        Text(catName.uppercased() + " · ROUTINE")
                             .fixedSize()
                             .font(.headline)
                             .fontWeight(.semibold)

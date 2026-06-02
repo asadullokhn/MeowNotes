@@ -180,7 +180,7 @@ struct EditBasicCareView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        Text("YOUR CAT" + " · ROUTINE")
+                        Text(catName.uppercased() + " · BASIC CARE")
                             .fixedSize()
                             .font(.headline)
                             .fontWeight(.bold)

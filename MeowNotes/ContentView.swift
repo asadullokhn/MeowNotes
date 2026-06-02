@@ -9,7 +9,11 @@ struct ContentView: View {
             case .booting:
                 SessionBootView()
             case .authenticated:
-                HomeView(onSignOut: { auth.logout() })
+                if auth.cats.isEmpty {
+                    WelcomeView()
+                } else {
+                    HomeView(onSignOut: { auth.logout() })
+                }
             case .unauthenticated:
                 LoginView(onSignIn: {})
             }

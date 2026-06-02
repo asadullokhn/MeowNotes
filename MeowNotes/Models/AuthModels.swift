@@ -1,12 +1,15 @@
 import Foundation
 
-// Matches serializeUser() on the server.
+// Matches serializeUser() on the server. `email` is null and `isGuest` is true
+// for anonymous guest accounts.
 struct User: Codable, Identifiable, Equatable {
     let id: String
-    let email: String
+    let email: String?
     let name: String
+    let phone: String?
     let avatar: String?
     let location: String?
+    let isGuest: Bool?
 }
 
 // Subset of serializeCat() needed to hydrate the session. The server sends more
@@ -157,5 +160,17 @@ struct LoginRequest: Encodable {
 struct RegisterRequest: Encodable {
     let name: String
     let email: String
+    let password: String
+}
+
+// POST /api/auth/guest — anonymous sign-in (needs the X-App-Key header).
+struct GuestRequest: Encodable {
+    let name: String?
+}
+
+// POST /api/auth/claim — converts the current guest into a full account.
+struct ClaimRequest: Encodable {
+    let email: String
+    let name: String
     let password: String
 }

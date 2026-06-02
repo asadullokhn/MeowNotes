@@ -9,6 +9,8 @@ struct AccountView: View {
     @Environment(AuthManager.self) private var auth
     @Environment(\.dismiss) private var dismiss
     @State private var showChangePassword = false
+    @State private var showClaim = false
+    @State private var showProfileEdit = false
 
     var body: some View {
         NavigationStack {
@@ -17,13 +19,19 @@ struct AccountView: View {
                     profileHeader
 
                     VStack(spacing: 0) {
-                        row(icon: "key.fill", title: "Change password") {
-                            showChangePassword = true
+                        row(icon: "person.text.rectangle", title: "Edit profile") {
+                            showProfileEdit = true
                         }
-                        Divider().padding(.leading, 56)
-                        row(icon: "rectangle.portrait.and.arrow.right",
-                            title: "Log out", tint: Color(red: 0.79, green: 0.44, blue: 0.42)) {
-                            auth.logout()
+                        if !auth.isGuest {
+                            Divider().padding(.leading, 56)
+                            row(icon: "key.fill", title: "Change password") {
+                                showChangePassword = true
+                            }
+                            Divider().padding(.leading, 56)
+                            row(icon: "rectangle.portrait.and.arrow.right",
+                                title: "Log out", tint: Color(red: 0.79, green: 0.44, blue: 0.42)) {
+                                auth.logout()
+                            }
                         }
                     }
                     .background(Color("BubbleBg"))
@@ -32,6 +40,10 @@ struct AccountView: View {
                         RoundedRectangle(cornerRadius: 18)
                             .stroke(Color("BubbleBorder"), lineWidth: 1)
                     )
+
+                    if auth.isGuest {
+                        guestCard
+                    }
                 }
                 .padding(24)
             }
@@ -47,7 +59,36 @@ struct AccountView: View {
             .sheet(isPresented: $showChangePassword) {
                 ChangePasswordView()
             }
+            .sheet(isPresented: $showClaim) {
+                ClaimAccountView()
+            }
+            .sheet(isPresented: $showProfileEdit) {
+                ProfileEditView()
+            }
         }
+    }
+
+    private var guestCard: some View {
+        VStack(spacing: 14) {
+            VStack(spacing: 6) {
+                Text("You're browsing as a guest")
+                    .font(.headline)
+                    .foregroundColor(Color("TextColor"))
+                Text("Save your account to keep your cats and sign in on the web or another device.")
+                    .font(.subheadline)
+                    .foregroundColor(Color("TextColor").opacity(0.6))
+                    .multilineTextAlignment(.center)
+            }
+            AuthPrimaryButton(title: "Save your account") { showClaim = true }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity)
+        .background(Color("BubbleBg"))
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color("BubbleBorder"), lineWidth: 1)
+        )
     }
 
     private var profileHeader: some View {
@@ -60,6 +101,10 @@ struct AccountView: View {
                 .foregroundColor(Color("TextColor"))
             if let email = auth.user?.email {
                 Text(email)
+                    .font(.subheadline)
+                    .foregroundColor(Color("TextColor").opacity(0.6))
+            } else if auth.isGuest {
+                Text("Guest account")
                     .font(.subheadline)
                     .foregroundColor(Color("TextColor").opacity(0.6))
             }

@@ -216,14 +216,18 @@ struct EditCautionView: View {
                             .foregroundColor(Color(.text))
                             .frame(maxWidth: 100)
                             .frame(height: 54)
-                            .background(Color(.white))
+                            .background(Color(.bubbleBg))
                             .clipShape(RoundedRectangle(cornerRadius: 30))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 30)
+                                    .stroke(Color(.bubbleBorder), lineWidth: 1)
+                            )
                     }
                     
                     Button {
                         dismiss()
                     } label: {
-                        Text("Save Caution")
+                        Text("Save")
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)

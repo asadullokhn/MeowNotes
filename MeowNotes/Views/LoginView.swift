@@ -156,7 +156,7 @@ struct LoginView: View {
             }
             .padding(10)
             .frame(maxWidth: .infinity)
-            .background(Color.white)
+            .background(Color("BubbleBg"))
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
                 RoundedRectangle(cornerRadius: 16)

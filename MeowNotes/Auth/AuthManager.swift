@@ -15,8 +15,18 @@ final class AuthManager {
     private(set) var phase: Phase = .booting
     private(set) var user: User?
     private(set) var cats: [Cat] = []
+    private(set) var selectedCatID: String?
 
     var isAuthenticated: Bool { phase == .authenticated }
+
+    // The cat currently shown across the app. Falls back to the first cat.
+    var currentCat: Cat? {
+        cats.first { $0.id == selectedCatID } ?? cats.first
+    }
+
+    func selectCat(_ id: String) {
+        selectedCatID = id
+    }
 
     // On launch: if a token exists, hydrate from /api/me; drop it on 401.
     func boot() async {
@@ -84,6 +94,10 @@ final class AuthManager {
     private func hydrate(user: User?, cats: [Cat]) {
         self.user = user
         self.cats = cats
+        // Keep the selection valid; default to the first cat.
+        if selectedCatID == nil || !cats.contains(where: { $0.id == selectedCatID }) {
+            selectedCatID = cats.first?.id
+        }
         phase = user == nil ? .unauthenticated : .authenticated
     }
 }

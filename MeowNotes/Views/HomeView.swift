@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum HomeSheet: String, Identifiable {
-    case newCat, personality, routine, basicCare, preferences, caution, medical, notes, share, editCat
+    case newCat, personality, routine, basicCare, preferences, caution, medical, notes, share, editCat, account
     var id: String { rawValue }
 }
 
@@ -13,51 +13,31 @@ let columns = [
 
 struct HomeView: View {
     var onSignOut: () -> Void
+    @Environment(AuthManager.self) private var auth
     @State private var activeSheet: HomeSheet?
-    @State private var showAccount = false
-    @State private var showGuide = false
-    
+
+    private var cat: Cat? { auth.currentCat }
+    private var catName: String { cat?.name ?? "Your cat" }
+    private var catSubtitle: String {
+        [cat?.breed, cat?.age.map { "\($0)" }].compactMap { $0 }.joined(separator: ", ")
+    }
+
     var body: some View {
         NavigationStack {
             // Using a ScrollView so the grid can scroll on smaller screens
             ScrollView {
                 VStack(spacing: 20) {
-                    HStack {
-                        Button(action : { activeSheet = .newCat}) {
-                            HStack{
-                                Image(systemName: "cat")
-                                Text("Mochi")
-                                Image(systemName: "chevron.down")
-                            }
-                            .padding(10)
-                            .background(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .foregroundColor(.brown)
-                        }
-                        .padding(.leading,10)
-                        Spacer()
-                        Button {
-                            showAccount = true
-                        } label: {
-                            HStack{
-                                Image(systemName: "person.crop.circle")
-                            }
-                            .padding(10)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .foregroundColor(.brown)
-                        }
-                        .padding(.trailing,20)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
                     // MARK: - Hero Image
                     ZStack(alignment: .bottomLeading) {
-                        Image("Cat") // Placeholder
-                            .frame(width: 350, height: 200)
-                            .background(Color.gray.opacity(0.3))
-                            .clipShape(RoundedRectangle(cornerRadius: 30))
-                        
+                        AsyncImage(url: URL(string: cat?.photo ?? "")) { image in
+                            image.resizable().scaledToFill()
+                        } placeholder: {
+                            Image("Cat").resizable().scaledToFill()
+                        }
+                        .frame(width: 350, height: 200)
+                        .background(Color.gray.opacity(0.3))
+                        .clipShape(RoundedRectangle(cornerRadius: 30))
+
                         Button(action: { activeSheet = .editCat }) {
                             HStack{
                                 Image(systemName: "pencil")
@@ -73,14 +53,15 @@ struct HomeView: View {
                         .frame(width: 350, height: 200, alignment: .topTrailing)
                         
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Mochi")
+                            Text(catName)
                                 .font(.headline)
                                 .foregroundColor(.white)
-                            
-                            Text("British Shorthair, 2")
-                                .font(.subheadline)
-                                .foregroundColor(.white)
-                            
+
+                            if !catSubtitle.isEmpty {
+                                Text(catSubtitle)
+                                    .font(.subheadline)
+                                    .foregroundColor(.white)
+                            }
                         }
                         .foregroundColor(.black)
                         .padding(.horizontal, 30)
@@ -97,7 +78,7 @@ struct HomeView: View {
                             HStack(spacing: 10) {
                                 Image(systemName: "square.and.arrow.up")
                                     .foregroundColor(.white)
-                                Text("Share Mochi's Care Guide")
+                                Text("Share \(catName)'s Care Guide")
                                     .font(.caption)
                                     .foregroundColor(.white)
                                 Spacer()
@@ -122,6 +103,55 @@ struct HomeView: View {
                 .padding(.top, 10)
             }
             .background(Color(red: 0.96, green: 0.95, blue: 0.93))
+            .toolbar(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .top) {
+                HStack {
+                    Menu {
+                        ForEach(auth.cats) { c in
+                            Button {
+                                auth.selectCat(c.id)
+                            } label: {
+                                if c.id == cat?.id {
+                                    Label(c.name, systemImage: "checkmark")
+                                } else {
+                                    Text(c.name)
+                                }
+                            }
+                        }
+                        Divider()
+                        Button {
+                            activeSheet = .newCat
+                        } label: {
+                            Label("Add new cat", systemImage: "plus")
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "cat")
+                            Text(catName)
+                            Image(systemName: "chevron.down")
+                        }
+                        .padding(10)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .foregroundColor(.brown)
+                    }
+                    .padding(.leading, 10)
+                    Spacer()
+                    Button {
+                        activeSheet = .account
+                    } label: {
+                        Image(systemName: "person.crop.circle")
+                            .padding(10)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .foregroundColor(.brown)
+                    }
+                    .padding(.trailing, 20)
+                }
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .background(Color(red: 0.96, green: 0.95, blue: 0.93))
+            }
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
@@ -134,10 +164,9 @@ struct HomeView: View {
             case .medical:     EditMedicalView()
             case .notes:       AdditionalPageView()
             case .share:       ShareView()
-            case .editCat:       EditCatProfileView()            }
-        }
-        .sheet(isPresented: $showAccount) {
-            AccountView()
+            case .editCat:     EditCatProfileView()
+            case .account:     AccountView()
+            }
         }
     }
 }
@@ -195,5 +224,5 @@ struct GridCard: View {
 
 #Preview {
     HomeView(onSignOut: {})
-//        .preferredColorScheme(.dark)
+        .environment(AuthManager())
 }

@@ -27,6 +27,12 @@ struct EditCatProfileView: View {
         "Persian", "Siamese", "Bengal", "Ragdoll", "Scottish Fold", "Mixed"
     ]
 
+    // Calm periwinkle for the memorial (clearly not a destructive action) and
+    // the app's terracotta for the destructive removal. Both are mid-tone so
+    // they stay legible in light and dark.
+    private let memorialColor = Color(red: 0.56, green: 0.56, blue: 0.80)
+    private let removeColor = Color(red: 0.79, green: 0.44, blue: 0.42)
+
     private var catName: String { auth.currentCat?.name ?? "your cat" }
     private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
     private var canSave: Bool { !trimmedName.isEmpty }
@@ -103,11 +109,11 @@ struct EditCatProfileView: View {
                 }
             }
             .onAppear(perform: load)
-            .alert("Delete \(catName)?", isPresented: $showingDeleteConfirm) {
-                Button("Delete", role: .destructive) { deleteCat() }
+            .alert("Remove \(catName)'s profile?", isPresented: $showingDeleteConfirm) {
+                Button("Remove", role: .destructive) { deleteCat() }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This permanently removes \(catName) and their care guide. This can't be undone.")
+                Text("This permanently removes \(catName)'s profile and care guide. This can't be undone. To keep their profile as a memorial instead, use \u{201C}Mark as deceased.\u{201D}")
             }
         }
     }
@@ -115,71 +121,114 @@ struct EditCatProfileView: View {
     // MARK: - Delete / memorial
 
     private var lifecycleSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 18) {
             Rectangle()
                 .fill(Color(.bubbleBorder))
                 .frame(height: 1)
-                .padding(.top, 4)
+                .padding(.vertical, 4)
 
-            if auth.currentCat?.deceased == true {
-                HStack(spacing: 12) {
-                    Image(systemName: "pawprint.circle")
-                        .font(.system(size: 20))
+            memorialSection
+
+            removeSection
+        }
+    }
+
+    // The gentle, memorial half — a warm card when the cat has passed, or a
+    // kind prompt to mark the date otherwise.
+    @ViewBuilder
+    private var memorialSection: some View {
+        if auth.currentCat?.deceased == true {
+            VStack(spacing: 10) {
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 30))
+                    .foregroundStyle(memorialColor)
+                Text("In loving memory of \(catName)")
+                    .font(.headline)
+                    .foregroundStyle(Color(.text))
+                    .multilineTextAlignment(.center)
+                if let date = auth.currentCat?.deceasedDate, !date.isEmpty {
+                    Text(prettyDate(date))
+                        .font(.subheadline)
                         .foregroundStyle(Color(.text).opacity(0.6))
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Marked as deceased")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color(.text))
-                        if let date = auth.currentCat?.deceasedDate, !date.isEmpty {
-                            Text(date)
-                                .font(.caption)
-                                .foregroundStyle(Color(.text).opacity(0.55))
-                        }
-                    }
-                    Spacer()
-                    Button("Undo") { applyDeceased(false) }
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color(.saveBg))
                 }
-                .padding(14)
-                .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 16))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color(.bubbleBorder), lineWidth: 1)
-                )
-            } else {
+                Text("Their care guide stays here so you can look back any time.")
+                    .font(.caption)
+                    .foregroundStyle(Color(.text).opacity(0.5))
+                    .multilineTextAlignment(.center)
+                Button { applyDeceased(false) } label: {
+                    Text("They're still with us — undo")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(memorialColor)
+                }
+                .padding(.top, 2)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(20)
+            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(memorialColor.opacity(0.45), lineWidth: 1.5)
+            )
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("IN MEMORY")
+                    .font(.caption2.weight(.semibold))
+                    .tracking(0.5)
+                    .foregroundStyle(Color(.text).opacity(0.5))
+                Text("If \(catName) has passed, mark the date to keep their profile as a memorial. You can undo any time.")
+                    .font(.caption)
+                    .foregroundStyle(Color(.text).opacity(0.6))
                 HStack(spacing: 10) {
                     DatePicker("", selection: $deceasedDate, in: ...Date(), displayedComponents: .date)
                         .labelsHidden()
                     Spacer()
                     Button { applyDeceased(true) } label: {
                         HStack(spacing: 6) {
-                            Image(systemName: "pawprint.circle")
+                            Image(systemName: "heart")
                             Text("Mark as deceased")
                         }
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color(.text).opacity(0.7))
+                        .foregroundStyle(memorialColor)
                     }
                 }
             }
-
-            Button(role: .destructive) { showingDeleteConfirm = true } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "trash")
-                    Text("Delete cat")
-                }
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.red)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(Color.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.red.opacity(0.3), lineWidth: 1)
-                )
-            }
-            .buttonStyle(.plain)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color(.bubbleBorder), lineWidth: 1)
+            )
         }
+    }
+
+    // The destructive half — kept visually distinct and lower down.
+    private var removeSection: some View {
+        Button(role: .destructive) { showingDeleteConfirm = true } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "trash")
+                Text("Remove cat profile")
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(removeColor)
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .background(removeColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(removeColor.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func prettyDate(_ raw: String) -> String {
+        let parser = DateFormatter()
+        parser.dateFormat = "yyyy-MM-dd"
+        guard let date = parser.date(from: raw) else { return raw }
+        let out = DateFormatter()
+        out.dateStyle = .long
+        return out.string(from: date)
     }
 
     private func applyDeceased(_ deceased: Bool) {

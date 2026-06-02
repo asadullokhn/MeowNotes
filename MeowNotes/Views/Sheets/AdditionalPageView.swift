@@ -154,59 +154,19 @@ struct AdditionalPageView: View {
                                 .listRowBackground(Color("BubbleSectionBg"))
                             }
                             .scrollContentBackground(.hidden)
-                            
-                            // MARK: Bottom Buttons
-                            Section{
-                                HStack(spacing: 16) {
-                                    Button {
-                                        dismiss()
-                                    } label: {
-                                        Text("Cancel")
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.primary)
-                                            .frame(maxWidth: 100)
-                                            .frame(height: 54)
-                                            .background(Color(.systemGray5))
-                                            .clipShape(RoundedRectangle(cornerRadius: 30))
-                                    }
-                                    
-                                    Button {
-                                        save()
-                                    } label: {
-                                        Group {
-                                            if saving { ProgressView().tint(.white) }
-                                            else { Text("Save").fontWeight(.semibold) }
-                                        }
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity)
-                                            .frame(height: 54)
-                                            .background(Color("SaveBg"))
-                                            .clipShape(RoundedRectangle(cornerRadius: 30))
-                                    }
-                                    .disabled(saving)
-                                }
-                            }
-                            .padding()
-                            
-                            //MARK: HEADER
+                            .navigationBarTitleDisplayMode(.inline)
                             .toolbar {
                                 ToolbarItem(placement: .topBarLeading) {
-                                    Text(catName.uppercased() + " • ADDITIONAL INFO")
-                                        .fixedSize()
-                                        .font(.headline)
-                                        .fontWeight(.semibold)
+                                    Button("Cancel") { dismiss() }
                                         .foregroundStyle(Color(.text))
                                 }
-                                .sharedBackgroundVisibility(.hidden)
-                                
                                 ToolbarItem(placement: .topBarTrailing) {
-                                    Button {
-                                        dismiss()
-                                    } label: {
-                                        Image(systemName: "xmark")
-                                            .resizable()
-                                            .frame(width: 12, height: 12)
+                                    Button(action: save) {
+                                        if saving { ProgressView() }
+                                        else { Text("Save").fontWeight(.semibold) }
                                     }
+                                    .foregroundStyle(Color(.text))
+                                    .disabled(saving)
                                 }
                             }
                         }

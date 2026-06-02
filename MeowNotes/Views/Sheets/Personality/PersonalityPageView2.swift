@@ -75,66 +75,25 @@ struct PersonalityPageView2: View {
                     }
                     .padding()
                 }
-                Divider()
-                
-                // MARK: Bottom Buttons
-                HStack(spacing: 16) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("Back")
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                            .frame(maxWidth: 100)
-                            .frame(height: 54)
-                            .background(Color(.systemGray5))
-                            .clipShape(RoundedRectangle(cornerRadius: 30))
-                    }
-                    
-                    Button {
-                        save()
-                    } label: {
-                        Group {
-                            if saving { ProgressView().tint(.white) }
-                            else { Text("Save").fontWeight(.semibold) }
-                        }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 54)
-                            .background(Color("SaveBg"))
-                            .clipShape(RoundedRectangle(cornerRadius: 30))
-                    }
-                    .disabled(saving)
-                }
-                .padding()
-                
-                //MARK: HEADER
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Text(catName.uppercased() + " • PERSONALITY")
-                            .fixedSize()
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(Color(.text))
-                    }
-                    .sharedBackgroundVisibility(.hidden)
-                    
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .resizable()
-                                .frame(width: 12, height: 12)
-                        }
-                    }
-                }
             }
             .background(Color("AppBg"))
-            
-            //to show sheet handle
+            .navigationBarTitleDisplayMode(.inline)
             .presentationDragIndicator(.visible)
             .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Back") { dismiss() }
+                        .foregroundStyle(Color(.text))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: save) {
+                        if saving { ProgressView() }
+                        else { Text("Save").fontWeight(.semibold) }
+                    }
+                    .foregroundStyle(Color(.text))
+                    .disabled(saving)
+                }
+            }
             .alert("Couldn't save", isPresented: saveErrorBinding) {
                 Button("OK", role: .cancel) {}
             } message: { Text(saveError ?? "") }

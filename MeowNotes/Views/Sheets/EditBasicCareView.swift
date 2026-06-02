@@ -149,63 +149,19 @@ struct EditBasicCareView: View {
                     .listRowBackground(Color(.backgroundPredefined))
                 }
                 .scrollContentBackground(.hidden)
-                .safeAreaInset(edge: .bottom) {
-                    VStack(spacing: 16) {
-                        Rectangle()
-                            .fill(Color(.bubbleBorder))
-                            .frame(height: 2)
-                        
-                        HStack {
-                            Button {
-                                dismiss()
-                            } label: {
-                                Text("Cancel")
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.primary)
-                                    .frame(maxWidth: 100)
-                                    .frame(height: 54)
-                                    .background(Color(.systemGray5))
-                                    .clipShape(RoundedRectangle(cornerRadius: 30))
-                            }
-
-                            Button {
-                                save()
-                            } label: {
-                                Group {
-                                    if saving { ProgressView().tint(.white) }
-                                    else { Text("Save").fontWeight(.semibold) }
-                                }
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 54)
-                                    .background(Color("SaveBg"))
-                                    .clipShape(RoundedRectangle(cornerRadius: 30))
-                            }
-                            .disabled(saving)
-                        }
-                    }
-                    .padding(8)
-                    .background(Color("AppBg").ignoresSafeArea(edges: .bottom))
-                }
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        Text(catName.uppercased() + " · BASIC CARE")
-                            .fixedSize()
-                            .font(.headline)
-                            .fontWeight(.bold)
+                        Button("Cancel") { dismiss() }
                             .foregroundStyle(Color(.text))
                     }
-                    .sharedBackgroundVisibility(.hidden)
-                    
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .resizable()
-                                .frame(width: 12, height: 12)
+                        Button(action: save) {
+                            if saving { ProgressView() }
+                            else { Text("Save").fontWeight(.semibold) }
                         }
+                        .foregroundStyle(Color(.text))
+                        .disabled(saving)
                     }
                 }
             }

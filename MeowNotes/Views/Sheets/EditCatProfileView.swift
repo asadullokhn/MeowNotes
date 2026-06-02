@@ -84,28 +84,21 @@ struct EditCatProfileView: View {
                     .padding()
                 }
 
-                footer
             }
             .background(Color(.background))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Text(catName.uppercased() + " · BASICS")
-                        .fixedSize()
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                    Button("Cancel") { dismiss() }
                         .foregroundStyle(Color(.text))
                 }
-                .sharedBackgroundVisibility(.hidden)
-
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .resizable()
-                            .frame(width: 12, height: 12)
+                    Button(action: save) {
+                        if saving { ProgressView() }
+                        else { Text("Save").fontWeight(.semibold) }
                     }
+                    .foregroundStyle(Color(.text))
+                    .disabled(!canSave || saving)
                 }
             }
             .onAppear(perform: load)
@@ -262,56 +255,6 @@ struct EditCatProfileView: View {
                 errorMessage = error.localizedDescription
             }
         }
-    }
-
-    // MARK: - Footer
-
-    private var footer: some View {
-        VStack(spacing: 0) {
-            Rectangle()
-                .fill(Color(.bubbleBorder))
-                .frame(height: 1)
-
-            HStack(spacing: 10) {
-                Button {
-                    dismiss()
-                } label: {
-                    Text("Cancel")
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color(.text))
-                        .frame(maxWidth: 110)
-                        .frame(height: 52)
-                        .background(Color(.bubbleBg))
-                        .clipShape(RoundedRectangle(cornerRadius: 26))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 26)
-                                .stroke(Color(.bubbleBorder), lineWidth: 1)
-                        )
-                }
-
-                Button {
-                    save()
-                } label: {
-                    Group {
-                        if saving {
-                            ProgressView().tint(.white)
-                        } else {
-                            Text("Save").fontWeight(.semibold)
-                        }
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color(.saveBg))
-                    .clipShape(RoundedRectangle(cornerRadius: 26))
-                    .opacity(canSave && !saving ? 1 : 0.5)
-                }
-                .disabled(!canSave || saving)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 12)
-        }
-        .background(Color(.background))
     }
 
     // MARK: - Field helpers

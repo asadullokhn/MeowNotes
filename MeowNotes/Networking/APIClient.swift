@@ -13,6 +13,10 @@ enum API {
         try await request("POST", path, body: body)
     }
 
+    static func patch<Body: Encodable, Response: Decodable>(_ path: String, _ body: Body) async throws -> Response {
+        try await request("PATCH", path, body: body)
+    }
+
     private static func request<Body: Encodable, Response: Decodable>(
         _ method: String, _ path: String, body: Body?
     ) async throws -> Response {

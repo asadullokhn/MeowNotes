@@ -84,6 +84,22 @@ final class AuthManager {
         try await Task.sleep(for: .milliseconds(600))
     }
 
+    // MARK: - Cat updates
+
+    // PATCH /api/cats/:id with the cat's medical record, then replace the cached
+    // cat with the server's response so `currentCat` reflects the save.
+    func updateMedical(catID: String, _ medical: Medical) async throws {
+        let updated: Cat = try await API.patch("/api/cats/\(catID)", CatPatch(medical: medical))
+        if let index = cats.firstIndex(where: { $0.id == updated.id }) {
+            cats[index] = updated
+        }
+    }
+
+    // Partial cat update — only the keys we send are touched server-side.
+    private struct CatPatch: Encodable {
+        let medical: Medical
+    }
+
     // MARK: - Helpers
 
     private func loadMe() async throws {

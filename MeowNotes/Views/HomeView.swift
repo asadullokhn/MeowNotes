@@ -87,7 +87,7 @@ struct HomeView: View {
                             .foregroundStyle(Color(.text))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 7)
-                            .background(Color(.bubbleBg), in: Capsule())
+                            .background(Color("AppBg"), in: Capsule())
                             .overlay(Capsule().stroke(Color(.bubbleBorder), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
@@ -96,7 +96,11 @@ struct HomeView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.saveBg).opacity(0.1), in: RoundedRectangle(cornerRadius: 20))
+        .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color(.bubbleBorder), lineWidth: 1)
+        )
         .overlay(alignment: .topTrailing) {
             Button { withAnimation { hintDismissed = true } } label: {
                 Image(systemName: "xmark")

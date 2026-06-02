@@ -10,43 +10,31 @@ import SwiftUI
 struct PersonalityPageView2: View {
     @State var vm = PersonalityViewModel()
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthManager.self) private var auth
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
     
     var body: some View {
         NavigationStack{
             VStack{
-                // MARK: Custom Header
-                HStack {
-                    Text("CAT • PERSONALITY")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                    
-                    Spacer()
-                    Button() {
-                        dismiss()
-                    } label:{
-                        Image(systemName: "xmark")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(Color("TextColor"))
-                            .padding(15)
-                            .background(Color("BubbleBorder"))
-                            .clipShape(Circle())
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 12)
-                
                 ScrollView {
                     VStack(alignment: .leading, spacing: 28) {
                         // MARK: Description
-                        VStack(alignment: .leading, spacing: 5) {
+                        VStack(alignment: .leading, spacing: 8) {
                             Text("Notes for the sitter")
-                                .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(Color("TextColor"))
-                            
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .foregroundStyle(Color("TextColor"))
                             Text("Written from the traits you picked. Tweak the wording, or generate a fresh take.")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color("TextColor"))
+                                .font(.subheadline)
+                                .foregroundStyle(Color("TextColor"))
                         }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        
                         // MARK: Notes Area
                         VStack(alignment: .leading, spacing: 12) {
                             TextEditor(text: $vm.notes)
@@ -108,6 +96,28 @@ struct PersonalityPageView2: View {
                     }
                 }
                 .padding()
+                
+                //MARK: HEADER
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Text(catName.uppercased() + " • PERSONALITY")
+                            .fixedSize()
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color(.text))
+                    }
+                    .sharedBackgroundVisibility(.hidden)
+                    
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .resizable()
+                                .frame(width: 12, height: 12)
+                        }
+                    }
+                }
             }
             .background(Color("AppBg"))
             
@@ -121,6 +131,7 @@ struct PersonalityPageView2: View {
 #Preview {
     NavigationStack {
         PersonalityPageView2()
+            .environment(AuthManager())
     }
 }
 

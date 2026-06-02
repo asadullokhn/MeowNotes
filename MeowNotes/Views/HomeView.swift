@@ -251,4 +251,5 @@ struct GridCard: View {
 #Preview {
     HomeView(onSignOut: {})
         .environment(AuthManager())
+        .preferredColorScheme(.dark)
 }

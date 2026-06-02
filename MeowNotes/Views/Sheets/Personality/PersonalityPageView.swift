@@ -10,43 +10,32 @@ import SwiftUI
 struct PersonalityPageView: View {
     @State var vm: PersonalityViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthManager.self) private var auth
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
+    @FocusState private var isFocused: Bool
     
     var body: some View {
         NavigationStack{
             VStack{
-                // MARK: Custom Header
-                HStack {
-                    Text("CAT • PERSONALITY")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                    
-                    Spacer()
-                    Button() {
-                        dismiss()
-                    } label:{
-                        Image(systemName: "xmark")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(Color("TextColor"))
-                            .padding(15)
-                            .background(Color("BubbleBorder"))
-                            .clipShape(Circle())
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 12)
-                
                 ScrollView {
                     VStack(alignment: .leading, spacing: 28) {
                         // MARK: Description
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Describe CAT in a few words.")
-                                .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(Color("TextColor"))
-                            
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Describe "+catName.uppercased()+" in a few words.")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .foregroundStyle(Color("TextColor"))
                             Text("Tap the words that fit")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color("TextColor"))
+                                .font(.subheadline)
+                                .foregroundStyle(Color("TextColor"))
                         }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        
                         // MARK: Add Custom
                         VStack(alignment: .leading, spacing: 12) {
                             Text("ADD YOUR OWN")
@@ -59,16 +48,19 @@ struct PersonalityPageView: View {
                                     "Enter personality",
                                     text: $vm.newTag
                                 )
+                                .focused($isFocused)
                                 .padding(.horizontal, 14)
                                 .frame(height: 48)
                                 .background(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color.white)
+                                        .fill(Color("AddBg"))
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color("BubbleBorder"), lineWidth: 1)
+                                        .stroke(Color("BubbleSelectedBg"), lineWidth: 1)
+                                        .opacity(isFocused ? 1 : 0)
                                 )
+                                .animation(.easeInOut, value: isFocused)
                                 
                                 Button(action: vm.addCustomTag) {
                                     Text("Add")
@@ -163,6 +155,28 @@ struct PersonalityPageView: View {
                     }
                 }
                 .padding()
+                
+                //MARK: HEADER
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Text(catName.uppercased() + " • PERSONALITY")
+                            .fixedSize()
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color(.text))
+                    }
+                    .sharedBackgroundVisibility(.hidden)
+                    
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .resizable()
+                                .frame(width: 12, height: 12)
+                        }
+                    }
+                }
             }
             .background(Color("AppBg"))
             

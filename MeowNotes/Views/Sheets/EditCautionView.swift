@@ -38,16 +38,17 @@ struct EditCautionView: View {
     }
     
     @Environment(\.dismiss) private var dismiss
-    
+    @Environment(AuthManager.self) private var auth
+
     @State private var inputCaution: String = ""
     @State private var editingCautionID: UUID?
     @State private var cautions: [CautionModel] = []
     @State private var savedCommonCautions: [CautionModel] = []
 
-    
+
     @FocusState private var focusedCautionID: UUID?
-    
-    var catName = "gohan"
+
+    private var catName: String { auth.currentCat?.name ?? "your cat" }
     
     var body: some View {
         NavigationStack {
@@ -266,4 +267,5 @@ struct EditCautionView: View {
 
 #Preview {
     EditCautionView()
+        .environment(AuthManager())
 }

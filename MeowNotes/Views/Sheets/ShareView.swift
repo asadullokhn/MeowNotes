@@ -5,17 +5,45 @@
 // share UI (link copy, ShareLink, QR code, etc.).
 
 import SwiftUI
+import CoreImage.CIFilterBuiltins
 
 struct ShareView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthManager.self) private var auth
+    @Environment(\.openURL) private var openURL
 
     @State private var isQRExpanded = false
     @State private var copied = false
 
     @State private var selectedDetent: PresentationDetent = .medium
 
-    let shareURL = "meownotes.teztun.uz/#/g/c-ffe7-6..."
-    var catName = "gohan"
+    private var cat: Cat? { auth.currentCat }
+    private var catName: String { cat?.name ?? "Your cat" }
+    private var shareURLString: String {
+        if let token = cat?.shareToken {
+            return "https://meownotes.teztun.uz/#/g/\(token)"
+        }
+        return "https://meownotes.teztun.uz"
+    }
+    private var shareURL: URL? { URL(string: shareURLString) }
+    private var shareDisplayURL: String { shareURLString.replacingOccurrences(of: "https://", with: "") }
+    private var shareMessage: String { "Here's \(catName)'s care guide: \(shareURLString)" }
+
+    private func qrImage(from string: String) -> UIImage? {
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = Data(string.utf8)
+        guard let output = filter.outputImage?.transformed(by: CGAffineTransform(scaleX: 10, y: 10)),
+              let cgImage = CIContext().createCGImage(output, from: output.extent) else { return nil }
+        return UIImage(cgImage: cgImage)
+    }
+
+    private func openShare(_ urlString: String) {
+        if let url = URL(string: urlString) { openURL(url) }
+    }
+
+    private func enc(_ string: String) -> String {
+        string.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+    }
 
     var body: some View {
         NavigationStack {
@@ -25,7 +53,7 @@ struct ShareView: View {
                     // HEADER
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("GOHAN'S CARE GUIDE")
+                            Text("\(catName.uppercased())'S CARE GUIDE")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(Color(.saveBg).opacity(0.6))
                                 .tracking(0.8)
@@ -63,7 +91,7 @@ struct ShareView: View {
                             .font(.system(size: 15))
                             .foregroundColor(Color(.saveBg).opacity(0.5))
 
-                        Text(shareURL)
+                        Text(shareDisplayURL)
                             .font(.system(size: 14, design: .monospaced))
                             .foregroundColor(Color(.saveBg))
                             .lineLimit(1)
@@ -72,7 +100,7 @@ struct ShareView: View {
                         Spacer()
 
                         Button(action: {
-                            UIPasteboard.general.string = shareURL
+                            UIPasteboard.general.string = shareURLString
 
                             withAnimation(.spring(response: 0.3)) {
                                 copied = true
@@ -108,7 +136,7 @@ struct ShareView: View {
 
                     // PREVIEW BUTTON
                     Button {
-
+                        if let url = shareURL { openURL(url) }
                     } label: {
                         HStack(spacing: 10) {
                             Image(systemName: "eye")
@@ -129,40 +157,43 @@ struct ShareView: View {
 
                     // SHARE OPTIONS
                     HStack(spacing: 0) {
-                        ShareIconButton(
-                            icon: "phone.fill",
-                            label: "WhatsApp",
-                            color: .green,
-                            bgColor: .green.opacity(0.15)
-                        )
+                        Button {
+                            openShare("https://wa.me/?text=\(enc(shareMessage))")
+                        } label: {
+                            ShareIconButton(icon: "phone.fill", label: "WhatsApp",
+                                            color: .green, bgColor: .green.opacity(0.15))
+                        }
+                        .buttonStyle(.plain)
 
-                        ShareIconButton(
-                            icon: "paperplane.fill",
-                            label: "Telegram",
-                            color: .blue.opacity(0.7),
-                            bgColor: .blue.opacity(0.1)
-                        )
+                        Button {
+                            openShare("https://t.me/share/url?url=\(enc(shareURLString))&text=\(enc("\(catName)'s care guide"))")
+                        } label: {
+                            ShareIconButton(icon: "paperplane.fill", label: "Telegram",
+                                            color: .blue.opacity(0.7), bgColor: .blue.opacity(0.1))
+                        }
+                        .buttonStyle(.plain)
 
-                        ShareIconButton(
-                            icon: "message.fill",
-                            label: "Messages",
-                            color: Color(.bubbleSelectedBg),
-                            bgColor: Color(.bubbleSelectedBg).opacity(0.15)
-                        )
+                        Button {
+                            openShare("sms:&body=\(enc(shareMessage))")
+                        } label: {
+                            ShareIconButton(icon: "message.fill", label: "Messages",
+                                            color: Color(.bubbleSelectedBg), bgColor: Color(.bubbleSelectedBg).opacity(0.15))
+                        }
+                        .buttonStyle(.plain)
 
-                        ShareIconButton(
-                            icon: "envelope.fill",
-                            label: "Mail",
-                            color: .indigo,
-                            bgColor: .indigo.opacity(0.1)
-                        )
+                        Button {
+                            openShare("mailto:?subject=\(enc("\(catName)'s Care Guide"))&body=\(enc(shareMessage))")
+                        } label: {
+                            ShareIconButton(icon: "envelope.fill", label: "Mail",
+                                            color: .indigo, bgColor: .indigo.opacity(0.1))
+                        }
+                        .buttonStyle(.plain)
 
-                        ShareIconButton(
-                            icon: "ellipsis",
-                            label: "More",
-                            color: Color(.saveBg).opacity(0.5),
-                            bgColor: Color(.saveBg).opacity(0.08)
-                        )
+                        ShareLink(item: shareURL ?? URL(string: "https://meownotes.teztun.uz")!,
+                                  message: Text(shareMessage)) {
+                            ShareIconButton(icon: "ellipsis", label: "More",
+                                            color: Color(.saveBg).opacity(0.5), bgColor: Color(.saveBg).opacity(0.08))
+                        }
                     }
 
                     // QR DROPDOWN
@@ -200,11 +231,14 @@ struct ShareView: View {
                             Divider()
                                 .padding(.horizontal, 16)
 
-                            Image("barcode")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 220, height: 220)
-                                .padding(.top, 24)
+                            if let qr = qrImage(from: shareURLString) {
+                                Image(uiImage: qr)
+                                    .interpolation(.none)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 220, height: 220)
+                                    .padding(.top, 24)
+                            }
 
                             Text("Point a phone at this and they'll get the guide instantly.")
                                 .font(.footnote)
@@ -271,4 +305,5 @@ struct ShareView: View {
 
 #Preview {
     ShareView()
+        .environment(AuthManager())
 }

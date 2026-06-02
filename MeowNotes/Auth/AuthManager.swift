@@ -18,6 +18,7 @@ final class AuthManager {
     private(set) var selectedCatID: String?
 
     var isAuthenticated: Bool { phase == .authenticated }
+    var isGuest: Bool { user?.isGuest == true }
 
     // The cat currently shown across the app. Falls back to the first cat.
     var currentCat: Cat? {
@@ -28,16 +29,19 @@ final class AuthManager {
         selectedCatID = id
     }
 
-    // On launch: if a token exists, hydrate from /api/me; drop it on 401.
+    // On launch: hydrate a stored session, or silently create a guest one so a
+    // first-time user lands straight in the app without a login wall.
     func boot() async {
         guard TokenStore.token != nil else {
-            phase = .unauthenticated
+            await signInAsGuest()
             return
         }
         do {
             let me: MeResponse = try await API.get("/api/me")
             hydrate(user: me.user, cats: me.cats)
         } catch let error as APIError where error.isUnauthorized {
+            // Stored token is no longer valid — drop it and show login so a real
+            // account holder can re-authenticate (don't silently orphan them).
             TokenStore.token = nil
             hydrate(user: nil, cats: [])
         } catch {
@@ -45,6 +49,29 @@ final class AuthManager {
             // user can retry rather than silently wiping a valid session.
             phase = .unauthenticated
         }
+    }
+
+    // Anonymous sign-in. The token (365-day) is stored like any other; the cat,
+    // photo, sharing, etc. features all work against a guest the same way.
+    private func signInAsGuest() async {
+        do {
+            let auth: AuthResponse = try await API.post(
+                "/api/auth/guest", GuestRequest(name: nil), headers: ["X-App-Key": API.appKey]
+            )
+            TokenStore.token = auth.token
+            try await loadMe()
+        } catch {
+            phase = .unauthenticated
+        }
+    }
+
+    // Convert the current guest into a full account, keeping all their cats.
+    func claim(email: String, name: String, password: String) async throws {
+        let auth: AuthResponse = try await API.post(
+            "/api/auth/claim", ClaimRequest(email: email, name: name, password: password)
+        )
+        TokenStore.token = auth.token
+        try await loadMe()
     }
 
     func login(email: String, password: String) async throws {
@@ -64,6 +91,21 @@ final class AuthManager {
     func logout() {
         TokenStore.token = nil
         hydrate(user: nil, cats: [])
+    }
+
+    // PATCH /api/me — update the owner's profile (works for guests too). The
+    // server ignores a blank name and clears phone/location sent as "".
+    func updateProfile(name: String, phone: String, location: String) async throws {
+        let updated: User = try await API.patch(
+            "/api/me", ProfilePatch(name: name, phone: phone, location: location)
+        )
+        user = updated
+    }
+
+    private struct ProfilePatch: Encodable {
+        let name: String
+        let phone: String
+        let location: String
     }
 
     // MARK: - Placeholder flows (no backend yet — needs new API endpoints)

@@ -72,7 +72,7 @@ struct HomeView: View {
             HStack(spacing: 8) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 14))
-                    .foregroundStyle(Color(.saveBg))
+                    .foregroundStyle(Color(.text))
                 Text("Still to add for \(catName)'s guide — tap to fill in:")
                     .font(.footnote)
                     .foregroundStyle(Color(.text).opacity(0.7))

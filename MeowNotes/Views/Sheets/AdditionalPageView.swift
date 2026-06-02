@@ -10,9 +10,9 @@ import SwiftUI
 struct AdditionalPageView: View {
     @State private var vm = AdditionalViewModel()
     @Environment(\.dismiss) private var dismiss
-    
     @Environment(AuthManager.self) private var auth
     private var catName: String { auth.currentCat?.name ?? "your cat" }
+    @FocusState private var isFocused: Bool
     
     var body: some View {
         NavigationStack {
@@ -50,6 +50,7 @@ struct AdditionalPageView: View {
                                             "e.g 'Will run if you let the window open'",
                                             text: $vm.newTag
                                         )
+                                        .focused($isFocused)
                                         .padding(.horizontal, 14)
                                         .frame(height: 48)
                                         .background(
@@ -58,8 +59,10 @@ struct AdditionalPageView: View {
                                         )
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 20)
-                                                .stroke(Color("BubbleBorder"), lineWidth: 1)
+                                                .stroke(Color("BubbleSelectedBg"), lineWidth: 1)
+                                                .opacity(isFocused ? 1 : 0)
                                         )
+                                        .animation(.easeInOut, value: isFocused)
                                         
                                         Button {
                                             vm.addCustomTag()

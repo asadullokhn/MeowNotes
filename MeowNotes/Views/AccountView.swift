@@ -11,6 +11,9 @@ struct AccountView: View {
     @State private var showChangePassword = false
     @State private var showClaim = false
     @State private var showProfileEdit = false
+    @State private var showDeleteConfirm = false
+    @State private var deleting = false
+    @State private var deleteError: String?
 
     var body: some View {
         NavigationStack {
@@ -44,6 +47,8 @@ struct AccountView: View {
                     if auth.isGuest {
                         guestCard
                     }
+
+                    dangerCard
                 }
                 .padding(24)
             }
@@ -65,6 +70,71 @@ struct AccountView: View {
             .sheet(isPresented: $showProfileEdit) {
                 ProfileEditView()
             }
+            .alert("Delete account?", isPresented: $showDeleteConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete", role: .destructive) { performDelete() }
+            } message: {
+                Text(auth.isGuest
+                    ? "This permanently deletes your cats and their care guides. As a guest there's no way to recover them — create an account first if you want to keep them."
+                    : "This permanently deletes your account, your cats, and their care guides. This can't be undone.")
+            }
+        }
+    }
+
+    private var dangerCard: some View {
+        VStack(spacing: 10) {
+            Button {
+                showDeleteConfirm = true
+            } label: {
+                HStack(spacing: 16) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 16))
+                        .foregroundColor(Color(red: 0.79, green: 0.44, blue: 0.42))
+                        .frame(width: 40, height: 40)
+                        .background(Color("AppBg"))
+                        .clipShape(Circle())
+                    Text(deleting ? "Deleting…" : "Delete account")
+                        .font(.body.weight(.medium))
+                        .foregroundColor(Color(red: 0.79, green: 0.44, blue: 0.42))
+                    Spacer()
+                    if deleting {
+                        ProgressView()
+                    } else {
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(Color("TextColor").opacity(0.3))
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+            }
+            .buttonStyle(.plain)
+            .disabled(deleting)
+            .background(Color("BubbleBg"))
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(Color("BubbleBorder"), lineWidth: 1)
+            )
+
+            if let deleteError {
+                AuthErrorBanner(message: deleteError)
+            }
+        }
+    }
+
+    private func performDelete() {
+        guard !deleting else { return }
+        deleteError = nil
+        deleting = true
+        Task {
+            do {
+                // On success this logs out; ContentView swaps away from Account.
+                try await auth.deleteAccount()
+            } catch {
+                deleteError = error.localizedDescription
+            }
+            deleting = false
         }
     }
 
@@ -74,12 +144,12 @@ struct AccountView: View {
                 Text("You're browsing as a guest")
                     .font(.headline)
                     .foregroundColor(Color("TextColor"))
-                Text("Save your account to keep your cats and sign in on the web or another device.")
+                Text("Keep your cats and sign in on another device.")
                     .font(.subheadline)
                     .foregroundColor(Color("TextColor").opacity(0.6))
                     .multilineTextAlignment(.center)
             }
-            AuthPrimaryButton(title: "Save your account") { showClaim = true }
+            AuthPrimaryButton(title: "Create account") { showClaim = true }
         }
         .padding(20)
         .frame(maxWidth: .infinity)

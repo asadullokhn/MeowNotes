@@ -1,6 +1,6 @@
 // Owner: Asad
 //
-// Edit the owner's profile (name, phone, location) via PATCH /api/me.
+// Edit the owner's profile (name, phone) via PATCH /api/me.
 // Works for guests and registered accounts. Presented from AccountView.
 
 import SwiftUI
@@ -11,7 +11,6 @@ struct ProfileEditView: View {
 
     @State private var name = ""
     @State private var phone = ""
-    @State private var location = ""
     @State private var loading = false
     @State private var error = ""
 
@@ -28,10 +27,9 @@ struct ProfileEditView: View {
                         .foregroundColor(Color("TextColor"))
 
                     AuthField(label: "Your name", text: $name, textContentType: .name)
-                    AuthField(label: "Phone · optional", placeholder: "+998 90 123 45 67", text: $phone,
-                              keyboard: .phonePad, textContentType: .telephoneNumber)
-                    AuthField(label: "Location · optional", placeholder: "Tashkent", text: $location,
-                              textContentType: .addressCity, submitLabel: .done, onSubmit: submit)
+                    AuthField(label: "Phone · optional", placeholder: "+62 812 3456 7890", text: $phone,
+                              keyboard: .phonePad, textContentType: .telephoneNumber,
+                              submitLabel: .done, onSubmit: submit)
 
                     if !error.isEmpty { AuthErrorBanner(message: error) }
 
@@ -54,7 +52,6 @@ struct ProfileEditView: View {
                 if let user = auth.user {
                     if name.isEmpty { name = user.name }
                     if phone.isEmpty { phone = user.phone ?? "" }
-                    if location.isEmpty { location = user.location ?? "" }
                 }
             }
         }
@@ -68,8 +65,7 @@ struct ProfileEditView: View {
             do {
                 try await auth.updateProfile(
                     name: name.trimmingCharacters(in: .whitespaces),
-                    phone: phone.trimmingCharacters(in: .whitespaces),
-                    location: location.trimmingCharacters(in: .whitespaces)
+                    phone: phone.trimmingCharacters(in: .whitespaces)
                 )
                 dismiss()
             } catch {

@@ -94,10 +94,10 @@ final class AuthManager {
     }
 
     // PATCH /api/me — update the owner's profile (works for guests too). The
-    // server ignores a blank name and clears phone/location sent as "".
-    func updateProfile(name: String, phone: String, location: String) async throws {
+    // server ignores a blank name and clears phone sent as "".
+    func updateProfile(name: String, phone: String) async throws {
         let updated: User = try await API.patch(
-            "/api/me", ProfilePatch(name: name, phone: phone, location: location)
+            "/api/me", ProfilePatch(name: name, phone: phone)
         )
         user = updated
     }
@@ -105,7 +105,14 @@ final class AuthManager {
     private struct ProfilePatch: Encodable {
         let name: String
         let phone: String
-        let location: String
+    }
+
+    // DELETE /api/me — permanently remove the account and everything it owns
+    // (cats + share links). Works for guests and registered users. Drops the
+    // local session afterward so the app returns to the unauthenticated state.
+    func deleteAccount() async throws {
+        try await API.delete("/api/me")
+        logout()
     }
 
     // MARK: - Placeholder flows (no backend yet — needs new API endpoints)
@@ -175,6 +182,24 @@ final class AuthManager {
         if selectedCatID == catID {
             selectedCatID = cats.first?.id
         }
+    }
+
+    // MARK: - Sharing
+
+    // GET /api/cats/:id/share — fetch the cat's active sitter-guide link,
+    // creating one server-side if it doesn't exist yet. A freshly-added cat has
+    // no share row, so this is what turns the bare domain into a real
+    // /#/g/<token> link (the reason guests saw no link before).
+    func shareLink(catID: String) async throws -> String {
+        let link: SharedLink = try await API.get("/api/cats/\(catID)/share")
+        return link.token
+    }
+
+    // POST /api/cats/:id/shares — expire the current link and mint a fresh one
+    // (the "Refresh" action), cutting off anyone holding the old URL.
+    func rotateShareLink(catID: String) async throws -> String {
+        let link: SharedLink = try await API.post("/api/cats/\(catID)/shares", Empty())
+        return link.token
     }
 
     private func replaceCachedCat(_ cat: Cat) {

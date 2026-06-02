@@ -26,12 +26,12 @@ struct ClaimAccountView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Save your account.")
+                    Text("Create your account.")
                         .font(.system(size: 26, weight: .bold))
                         .foregroundColor(Color("TextColor"))
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("Keep your cats and be able to sign in on the web or another device. Your data stays exactly as it is.")
+                    Text("Keep your cats and sign in on another device. Your data stays exactly as it is.")
                         .font(.subheadline)
                         .foregroundColor(Color("TextColor").opacity(0.6))
 
@@ -47,14 +47,14 @@ struct ClaimAccountView: View {
 
                     if !error.isEmpty { AuthErrorBanner(message: error) }
 
-                    AuthPrimaryButton(title: "Save account", loading: loading,
+                    AuthPrimaryButton(title: "Save", loading: loading,
                                       disabled: !canSubmit, action: submit)
                         .padding(.top, 4)
                 }
                 .padding(24)
             }
             .background(Color("AppBg").ignoresSafeArea())
-            .navigationTitle("Save account")
+            .navigationTitle("Create account")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

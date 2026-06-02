@@ -195,7 +195,7 @@ struct EditRoutineView: View {
                             Button {
                                 dismiss()
                             } label: {
-                                Text("Save routine")
+                                Text("Save")
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)

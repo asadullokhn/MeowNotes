@@ -327,7 +327,7 @@ struct EditMedicalView: View {
                         if saving {
                             ProgressView().tint(.white)
                         } else {
-                            Text("Save medical").fontWeight(.semibold)
+                            Text("Save").fontWeight(.semibold)
                         }
                     }
                     .foregroundStyle(.white)

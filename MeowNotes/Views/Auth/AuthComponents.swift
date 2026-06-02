@@ -40,7 +40,7 @@ struct AuthField: View {
             .foregroundColor(Color("TextColor"))
             .padding(.horizontal, 16)
             .frame(height: 50)
-            .background(Color.white)
+            .background(Color("BubbleBg"))
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
@@ -80,20 +80,23 @@ struct AuthPrimaryButton: View {
 }
 
 // Inline error banner, mirroring the web's rose-tinted error box.
+// A translucent rose tint keeps the same look in light mode and stays legible
+// in dark mode (the page background shows through instead of a bright box).
 struct AuthErrorBanner: View {
+    private static let rose = Color(red: 0.79, green: 0.44, blue: 0.42)
     let message: String
     var body: some View {
         Text(message)
             .font(.footnote)
-            .foregroundColor(Color(red: 0.79, green: 0.44, blue: 0.42))
+            .foregroundColor(Self.rose)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(Color(red: 0.98, green: 0.94, blue: 0.94))
+            .background(Self.rose.opacity(0.15))
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(red: 0.91, green: 0.71, blue: 0.69).opacity(0.5), lineWidth: 1)
+                    .stroke(Self.rose.opacity(0.4), lineWidth: 1)
             )
     }
 }

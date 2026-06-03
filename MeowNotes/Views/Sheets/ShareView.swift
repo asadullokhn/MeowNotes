@@ -77,6 +77,7 @@ struct ShareView: View {
                                 .foregroundColor(Color(.saveBg))
                         }
                     }
+                    .accessibilityLabel("Close")
                 }
                 .padding(.top)
                 .padding(.horizontal)

@@ -69,7 +69,7 @@ struct CatDOBField: View {
                     Button { self.dob = nil } label: {
                         Text("Clear")
                             .font(.subheadline)
-                            .foregroundStyle(Color(.text).opacity(0.5))
+                            .foregroundStyle(Color(.text).opacity(0.6))
                     }
                 }
                 .padding(.horizontal, 16)
@@ -82,7 +82,7 @@ struct CatDOBField: View {
 
                 Text("\(AgeFormat.relative(from: dob)) · keeps itself up to date")
                     .font(.caption)
-                    .foregroundStyle(Color(.text).opacity(0.5))
+                    .foregroundStyle(Color(.text).opacity(0.6))
             } else {
                 Button { dob = Self.defaultDOB } label: {
                     HStack(spacing: 8) {
@@ -91,7 +91,7 @@ struct CatDOBField: View {
                         Spacer()
                     }
                     .font(.system(size: 17))
-                    .foregroundStyle(Color(.text).opacity(0.45))
+                    .foregroundStyle(Color(.text).opacity(0.6))
                     .padding(.horizontal, 16)
                     .frame(height: 52)
                     .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))

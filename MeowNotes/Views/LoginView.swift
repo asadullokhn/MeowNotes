@@ -36,7 +36,8 @@ struct LoginView: View {
                 header
 
                 Text(isRegister ? "Make a calm space for your cat." : "Sign in to continue.")
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
                     .foregroundColor(Color("TextColor"))
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.bottom, 24)
@@ -106,7 +107,8 @@ struct LoginView: View {
                 .background(Color("SaveBg"))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             Text("MeowNotes")
-                .font(.system(size: 24, weight: .bold))
+                .font(.title2)
+                .fontWeight(.bold)
                 .foregroundColor(Color("TextColor"))
         }
         .padding(.bottom, 28)
@@ -147,7 +149,7 @@ struct LoginView: View {
 
             Text("No account needed — claim one later to keep your cats safe.")
                 .font(.caption2)
-                .foregroundColor(Color("TextColor").opacity(0.5))
+                .foregroundColor(Color("TextColor").opacity(0.65))
                 .multilineTextAlignment(.center)
         }
     }

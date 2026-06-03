@@ -25,7 +25,8 @@ struct ForgotPasswordView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
                     Text(headline)
-                        .font(.system(size: 26, weight: .bold))
+                        .font(.title)
+                        .fontWeight(.bold)
                         .foregroundColor(Color("TextColor"))
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -90,7 +91,7 @@ struct ForgotPasswordView: View {
 
             Text("Password must be at least 6 characters.")
                 .font(.caption)
-                .foregroundColor(Color("TextColor").opacity(0.5))
+                .foregroundColor(Color("TextColor").opacity(0.65))
         }
     }
 

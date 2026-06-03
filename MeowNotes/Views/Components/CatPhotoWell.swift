@@ -55,6 +55,7 @@ struct CatPhotoWell: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(actionLabelText)
         .background(
             GeometryReader { proxy in
                 Color.clear
@@ -168,7 +169,7 @@ private struct PhotoWellLabel: View {
                     Image(systemName: "camera.fill").font(.system(size: 18))
                     Text("PHOTO").font(.system(size: 9, weight: .semibold)).tracking(0.5)
                 }
-                .foregroundStyle(Color(.text).opacity(0.45))
+                .foregroundStyle(Color(.text).opacity(0.6))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 

@@ -357,9 +357,10 @@ private struct VaccineDateField: View {
                     .labelsHidden()
                 Button { value = "" } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(Color(.text).opacity(0.3))
+                        .foregroundStyle(Color(.text).opacity(0.4))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Clear \(title.lowercased())")
             } else {
                 Button("Add date") { value = Self.display.string(from: Date()) }
                     .font(.subheadline.weight(.semibold))

@@ -9,6 +9,7 @@ struct EditableListRow: View {
 
     @Binding var text: String
     var accessory: Accessory = .dot
+    var limit: Int = 200
     let onRemove: () -> Void
 
     @State private var isEditing = false
@@ -25,6 +26,7 @@ struct EditableListRow: View {
                         .focused($isFocused)
                         .submitLabel(.done)
                         .onSubmit { isFocused = false }
+                        .characterLimit(limit, $text)
                 } else {
                     Text(text)
                         .font(.subheadline)

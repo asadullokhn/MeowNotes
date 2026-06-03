@@ -54,6 +54,7 @@ struct PersonalityPageView2: View {
                         // MARK: Notes Area
                         VStack(alignment: .leading, spacing: 12) {
                             TextEditor(text: $vm.notes)
+                                .characterLimit(500, $vm.notes)
                                 .padding(8)
                                 .frame(height: 200)
                                 .background(Color(.systemBackground))

@@ -281,6 +281,7 @@ struct EditCatProfileView: View {
         TextField(placeholder, text: text)
             .font(.system(size: 16))
             .foregroundStyle(Color(.text))
+            .characterLimit(50, text)
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 16))

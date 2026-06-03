@@ -15,6 +15,7 @@ struct AuthField: View {
     var textContentType: UITextContentType? = nil
     var submitLabel: SubmitLabel = .next
     var onSubmit: () -> Void = {}
+    var limit: Int = 120
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -37,6 +38,7 @@ struct AuthField: View {
             .textContentType(textContentType)
             .submitLabel(submitLabel)
             .onSubmit(onSubmit)
+            .characterLimit(limit, $text)
             .foregroundColor(Color("TextColor"))
             .padding(.horizontal, 16)
             .frame(height: 50)

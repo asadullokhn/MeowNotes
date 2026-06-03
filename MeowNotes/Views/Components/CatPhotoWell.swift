@@ -23,6 +23,13 @@ struct CatPhotoWell: View {
 
     @State private var item: PhotosPickerItem?
     @State private var pickedImage: Image?
+    @State private var cropTarget: CropTarget?
+    @State private var wellWidth: CGFloat = 0
+
+    // The crop window matches the well's shape, so what you frame is what shows.
+    private var cropAspect: CGFloat {
+        wellWidth > 0 ? wellWidth / height : (fillWidth ? 1.7 : 1)
+    }
 
     var body: some View {
         // Read the main-actor @State here in `body` (which is main-actor), then
@@ -44,12 +51,30 @@ struct CatPhotoWell: View {
             )
         }
         .buttonStyle(.plain)
+        .background(
+            GeometryReader { proxy in
+                Color.clear
+                    .onAppear { wellWidth = proxy.size.width }
+                    .onChange(of: proxy.size.width) { _, w in wellWidth = w }
+            }
+        )
         .onChange(of: item) { _, newItem in
             guard let newItem else { return }
             Task { await load(newItem) }
         }
+        .fullScreenCover(item: $cropTarget) { target in
+            PhotoCropView(
+                image: target.image,
+                aspect: cropAspect,
+                onCancel: { cropTarget = nil; item = nil },
+                onCrop: { cropped in commit(cropped); cropTarget = nil; item = nil }
+            )
+        }
     }
 
+    // Load the picked image and hand it to the cropper. Downscale a little first
+    // so panning/zooming a huge photo stays smooth; the final downscale + encode
+    // happens in commit() once the crop is confirmed.
     private func load(_ photoItem: PhotosPickerItem) async {
         errorMessage = nil
         guard let data = try? await photoItem.loadTransferable(type: Data.self),
@@ -57,7 +82,12 @@ struct CatPhotoWell: View {
             errorMessage = "Couldn't load that image."
             return
         }
-        let resized = uiImage.downscaled(maxDimension: 1024)
+        cropTarget = CropTarget(image: uiImage.downscaled(maxDimension: 2048))
+    }
+
+    // Encode the cropped image as a base64 data URL, mirroring the web's pipeline.
+    private func commit(_ cropped: UIImage) {
+        let resized = cropped.downscaled(maxDimension: 1024)
         guard let jpeg = resized.jpegData(compressionQuality: 0.7) else {
             errorMessage = "Couldn't process that image."
             return
@@ -69,6 +99,12 @@ struct CatPhotoWell: View {
         pickedImage = Image(uiImage: resized)
         dataURL = "data:image/jpeg;base64,\(jpeg.base64EncodedString())"
     }
+}
+
+// A picked image awaiting crop. Identifiable so it can drive a fullScreenCover.
+private struct CropTarget: Identifiable {
+    let id = UUID()
+    let image: UIImage
 }
 
 // The picker's label content as its own view, so its body is main-actor isolated

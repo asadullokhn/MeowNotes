@@ -14,6 +14,7 @@ struct EditCatProfileView: View {
 
     @State private var name = ""
     @State private var breed = ""
+    @State private var gender = ""
     @State private var ageValue = ""
     @State private var ageUnit: AgeUnit = .years
     @State private var initialAgeValue = ""
@@ -77,6 +78,8 @@ struct EditCatProfileView: View {
                         }
 
                         ageField
+
+                        sexField
 
                         if let errorMessage {
                             AuthErrorBanner(message: errorMessage)
@@ -294,6 +297,31 @@ struct EditCatProfileView: View {
             .overlay(Capsule().stroke(Color(.bubbleBorder), lineWidth: 1))
     }
 
+    // MARK: - Sex (optional)
+
+    private var sexField: some View {
+        field("Sex · optional") {
+            HStack(spacing: 8) {
+                ForEach(["Male", "Female"], id: \.self) { option in
+                    Button { gender = (gender == option ? "" : option) } label: { sexChip(option) }
+                        .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    // Tap a selected sex again to clear it back to unset.
+    private func sexChip(_ option: String) -> some View {
+        let selected = gender == option
+        return Text(option)
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(selected ? .white : Color(.text).opacity(0.75))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(selected ? Color(.saveBg) : Color(.bubbleBg), in: Capsule())
+            .overlay(Capsule().stroke(Color(.bubbleBorder), lineWidth: 1))
+    }
+
     // MARK: - Age
 
     private enum AgeUnit: String, CaseIterable, Identifiable {
@@ -448,6 +476,7 @@ struct EditCatProfileView: View {
         guard let cat = auth.currentCat else { return }
         name = cat.name
         breed = cat.breed ?? ""
+        gender = cat.gender ?? ""
         let raw = cat.age?.display ?? ""
         loadedAgeRaw = raw
         let (value, unit) = parseAge(raw)
@@ -474,7 +503,8 @@ struct EditCatProfileView: View {
                     name: trimmedName,
                     photo: pickedDataURL,                          // nil unless a new image was picked
                     breed: trimmedBreed.isEmpty ? nil : trimmedBreed,
-                    age: agePatch
+                    age: agePatch,
+                    gender: gender.isEmpty ? nil : gender
                 )
                 dismiss()
             } catch {

@@ -11,6 +11,7 @@ struct AccountView: View {
     @State private var showClaim = false
     @State private var showProfileEdit = false
     @State private var showDeleteConfirm = false
+    @State private var showLogoutConfirm = false
     @State private var deleting = false
     @State private var deleteError: String?
     @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
@@ -29,11 +30,11 @@ struct AccountView: View {
                             row(icon: "key.fill", title: "Change password") {
                                 showChangePassword = true
                             }
-                            Divider().padding(.leading, 56)
-                            row(icon: "rectangle.portrait.and.arrow.right",
-                                title: "Log out", tint: Color(red: 0.79, green: 0.44, blue: 0.42)) {
-                                auth.logout()
-                            }
+                        }
+                        Divider().padding(.leading, 56)
+                        row(icon: "rectangle.portrait.and.arrow.right",
+                            title: "Log out", tint: Color(red: 0.79, green: 0.44, blue: 0.42)) {
+                            showLogoutConfirm = true
                         }
                     }
                     .background(Color("BubbleBg"))
@@ -72,6 +73,14 @@ struct AccountView: View {
                 Text(auth.isGuest
                     ? "This permanently deletes your cats and their care guides. As a guest there's no way to recover them — create an account first if you want to keep them."
                     : "This permanently deletes your account, your cats, and their care guides. This can't be undone.")
+            }
+            .alert("Log out?", isPresented: $showLogoutConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Log out", role: .destructive) { auth.logout() }
+            } message: {
+                Text(auth.isGuest
+                    ? "You're using a guest account — logging out loses access to these cats unless you've created an account."
+                    : "You can sign back in any time.")
             }
     }
 
@@ -123,6 +132,7 @@ struct AccountView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .disabled(deleting)
@@ -223,6 +233,7 @@ struct AccountView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

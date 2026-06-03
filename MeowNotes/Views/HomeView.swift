@@ -147,15 +147,13 @@ struct HomeView: View {
                     }
                     .overlay(alignment: .topTrailing) {
                         Button(action: { activeSheet = .editCat }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "pencil")
-                                Text("Edit Profile")
-                            }
-                            .font(.subheadline)
-                            .padding(10)
-                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                            .foregroundStyle(Color(.text))
+                            Image(systemName: "pencil")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(Color(.text))
+                                .frame(width: 44, height: 44)
+                                .background(.ultraThinMaterial, in: Circle())
                         }
+                        .accessibilityLabel("Edit profile")
                         .padding(12)
                     }
                     .padding(.horizontal, 20)
@@ -165,7 +163,7 @@ struct HomeView: View {
                         HStack(spacing: 10) {
                             Image(systemName: "square.and.arrow.up")
                             Text("Share \(catName)'s Care Guide")
-                                .font(.caption)
+                                .font(.headline)
                             Spacer()
                             Image(systemName: "chevron.right")
                         }
@@ -286,6 +284,7 @@ struct GridCard: View {
                     .frame(width: 44, height: 44)
                     .background(Color("AppBg"))
                     .clipShape(Circle())
+                    .overlay(Circle().stroke(Color(.bubbleBorder), lineWidth: 1))
                     .foregroundStyle(Color(.text))
 
                 Spacer(minLength: 20)

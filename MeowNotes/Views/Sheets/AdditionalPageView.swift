@@ -19,114 +19,87 @@ struct AdditionalPageView: View {
     private var saveErrorBinding: Binding<Bool> {
         Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
     }
-    
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // MARK: Background
-                Color("AppBg")
-                    .ignoresSafeArea()
-                    .overlay(
-                        VStack(spacing: 0) {
-                            // MARK: FORM CONTENT
-                            Form {
-                                //MARK: DESCRIPTION
-                                Section {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("What should sitters know?")
-                                            .font(.largeTitle)
-                                            .fontWeight(.bold)
-                                            .multilineTextAlignment(.leading)
-                                            .lineLimit(nil)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                            .foregroundStyle(Color("TextColor"))
-                                        Text("Quirks, habits, little tips - Anything else worth knowing. Must-read warning go under Caution.")
-                                            .font(.subheadline)
-                                            .foregroundStyle(Color("TextColor"))
-                                    }
-                                    .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
-                                    .listRowBackground(Color.clear)
-                                    .listRowSeparator(.hidden)
-                                }
-                                
-                                //MARK: ADD CUSTOM
-                                Section {
-                                    TagInputField(
-                                        placeholder: "e.g 'Will run if you let the window open'",
-                                        text: $vm.newTag,
-                                        onAdd: vm.addCustomTag
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    // MARK: Header
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("What should sitters know?")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .foregroundStyle(Color("TextColor"))
+                        Text("Quirks, habits, little tips - Anything else worth knowing. Must-read warning go under Caution.")
+                            .font(.subheadline)
+                            .foregroundStyle(Color("TextColor"))
+                    }
+
+                    // MARK: Add custom
+                    TagInputField(
+                        placeholder: "e.g 'Will run if you let the window open'",
+                        text: $vm.newTag,
+                        onAdd: vm.addCustomTag
+                    )
+
+                    // MARK: Infos
+                    if !vm.selectedTags.isEmpty {
+                        VStack(alignment: .leading, spacing: 14) {
+                            SectionLabel("Infos")
+                            VStack(spacing: 8) {
+                                ForEach(vm.selectedTags, id: \.self) { tag in
+                                    EditableListRow(
+                                        text: tag,
+                                        accessory: .dot,
+                                        onRemove: { vm.removeTag(tag) },
+                                        onSave: { newValue in vm.updateTag(old: tag, new: newValue) }
                                     )
-                                    .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
-                                    .listRowBackground(Color.clear)
-                                    .listRowSeparator(.hidden)
-                                }
-                                
-                                //MARK: INFOS
-                                if !vm.selectedTags.isEmpty {
-                                    Section(header: SectionLabel("Infos")) {
-                                        ForEach(vm.selectedTags, id: \.self) { tag in
-                                            EditableListRow(
-                                                text: tag,
-                                                accessory: .dot,
-                                                onRemove: { vm.removeTag(tag) },
-                                                onSave: { newValue in
-                                                    vm.updateTag(old: tag, new: newValue)
-                                                }
-                                            )
-                                            .listRowBackground(Color.clear)
-                                            .listRowSeparator(.hidden)
-                                            .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-                                        }
-                                    }
-                                }
-                                
-                                //MARK: PRE-DEFINE
-                                Section {
-                                    VStack(alignment: .leading, spacing: 14) {
-                                        SectionLabel("Need a nudge?")
-
-                                        ForEach(vm.availableTags, id: \.self) { tag in
-                                            AddBubble(
-                                                text: tag,
-                                                isSelected: vm.selectedTags.contains(tag)
-                                            ) { vm.addTag(tag) }
-                                        }
-
-                                        ForEach(vm.customAvailableTags, id: \.self) { tag in
-                                            CustomAddBubble(
-                                                text: tag,
-                                                onAdd: { vm.addCustomAvailableTag(tag) },
-                                                onDelete: { vm.deleteCustomTag(tag) }
-                                            )
-                                        }
-                                    }
-                                    .padding(.vertical, 6)
-                                }
-                                .listRowBackground(Color("BubbleSectionBg"))
-                            }
-                            .scrollContentBackground(.hidden)
-                            .navigationBarTitleDisplayMode(.inline)
-                            .toolbar {
-                                ToolbarItem(placement: .topBarLeading) {
-                                    Button("Cancel") { dismiss() }
-                                        .foregroundStyle(Color(.text))
-                                }
-                                ToolbarItem(placement: .topBarTrailing) {
-                                    Button(action: save) {
-                                        if saving { ProgressView() }
-                                        else { Text("Save").fontWeight(.semibold) }
-                                    }
-                                    .foregroundStyle(Color(.text))
-                                    .disabled(saving)
                                 }
                             }
                         }
-                    )
-                    .onAppear(perform: loadNotes)
-                    .alert("Couldn't save", isPresented: saveErrorBinding) {
-                        Button("OK", role: .cancel) {}
-                    } message: { Text(saveError ?? "") }
+                    }
+
+                    // MARK: Need a nudge
+                    VStack(alignment: .leading, spacing: 14) {
+                        SectionLabel("Need a nudge?")
+                        ForEach(vm.availableTags, id: \.self) { tag in
+                            AddBubble(text: tag, isSelected: vm.selectedTags.contains(tag)) {
+                                vm.addTag(tag)
+                            }
+                        }
+                        ForEach(vm.customAvailableTags, id: \.self) { tag in
+                            CustomAddBubble(
+                                text: tag,
+                                onAdd: { vm.addCustomAvailableTag(tag) },
+                                onDelete: { vm.deleteCustomTag(tag) }
+                            )
+                        }
+                    }
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .background(Color("AppBg"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                        .foregroundStyle(Color(.text))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: save) {
+                        if saving { ProgressView() }
+                        else { Text("Save").fontWeight(.semibold) }
+                    }
+                    .foregroundStyle(Color(.text))
+                    .disabled(saving)
+                }
+            }
+            .onAppear(perform: loadNotes)
+            .alert("Couldn't save", isPresented: saveErrorBinding) {
+                Button("OK", role: .cancel) {}
+            } message: { Text(saveError ?? "") }
         }
     }
 
@@ -161,7 +134,7 @@ struct AdditionalPageView: View {
     }
 }
 
-#Preview{
+#Preview {
     AdditionalPageView()
         .environment(AuthManager())
         .preferredColorScheme(.dark)

@@ -48,7 +48,8 @@ struct EditCatProfileView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         Text("A little more about them.")
-                            .font(.system(size: 28, weight: .bold))
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
                             .foregroundStyle(Color(.text))
 
                         field("Name") {

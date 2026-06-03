@@ -88,7 +88,6 @@ struct PersonalityPageView2: View {
             }
             .background(Color("AppBg"))
             .navigationBarTitleDisplayMode(.inline)
-            .presentationDragIndicator(.visible)
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

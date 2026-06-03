@@ -6,10 +6,10 @@
 import SwiftUI
 
 struct EditCautionView: View {
-    
+
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
-    
+
     @State private var vm = CautionModel()
     @State private var saving = false
     @State private var saveError: String?
@@ -20,114 +20,84 @@ struct EditCautionView: View {
     }
 
     private var catName: String { auth.currentCat?.name ?? "your cat" }
-    
+
     var body: some View {
         NavigationStack {
-            Color("AppBg")
-                .ignoresSafeArea()
-                .overlay(
-                    VStack(spacing: 16) {
-                        Form {
-                            Section {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Anything to watch out for?")
-                                        .font(.largeTitle)
-                                        .fontWeight(.bold)
-                                        .multilineTextAlignment(.leading)
-                                        .lineLimit(nil)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                        .foregroundStyle(Color("TextColor"))
-                                    
-                                    Text("The must-reads — foods your cat can't eat, warnings, medication. Sitters see these pinned to the top of the guide.")
-                                        .font(.subheadline)
-                                        .foregroundStyle(Color("TextColor"))
-                                }
-                                .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                            }
-
-                            
-                            //MARK: Added caution
-                            if !vm.selectedTags.isEmpty {
-
-                                ForEach(vm.selectedTags, id: \.self) { tag in
-                                    EditableListRow(
-                                        text: tag,
-                                        accessory: .warning,
-                                        onRemove: { vm.removeTag(tag) },
-                                        onSave: { newValue in
-                                            vm.updateTag(old: tag, new: newValue)
-                                        }
-                                    )
-                                    .listRowBackground(Color.clear)
-                                    .listRowSeparator(.hidden)
-                                    .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-                                }
-
-                            }
-                            
-                            //MARK: ADD CUSTOM
-                            Section {
-                                TagInputField(
-                                    placeholder: "Add a caution — e.g. 'Bolts for the door'",
-                                    text: $vm.newTag,
-                                    onAdd: vm.addCustomTag
-                                )
-                                .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                            }
-                            
-                          
-                            //MARK: PRE-DEFINE
-                            Section {
-                                VStack(alignment: .leading, spacing: 14) {
-                                    SectionLabel("Common ones")
-
-                                    ForEach(vm.availableTags, id: \.self) { tag in
-                                        AddBubble(
-                                            text: tag,
-                                            isSelected: vm.selectedTags.contains(tag)
-                                        ) { vm.addTag(tag) }
-                                    }
-
-                                    ForEach(vm.customAvailableTags, id: \.self) { tag in
-                                        CustomAddBubble(
-                                            text: tag,
-                                            onAdd: { vm.addCustomAvailableTag(tag) },
-                                            onDelete: { vm.deleteCustomTag(tag) }
-                                        )
-                                    }
-                                }
-                            }
-                            .listRowBackground(Color("BubbleSectionBg"))
-                        }
-                        .scrollContentBackground(.hidden)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    // MARK: Header
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Anything to watch out for?")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .foregroundStyle(Color("TextColor"))
+                        Text("The must-reads — foods your cat can't eat, warnings, medication. Sitters see these pinned to the top of the guide.")
+                            .font(.subheadline)
+                            .foregroundStyle(Color("TextColor"))
                     }
-                        .padding(1)
-                        .background(Color(.background))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .topBarLeading) {
-                                Button("Cancel") { dismiss() }
-                                    .foregroundStyle(Color(.text))
-                            }
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button(action: save) {
-                                    if saving { ProgressView() }
-                                    else { Text("Save").fontWeight(.semibold) }
-                                }
-                                .foregroundStyle(Color(.text))
-                                .disabled(saving)
+
+                    // MARK: Add custom
+                    TagInputField(
+                        placeholder: "Add a caution — e.g. 'Bolts for the door'",
+                        text: $vm.newTag,
+                        onAdd: vm.addCustomTag
+                    )
+
+                    // MARK: Added cautions
+                    if !vm.selectedTags.isEmpty {
+                        VStack(spacing: 8) {
+                            ForEach(vm.selectedTags, id: \.self) { tag in
+                                EditableListRow(
+                                    text: tag,
+                                    accessory: .warning,
+                                    onRemove: { vm.removeTag(tag) },
+                                    onSave: { newValue in vm.updateTag(old: tag, new: newValue) }
+                                )
                             }
                         }
-                )
-                .onAppear(perform: loadCautions)
-                .alert("Couldn't save", isPresented: saveErrorBinding) {
-                    Button("OK", role: .cancel) {}
-                } message: { Text(saveError ?? "") }
+                    }
+
+                    // MARK: Common ones
+                    VStack(alignment: .leading, spacing: 14) {
+                        SectionLabel("Common ones")
+                        ForEach(vm.availableTags, id: \.self) { tag in
+                            AddBubble(text: tag, isSelected: vm.selectedTags.contains(tag)) {
+                                vm.addTag(tag)
+                            }
+                        }
+                        ForEach(vm.customAvailableTags, id: \.self) { tag in
+                            CustomAddBubble(
+                                text: tag,
+                                onAdd: { vm.addCustomAvailableTag(tag) },
+                                onDelete: { vm.deleteCustomTag(tag) }
+                            )
+                        }
+                    }
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .background(Color("AppBg"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                        .foregroundStyle(Color(.text))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: save) {
+                        if saving { ProgressView() }
+                        else { Text("Save").fontWeight(.semibold) }
+                    }
+                    .foregroundStyle(Color(.text))
+                    .disabled(saving)
+                }
+            }
+            .onAppear(perform: loadCautions)
+            .alert("Couldn't save", isPresented: saveErrorBinding) {
+                Button("OK", role: .cancel) {}
+            } message: { Text(saveError ?? "") }
         }
     }
 

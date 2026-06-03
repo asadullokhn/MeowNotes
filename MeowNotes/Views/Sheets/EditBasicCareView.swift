@@ -35,95 +35,85 @@ struct EditBasicCareView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color("AppBg").ignoresSafeArea()
-                
-                Form {
-                    VStack(alignment: .leading, spacing: 16) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    // MARK: Header
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("What needs a quick check?")
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(Color("TextColor"))
-                        
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .foregroundStyle(Color("TextColor"))
                         Text("Cat-care tasks with no fixed time. Your sitter ticks these off in their guide — you just list them here.")
-                            .font(.system(size: 14))
-                            .foregroundColor(Color("TextColor"))
+                            .font(.subheadline)
+                            .foregroundStyle(Color("TextColor"))
                     }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
 
-                    Section {
-                        VStack(spacing: 12) {
-                            ForEach(checklistItems.indices, id: \.self) { index in
-                                HStack(spacing: 12) {
-                                    Circle()
-                                        .fill(Color(.bubbleSelectedBg))
-                                        .frame(width: 6, height: 6)
-                                    TextField("Check", text: binding(for: index))
-                                        .textInputAutocapitalization(.sentences)
-                                        .font(.callout.weight(.semibold))
-                                        .foregroundStyle(Color(.text))
-                                    Spacer(minLength: 8)
-                                    Image(systemName: "pencil")
-                                        .foregroundStyle(.secondary)
-                                        .accessibilityHidden(true)
-                                        .opacity(0.5)
-                                    RemoveCircleButton(size: 32) {
-                                        removeChecklistItem(at: index)
-                                    }
+                    // MARK: Checklist + add custom
+                    VStack(spacing: 12) {
+                        ForEach(checklistItems.indices, id: \.self) { index in
+                            HStack(spacing: 12) {
+                                Circle()
+                                    .fill(Color(.bubbleSelectedBg))
+                                    .frame(width: 6, height: 6)
+                                TextField("Check", text: binding(for: index))
+                                    .textInputAutocapitalization(.sentences)
+                                    .font(.callout.weight(.semibold))
+                                    .foregroundStyle(Color(.text))
+                                Spacer(minLength: 8)
+                                Image(systemName: "pencil")
+                                    .foregroundStyle(.secondary)
+                                    .accessibilityHidden(true)
+                                    .opacity(0.5)
+                                RemoveCircleButton(size: 32) {
+                                    removeChecklistItem(at: index)
                                 }
-                                .padding(.vertical, 10)
-                                .padding(.horizontal, 14)
-                                .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 18)
-                                        .stroke(Color(.bubbleBorder), lineWidth: 1)
-                                )
                             }
-                            
-                            Spacer()
-
-                            TagInputField(
-                                placeholder: "Add your own - e.g. 'curtains open'",
-                                text: $newChecklistItem,
-                                onAdd: addChecklistItem
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 14)
+                            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 18)
+                                    .stroke(Color(.bubbleBorder), lineWidth: 1)
                             )
                         }
+
+                        TagInputField(
+                            placeholder: "Add your own - e.g. 'curtains open'",
+                            text: $newChecklistItem,
+                            onAdd: addChecklistItem
+                        )
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
 
-                    Section {
-                        VStack(alignment: .leading, spacing: 16) {
-                            SectionLabel("Common ones")
-
-                            FlowLayout(spacing: 12) {
-                                ForEach(commonChecklistItems, id: \.self) { item in
-                                    AddBubble(text: item, isSelected: isCommonItemAdded(item)) {
-                                        addCommonChecklistItem(item)
-                                    }
+                    // MARK: Common ones
+                    VStack(alignment: .leading, spacing: 14) {
+                        SectionLabel("Common ones")
+                        FlowLayout(spacing: 12) {
+                            ForEach(commonChecklistItems, id: \.self) { item in
+                                AddBubble(text: item, isSelected: isCommonItemAdded(item)) {
+                                    addCommonChecklistItem(item)
                                 }
                             }
-                            .padding(.vertical, 4)
                         }
                     }
-                    .listRowBackground(Color(.backgroundPredefined))
                 }
-                .scrollContentBackground(.hidden)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button("Cancel") { dismiss() }
-                            .foregroundStyle(Color(.text))
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: save) {
-                            if saving { ProgressView() }
-                            else { Text("Save").fontWeight(.semibold) }
-                        }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .background(Color("AppBg"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
                         .foregroundStyle(Color(.text))
-                        .disabled(saving)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: save) {
+                        if saving { ProgressView() }
+                        else { Text("Save").fontWeight(.semibold) }
                     }
+                    .foregroundStyle(Color(.text))
+                    .disabled(saving)
                 }
             }
             .onAppear(perform: loadChecks)

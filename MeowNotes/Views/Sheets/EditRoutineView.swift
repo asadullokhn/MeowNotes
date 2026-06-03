@@ -15,9 +15,7 @@ struct EditRoutineView: View {
     }
 
     private let textColor = Color("TextColor")
-    private let tapToAddBackground = Color(.backgroundPredefined)
     private let timeChipColor = Color(red: 167.0 / 255.0, green: 154.0 / 255.0, blue: 137.0 / 255.0)
-    private let backgroundFieldColor = Color(red: 240.0 / 255.0, green: 233.0 / 255.0, blue: 219.0 / 255.0)
 
     private let commonRoutines: [CommonRoutine] = [
         CommonRoutine(title: "Breakfast", time: Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date(), details: "Serve morning meal and refresh water."),
@@ -33,77 +31,71 @@ struct EditRoutineView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color("AppBg").ignoresSafeArea()
-
-                Form {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    // MARK: Header
                     VStack(alignment: .leading, spacing: 8) {
                         Text("What does your cat's day look like?")
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(Color("TextColor"))
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .foregroundStyle(Color("TextColor"))
                         Text("Add the regular things — food, play, litter. Sitters will follow this as today's checklist.")
-                            .font(.system(size: 14))
-                            .foregroundColor(Color("TextColor"))
+                            .font(.subheadline)
+                            .foregroundStyle(Color("TextColor"))
                     }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    
-                    Section {
-                        VStack(alignment: .leading, spacing: 16) {
-                            SectionLabel("Tap to add")
 
-                            FlowLayout(spacing: 12) {
-                                ForEach(commonRoutines) { routine in
-                                    let isAdded = isCommonRoutineAdded(routine)
-                                    Button {
-                                        addCommonRoutine(routine)
-                                    } label: {
-                                        HStack(spacing: 8) {
-                                            Text(formatTime(routine.time))
-                                                .font(.footnote)
-                                                .foregroundStyle(timeChipColor)
-                                                .padding(.vertical, 2)
-                                                .padding(.horizontal, 6)
-                                                .background(
-                                                    RoundedRectangle(cornerRadius: 6)
-                                                        .fill(Color(.bubbleSectionBg))
-                                                )
-                                            Text(routine.title)
-                                                .lineLimit(1)
-                                                .foregroundStyle(textColor)
-                                        }
-                                        .padding(.vertical, 10)
-                                        .padding(.horizontal, 14)
-                                        .background(Color("BubbleBg"))
-                                        .clipShape(Capsule())
-                                        .overlay(
-                                            Capsule()
-                                                .stroke(Color("BubbleBorder"), lineWidth: 1)
-                                        )
+                    // MARK: Tap to add (Raffi's chip design)
+                    VStack(alignment: .leading, spacing: 14) {
+                        SectionLabel("Tap to add")
+                        FlowLayout(spacing: 12) {
+                            ForEach(commonRoutines) { routine in
+                                let isAdded = isCommonRoutineAdded(routine)
+                                Button {
+                                    addCommonRoutine(routine)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Text(formatTime(routine.time))
+                                            .font(.footnote)
+                                            .foregroundStyle(timeChipColor)
+                                            .padding(.vertical, 2)
+                                            .padding(.horizontal, 6)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 6)
+                                                    .fill(Color("BubbleBg"))
+                                            )
+                                        Text(routine.title)
+                                            .lineLimit(1)
+                                            .foregroundStyle(textColor)
                                     }
-                                    .buttonStyle(.plain)
-                                    .disabled(isAdded)
-                                    .opacity(isAdded ? 0.4 : 1)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 10)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color("BubbleBg"))
+                                    )
                                 }
+                                .buttonStyle(.plain)
+                                .disabled(isAdded)
+                                .opacity(isAdded ? 0.8 : 1)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 32)
+                                        .stroke(textColor.opacity(0.1), lineWidth: 2)
+                                )
                             }
-                            .padding(.vertical, 4)
                         }
                     }
-                    .listRowBackground(tapToAddBackground)
-                    
-                    Section {
-                        if routines.isEmpty {
-                            // Nothing here based on the prototype
-                        } else {
+
+                    // MARK: Routine rows
+                    if !routines.isEmpty {
+                        VStack(spacing: 12) {
                             ForEach(sortedRoutines) { routine in
                                 let routineBinding = binding(for: routine.id)
                                 VStack(alignment: .leading, spacing: 10) {
                                     HStack(spacing: 10) {
                                         DatePicker("", selection: routineBinding.time, displayedComponents: .hourAndMinute)
                                             .labelsHidden()
-                                        
-                                        
+
                                         TextField("Routine", text: routineBinding.title)
                                             .textInputAutocapitalization(.sentences)
                                             .foregroundStyle(Color("TextColor"))
@@ -111,72 +103,66 @@ struct EditRoutineView: View {
                                             .padding(.horizontal, 12)
                                             .padding(.vertical, 9)
                                             .background(Color(.bubbleSectionBg), in: RoundedRectangle(cornerRadius: 12))
-                                        
+
                                         RemoveCircleButton(size: 40) {
                                             removeRoutine(id: routine.id)
                                         }
                                     }
-                                    .padding(.vertical, 6)
-                                    
-                                    VStack {
-                                        TextField("Description", text: routineBinding.details, axis: .vertical)
-                                            .lineLimit(2...4)
-                                            .textInputAutocapitalization(.sentences)
-                                            .foregroundStyle(Color("TextColor"))
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 9)
-                                            .background(Color(.bubbleSectionBg), in: RoundedRectangle(cornerRadius: 12))
-                                    }
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(backgroundFieldColor)
-                                    )
+
+                                    TextField("Description", text: routineBinding.details, axis: .vertical)
+                                        .lineLimit(2...4)
+                                        .textInputAutocapitalization(.sentences)
+                                        .foregroundStyle(Color("TextColor"))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 9)
+                                        .background(Color(.bubbleSectionBg), in: RoundedRectangle(cornerRadius: 12))
                                 }
-                                .padding(.vertical, 4)
-                                
+                                .padding(14)
+                                .background(Color("BubbleBg"), in: RoundedRectangle(cornerRadius: 20))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color("BubbleBorder"), lineWidth: 1)
+                                )
                             }
                         }
                     }
-                    .listRowBackground(Color("BubbleBg"))
 
-                    Section {
-                        Button {
-                            addRoutine()
-                        } label: {
-                            Text("+ Custom Routine")
-                                .foregroundStyle(textColor)
-                                .padding(.vertical, 10)
-                                .frame(maxWidth: .infinity)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color("BubbleBg"))
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(textColor.opacity(0.1), lineWidth: 2)
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
+                    // MARK: Add custom routine
+                    Button {
+                        addRoutine()
+                    } label: {
+                        Text("+ Custom Routine")
+                            .foregroundStyle(textColor)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color("BubbleBg"))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(textColor.opacity(0.1), lineWidth: 2)
+                            )
                     }
-                    .listRowBackground(Color("BubbleBg"))
+                    .buttonStyle(.plain)
                 }
-                .scrollContentBackground(.hidden)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button("Cancel") { dismiss() }
-                            .foregroundStyle(Color(.text))
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: save) {
-                            if saving { ProgressView() }
-                            else { Text("Save").fontWeight(.semibold) }
-                        }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .background(Color("AppBg"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
                         .foregroundStyle(Color(.text))
-                        .disabled(saving)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: save) {
+                        if saving { ProgressView() }
+                        else { Text("Save").fontWeight(.semibold) }
                     }
+                    .foregroundStyle(Color(.text))
+                    .disabled(saving)
                 }
             }
             .onAppear(perform: loadRoutines)

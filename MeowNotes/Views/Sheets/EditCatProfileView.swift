@@ -265,10 +265,7 @@ struct EditCatProfileView: View {
 
     private func field<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title.uppercased())
-                .font(.caption2.weight(.semibold))
-                .tracking(0.5)
-                .foregroundStyle(Color(.text).opacity(0.5))
+            SectionLabel(title, dimmed: true)
             content()
         }
     }

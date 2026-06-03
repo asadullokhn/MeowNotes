@@ -50,10 +50,11 @@ struct EditCautionView: View {
                             
                             //MARK: Added caution
                             if !vm.selectedTags.isEmpty {
-                                
+
                                 ForEach(vm.selectedTags, id: \.self) { tag in
-                                    SelectedBubbleCautionEdit(
+                                    EditableListRow(
                                         text: tag,
+                                        accessory: .warning,
                                         onRemove: { vm.removeTag(tag) },
                                         onSave: { newValue in
                                             vm.updateTag(old: tag, new: newValue)
@@ -63,44 +64,16 @@ struct EditCautionView: View {
                                     .listRowSeparator(.hidden)
                                     .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
                                 }
-                                
+
                             }
                             
                             //MARK: ADD CUSTOM
                             Section {
-                                HStack(spacing: 12) {
-                                    TextField(
-                                        "Add a caution — e.g. 'Bolts for the door'",
-                                        text: $vm.newTag
-                                    )
-                                    .padding(.horizontal, 14)
-                                    .frame(height: 48)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .fill(Color("AddBg"))
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color("BubbleBorder"), lineWidth: 1)
-                                    )
-                                    
-                                    Button {
-                                        vm.addCustomTag()
-                                    } label: {
-                                        Text("Add")
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.white)
-                                            .padding(.horizontal, 18)
-                                            .frame(height: 48)
-                                            .background(
-                                                vm.newTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                                ? Color.gray
-                                                : Color("SaveBg")
-                                            )
-                                            .clipShape(RoundedRectangle(cornerRadius: 30))
-                                    }
-                                    .disabled(vm.newTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                                }
+                                TagInputField(
+                                    placeholder: "Add a caution — e.g. 'Bolts for the door'",
+                                    text: $vm.newTag,
+                                    onAdd: vm.addCustomTag
+                                )
                                 .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
@@ -110,33 +83,15 @@ struct EditCautionView: View {
                             //MARK: PRE-DEFINE
                             Section {
                                 VStack(alignment: .leading, spacing: 14) {
-                                    Text("COMMON ONES")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(Color("TextColor"))
-                                    
+                                    SectionLabel("Common ones")
+
                                     ForEach(vm.availableTags, id: \.self) { tag in
-                                        let isSelected = vm.selectedTags.contains(tag)
-                                        
-                                        Button {
-                                            if !isSelected {
-                                                vm.addTag(tag)
-                                            }
-                                        } label: {
-                                            Image(systemName: "plus")
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 10, height: 10)
-                                            Text(tag)
-                                        }
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 8)
-                                        .background(isSelected ? Color.gray.opacity(0.4) : Color("BubbleBg"))
-                                        .foregroundColor(isSelected ? Color.gray.opacity(0.8) : Color("TextColor"))
-                                        .clipShape(Capsule())
-                                        .buttonStyle(.plain)
+                                        AddBubble(
+                                            text: tag,
+                                            isSelected: vm.selectedTags.contains(tag)
+                                        ) { vm.addTag(tag) }
                                     }
-                                    
+
                                     ForEach(vm.customAvailableTags, id: \.self) { tag in
                                         CustomAddBubble(
                                             text: tag,

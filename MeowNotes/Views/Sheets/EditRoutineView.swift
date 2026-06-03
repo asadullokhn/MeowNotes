@@ -51,10 +51,7 @@ struct EditRoutineView: View {
                     
                     Section {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("TAP TO ADD")
-                                .font(.headline)
-                                .bold()
-                                .foregroundStyle(textColor)
+                            SectionLabel("Tap to add")
 
                             FlowLayout(spacing: 12) {
                                 ForEach(commonRoutines) { routine in
@@ -70,26 +67,24 @@ struct EditRoutineView: View {
                                                 .padding(.horizontal, 6)
                                                 .background(
                                                     RoundedRectangle(cornerRadius: 6)
-                                                        .fill(Color("BubbleBg"))
+                                                        .fill(Color(.bubbleSectionBg))
                                                 )
                                             Text(routine.title)
                                                 .lineLimit(1)
                                                 .foregroundStyle(textColor)
                                         }
-                                        .padding(.vertical, 6)
-                                        .padding(.horizontal, 10)
-                                        .background(
+                                        .padding(.vertical, 10)
+                                        .padding(.horizontal, 14)
+                                        .background(Color("BubbleBg"))
+                                        .clipShape(Capsule())
+                                        .overlay(
                                             Capsule()
-                                                .fill(Color("BubbleBg"))
+                                                .stroke(Color("BubbleBorder"), lineWidth: 1)
                                         )
                                     }
                                     .buttonStyle(.plain)
                                     .disabled(isAdded)
-                                    .opacity(isAdded ? 0.8 : 1)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 32)
-                                            .stroke(textColor.opacity(0.1), lineWidth: 2)
-                                    )
+                                    .opacity(isAdded ? 0.4 : 1)
                                 }
                             }
                             .padding(.vertical, 4)
@@ -117,20 +112,9 @@ struct EditRoutineView: View {
                                             .padding(.vertical, 9)
                                             .background(Color(.bubbleSectionBg), in: RoundedRectangle(cornerRadius: 12))
                                         
-                                        Button {
+                                        RemoveCircleButton(size: 40) {
                                             removeRoutine(id: routine.id)
-                                        } label: {
-                                            ZStack {
-                                                Circle()
-                                                    .fill(Color(.backgroundPredefined))
-                                                Image(systemName: "xmark")
-                                                    .font(.system(size: 16, weight: .bold))
-                                                    .foregroundStyle(Color(.xIcon).opacity(0.5))
-                                            }
-                                            .frame(width: 40, height: 40)
                                         }
-                                        .buttonStyle(.plain)
-                                        .accessibilityLabel("Remove routine")
                                     }
                                     .padding(.vertical, 6)
                                     

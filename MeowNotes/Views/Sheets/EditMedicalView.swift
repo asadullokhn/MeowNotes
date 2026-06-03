@@ -222,7 +222,11 @@ struct EditMedicalView: View {
                 VStack(spacing: 8) {
                     HStack(spacing: 8) {
                         inputField("FVRCP", text: $vaccine.name, fill: Color(.bubbleBg), bold: true)
-                        removeButton { vaccines.removeAll { $0.id == vaccine.id } }
+                        RemoveCircleButton(size: 28) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                                vaccines.removeAll { $0.id == vaccine.id }
+                            }
+                        }
                     }
                     HStack(spacing: 8) {
                         inputField("Last · Feb 2026", text: $vaccine.last, fill: Color(.bubbleBg))
@@ -235,12 +239,9 @@ struct EditMedicalView: View {
 
             FlowLayout(spacing: 8) {
                 ForEach(commonVaccines.filter { name in !vaccines.contains { $0.name == name } }, id: \.self) { name in
-                    Button {
+                    AddBubble(text: name) {
                         vaccines.append(Vaccine(name: name, last: "", next: ""))
-                    } label: {
-                        chip("+ \(name)", dashed: false)
                     }
-                    .buttonStyle(.plain)
                 }
                 Button {
                     vaccines.append(Vaccine(name: "", last: "", next: ""))
@@ -260,7 +261,11 @@ struct EditMedicalView: View {
                 VStack(spacing: 8) {
                     HStack(spacing: 8) {
                         inputField("Joint vitamin", text: $med.name, fill: Color(.bubbleBg), bold: true)
-                        removeButton { medications.removeAll { $0.id == med.id } }
+                        RemoveCircleButton(size: 28) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                                medications.removeAll { $0.id == med.id }
+                            }
+                        }
                     }
                     HStack(spacing: 8) {
                         inputField("½ tab", text: $med.dose, fill: Color(.bubbleBg))
@@ -297,10 +302,7 @@ struct EditMedicalView: View {
         keyboard: UIKeyboardType = .default
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title.uppercased())
-                .font(.caption2.weight(.semibold))
-                .tracking(0.5)
-                .foregroundStyle(Color(.text).opacity(0.5))
+            SectionLabel(title, dimmed: true)
             inputField(placeholder, text: text, fill: Color(.bubbleSectionBg), keyboard: keyboard)
         }
     }
@@ -319,19 +321,6 @@ struct EditMedicalView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 9)
             .background(fill, in: RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func removeButton(_ action: @escaping () -> Void) -> some View {
-        Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { action() }
-        } label: {
-            Image(systemName: "xmark")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(Color(.text).opacity(0.55))
-                .frame(width: 28, height: 28)
-                .background(Color(.bubbleBg), in: Circle())
-        }
-        .buttonStyle(.plain)
     }
 
     private func chip(_ text: String, dashed: Bool) -> some View {

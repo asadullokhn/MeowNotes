@@ -9,6 +9,9 @@ import SwiftUI
 
 struct AddBubble: View {
     let text: String
+    // Already added: dimmed and non-tappable. Drives the "greyed when selected"
+    // state the care sheets used to hand-roll.
+    var isSelected: Bool = false
     let onTap: () -> Void
 
     var body: some View {
@@ -31,5 +34,8 @@ struct AddBubble: View {
                     .stroke(Color("BubbleBorder").opacity(1), lineWidth: 1)
             )
         }
+        .buttonStyle(.plain)
+        .disabled(isSelected)
+        .opacity(isSelected ? 0.4 : 1)
     }
 }

@@ -83,7 +83,7 @@ struct AccountView: View {
                 Button("Log out", role: .destructive) { auth.logout() }
             } message: {
                 Text(auth.isGuest
-                    ? "You're using a guest account — logging out loses access to these cats unless you've created an account."
+                    ? "You're using a guest account. 'Continue as guest' brings these cats back on this device — create an account to keep them safe everywhere."
                     : "You can sign back in any time.")
             }
     }

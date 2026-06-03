@@ -77,15 +77,11 @@ struct ShareView: View {
                 // HEADER
                 HStack() {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(catName.uppercased())'S CARE GUIDE")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(Color(.text).opacity(0.6))
-                            .tracking(0.8)
-                            .padding(.top,10)
-
                         Text("Share the link")
-                            .font(.system(size: 28, weight: .bold))
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
                             .foregroundColor(Color(.text))
+                            .padding(.top, 10)
                     }
 
                     Spacer()
@@ -109,8 +105,9 @@ struct ShareView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         Text("Sitters open this in any browser. No app install on their side.")
-                            .font(.footnote)
+                            .font(.subheadline)
                             .foregroundColor(Color(.text))
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
                         // COPY LINK
                         HStack(spacing: 12) {
@@ -287,7 +284,7 @@ struct ShareView: View {
 
                         // REFRESH LINK
                         HStack(spacing: 16) {
-                            Text("Need to cut off access? Rotate to a fresh link — the old one stops working.")
+                            Text("Need to cut off access? Refresh for a new link — the old one stops working.")
                                 .font(.system(size: 13))
                                 .foregroundColor(Color(.text).opacity(0.6))
                                 .fixedSize(horizontal: false, vertical: true)

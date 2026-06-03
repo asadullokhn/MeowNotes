@@ -12,6 +12,9 @@ struct AddBubble: View {
     // Already added: dimmed and non-tappable. Drives the "greyed when selected"
     // state the care sheets used to hand-roll.
     var isSelected: Bool = false
+    // Dashed border for "add a custom one" chips (e.g. + Custom), same size as
+    // the solid chips so they don't look broken next to each other.
+    var dashed: Bool = false
     let onTap: () -> Void
 
     var body: some View {
@@ -31,7 +34,10 @@ struct AddBubble: View {
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .stroke(Color("BubbleBorder").opacity(1), lineWidth: 1)
+                    .stroke(
+                        Color("BubbleBorder"),
+                        style: StrokeStyle(lineWidth: 1, dash: dashed ? [4] : [])
+                    )
             )
         }
         .buttonStyle(.plain)

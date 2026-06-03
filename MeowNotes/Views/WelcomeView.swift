@@ -32,15 +32,13 @@ struct WelcomeView: View {
                     // (often accidental) guest to the sign-in screen.
                     if !isAdditional {
                         Button { auth.logout() } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 17, weight: .semibold))
-                                Text("Back")
-                                    .font(.system(size: 17))
-                            }
-                            .foregroundStyle(Color(.text))
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(Color(.text).opacity(0.6))
+                                .frame(width: 36, height: 36)
+                                .background(Color(.bubbleBg), in: Circle())
                         }
-                        .padding(.top, 4)
+                        .accessibilityLabel("Back to sign in")
                         .padding(.bottom, 16)
                     }
 

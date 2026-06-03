@@ -157,7 +157,7 @@ struct EditCatProfileView: View {
                 }
                 Text("Their care guide stays here so you can look back any time.")
                     .font(.caption)
-                    .foregroundStyle(Color(.text).opacity(0.5))
+                    .foregroundStyle(Color(.text).opacity(0.6))
                     .multilineTextAlignment(.center)
                 Button { applyDeceased(false) } label: {
                     Text("They're still with us — undo")
@@ -178,7 +178,7 @@ struct EditCatProfileView: View {
                 Text("IN MEMORY")
                     .font(.caption2.weight(.semibold))
                     .tracking(0.5)
-                    .foregroundStyle(Color(.text).opacity(0.5))
+                    .foregroundStyle(Color(.text).opacity(0.6))
                 Text("If \(catName) has passed, mark the date to keep their profile as a memorial. You can undo any time.")
                     .font(.caption)
                     .foregroundStyle(Color(.text).opacity(0.6))

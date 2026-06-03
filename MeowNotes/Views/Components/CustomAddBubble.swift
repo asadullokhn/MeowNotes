@@ -29,6 +29,7 @@ struct CustomAddBubble: View {
                 Image(systemName: "xmark")
                     .font(.system(size: 10, weight: .bold))
             }
+            .accessibilityLabel("Remove \(text)")
         }
         .foregroundColor(Color("TextColor"))
         .padding(.horizontal, 14)

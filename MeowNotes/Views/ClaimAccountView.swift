@@ -27,7 +27,8 @@ struct ClaimAccountView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Create your account.")
-                        .font(.system(size: 26, weight: .bold))
+                        .font(.title)
+                        .fontWeight(.bold)
                         .foregroundColor(Color("TextColor"))
                         .fixedSize(horizontal: false, vertical: true)
 

@@ -42,6 +42,7 @@ struct EditableListRow: View {
             Image(systemName: "pencil")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(.gray.opacity(0.8))
+                .accessibilityHidden(true)
 
             RemoveCircleButton(size: 26, action: onRemove)
         }

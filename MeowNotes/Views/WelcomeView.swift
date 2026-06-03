@@ -39,6 +39,7 @@ struct WelcomeView: View {
                                     .frame(width: 36, height: 36)
                                     .background(Color(.bubbleBg), in: Circle())
                             }
+                            .accessibilityLabel("Close")
                         } else {
                             Button { auth.logout() } label: {
                                 Image(systemName: "chevron.left")
@@ -55,7 +56,8 @@ struct WelcomeView: View {
                     .padding(.bottom, 24)
 
                     Text(isAdditional ? "Add another cat." : "Let's meet your cat.")
-                        .font(.system(size: 30, weight: .bold))
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
                         .foregroundStyle(Color(.text))
                     Text("Start with a name and a photo — you can add routine, quirks, medical and the rest from the home screen.")
                         .font(.subheadline)
@@ -78,7 +80,7 @@ struct WelcomeView: View {
                         .padding(.bottom, 6)
 
                     TextField("Mochi", text: $name)
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.title3.weight(.medium))
                         .foregroundStyle(Color(.text))
                         .textInputAutocapitalization(.words)
                         .submitLabel(.done)

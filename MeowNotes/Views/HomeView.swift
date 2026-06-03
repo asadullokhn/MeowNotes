@@ -105,9 +105,10 @@ struct HomeView: View {
             Button { withAnimation { hintDismissed = true } } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(Color(.text).opacity(0.4))
+                    .foregroundStyle(Color(.text).opacity(0.5))
                     .frame(width: 28, height: 28)
             }
+            .accessibilityLabel("Dismiss")
             .padding(6)
         }
         .padding(.horizontal, 20)
@@ -245,6 +246,7 @@ struct HomeView: View {
                             .clipShape(Circle())
                             .foregroundStyle(Color(.text))
                     }
+                    .accessibilityLabel("Settings")
                     .padding(.trailing, 20)
                 }
                 .padding(.vertical, 8)

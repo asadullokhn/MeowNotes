@@ -10,7 +10,7 @@ struct SaveToolbarButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: { Haptics.tap(.medium); action() }) {
             if saving {
                 ProgressView()
             } else {

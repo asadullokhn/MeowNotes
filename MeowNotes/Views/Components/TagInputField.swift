@@ -45,6 +45,7 @@ struct TagInputField: View {
 
     private func add() {
         guard !isBlank else { return }
+        Haptics.tap()
         onAdd()
     }
 }

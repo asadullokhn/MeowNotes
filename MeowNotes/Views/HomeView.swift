@@ -285,7 +285,7 @@ struct GridCard: View {
     
     var body: some View {
         // 2. Wrap everything in a Button
-        Button(action: action) {
+        Button(action: { Haptics.tap(); action() }) {
             VStack(alignment: .leading) {
                 Image(systemName: icon)
                     .font(.system(size: 18))

@@ -16,6 +16,11 @@ struct AdditionalPageView: View {
     @Environment(AuthManager.self) private var auth
     private var catName: String { auth.currentCat?.name ?? "your cat" }
 
+    private var hasChanges: Bool {
+        let initial = (auth.currentCat?.notes ?? []).filter { $0.urgent != true }.map { $0.text }
+        return vm.selectedTags != initial
+    }
+
     private var saveErrorBinding: Binding<Bool> {
         Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
     }
@@ -88,12 +93,7 @@ struct AdditionalPageView: View {
                         .foregroundStyle(Color(.text))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: save) {
-                        if saving { ProgressView() }
-                        else { Text("Save").fontWeight(.semibold) }
-                    }
-                    .foregroundStyle(Color(.text))
-                    .disabled(saving)
+                    SaveToolbarButton(saving: saving, hasChanges: hasChanges, action: save)
                 }
             }
             .onAppear(perform: loadNotes)

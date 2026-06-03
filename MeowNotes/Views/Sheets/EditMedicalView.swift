@@ -18,6 +18,8 @@ struct EditMedicalView: View {
     @State private var openRow: Row?
     @State private var saving = false
     @State private var errorMessage: String?
+    @State private var initialSignature = ""
+    @State private var loaded = false
 
     private let commonVaccines = ["FVRCP", "Rabies", "FeLV"]
     private var catName: String { auth.currentCat?.name ?? "your cat" }
@@ -40,6 +42,15 @@ struct EditMedicalView: View {
             case .medications: "Medications"
             }
         }
+    }
+
+    private var hasChanges: Bool { medicalSignature() != initialSignature }
+
+    private func medicalSignature() -> String {
+        let v = "\(vet.name)|\(vet.clinic)|\(vet.phone)|\(vet.address)"
+        let vac = vaccines.map { "\($0.name)|\($0.last)|\($0.next)" }.joined(separator: ";")
+        let med = medications.map { "\($0.name)|\($0.dose)|\($0.schedule)" }.joined(separator: ";")
+        return "\(v)#\(vac)#\(med)"
     }
 
     private func summary(for row: Row) -> String {
@@ -84,19 +95,17 @@ struct EditMedicalView: View {
             }
             .background(Color(.background))
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear(perform: load)
+            .onAppear {
+                load()
+                if !loaded { initialSignature = medicalSignature(); loaded = true }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
                         .foregroundStyle(Color(.text))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: save) {
-                        if saving { ProgressView() }
-                        else { Text("Save").fontWeight(.semibold) }
-                    }
-                    .foregroundStyle(Color(.text))
-                    .disabled(saving || auth.currentCat == nil)
+                    SaveToolbarButton(saving: saving, hasChanges: hasChanges, disabled: auth.currentCat == nil, action: save)
                 }
             }
         }

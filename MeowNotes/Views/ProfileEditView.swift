@@ -18,6 +18,11 @@ struct ProfileEditView: View {
         !name.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
+    private var hasChanges: Bool {
+        name.trimmingCharacters(in: .whitespaces) != (auth.user?.name ?? "") ||
+        phone.trimmingCharacters(in: .whitespaces) != (auth.user?.phone ?? "")
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
@@ -44,12 +49,7 @@ struct ProfileEditView: View {
                         .foregroundColor(Color("TextColor"))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: submit) {
-                        if loading { ProgressView() }
-                        else { Text("Save").fontWeight(.semibold) }
-                    }
-                    .foregroundColor(Color("TextColor"))
-                    .disabled(!canSubmit || loading)
+                    SaveToolbarButton(saving: loading, hasChanges: hasChanges, disabled: !canSubmit, action: submit)
                 }
             }
             .onAppear {

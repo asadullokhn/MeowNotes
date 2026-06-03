@@ -17,6 +17,14 @@ struct PersonalityPageView2: View {
     @Environment(AuthManager.self) private var auth
     private var catName: String { auth.currentCat?.name ?? "your cat" }
 
+    private var hasChanges: Bool {
+        let cat = auth.currentCat
+        let savedSummary = (cat?.personalitySummary ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentSummary = vm.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        if currentSummary != savedSummary { return true }
+        return vm.selectedTags != (cat?.personality ?? [])
+    }
+
     private var saveErrorBinding: Binding<Bool> {
         Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
     }
@@ -95,12 +103,7 @@ struct PersonalityPageView2: View {
                         .foregroundStyle(Color(.text))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: save) {
-                        if saving { ProgressView() }
-                        else { Text("Save").fontWeight(.semibold) }
-                    }
-                    .foregroundStyle(Color(.text))
-                    .disabled(saving || generating)
+                    SaveToolbarButton(saving: saving, hasChanges: hasChanges, disabled: generating, action: save)
                 }
             }
             .alert("Couldn't save", isPresented: saveErrorBinding) {

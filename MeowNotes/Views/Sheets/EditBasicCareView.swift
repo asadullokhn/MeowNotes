@@ -17,11 +17,14 @@ struct EditBasicCareView: View {
     @State private var saving = false
     @State private var saveError: String?
     @State private var loaded = false
+    @State private var initialChecklist: [String] = []
     @FocusState private var focusedCheck: Int?
 
     private var saveErrorBinding: Binding<Bool> {
         Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
     }
+
+    private var hasChanges: Bool { checklistItems != initialChecklist }
 
     private let commonChecklistItems = [
         "Fresh water",
@@ -114,12 +117,7 @@ struct EditBasicCareView: View {
                         .foregroundStyle(Color(.text))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: save) {
-                        if saving { ProgressView() }
-                        else { Text("Save").fontWeight(.semibold) }
-                    }
-                    .foregroundStyle(Color(.text))
-                    .disabled(saving)
+                    SaveToolbarButton(saving: saving, hasChanges: hasChanges, action: save)
                 }
             }
             .onAppear(perform: loadChecks)
@@ -135,6 +133,7 @@ struct EditBasicCareView: View {
         if let items = auth.currentCat?.checks {
             checklistItems = items.map { $0.label }
         }
+        initialChecklist = checklistItems
     }
 
     private func save() {

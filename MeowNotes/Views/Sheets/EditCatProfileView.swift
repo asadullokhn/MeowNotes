@@ -38,6 +38,16 @@ struct EditCatProfileView: View {
     private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
     private var canSave: Bool { !trimmedName.isEmpty }
 
+    private var hasChanges: Bool {
+        guard let cat = auth.currentCat else { return false }
+        if pickedDataURL != nil { return true }   // a new photo was picked
+        if trimmedName != cat.name { return true }
+        if breed.trimmingCharacters(in: .whitespaces) != (cat.breed ?? "") { return true }
+        if gender != (cat.gender ?? "") { return true }
+        if dob != cat.dob.flatMap(AgeFormat.date(fromISO:)) { return true }
+        return false
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -99,12 +109,7 @@ struct EditCatProfileView: View {
                         .foregroundStyle(Color(.text))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: save) {
-                        if saving { ProgressView() }
-                        else { Text("Save").fontWeight(.semibold) }
-                    }
-                    .foregroundStyle(Color(.text))
-                    .disabled(!canSave || saving)
+                    SaveToolbarButton(saving: saving, hasChanges: hasChanges, disabled: !canSave, action: save)
                 }
             }
             .onAppear(perform: load)

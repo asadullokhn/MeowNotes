@@ -9,6 +9,8 @@ struct EditRoutineView: View {
     @State private var routines: [CustomRoutine] = []
     @State private var saving = false
     @State private var saveError: String?
+    @State private var initialSignature: [String] = []
+    @State private var loaded = false
 
     private var saveErrorBinding: Binding<Bool> {
         Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
@@ -27,6 +29,15 @@ struct EditRoutineView: View {
 
     private var sortedRoutines: [CustomRoutine] {
         routines.sorted { $0.time < $1.time }
+    }
+
+    private var hasChanges: Bool { routineSignature(routines) != initialSignature }
+
+    // Compares routines ignoring transient ids — what actually gets saved.
+    private func routineSignature(_ list: [CustomRoutine]) -> [String] {
+        list.sorted { $0.time < $1.time }
+            .filter { !$0.title.trimmingCharacters(in: .whitespaces).isEmpty }
+            .map { "\(formatTime($0.time))|\($0.title.trimmingCharacters(in: .whitespaces))|\($0.details.trimmingCharacters(in: .whitespaces))" }
     }
 
     var body: some View {
@@ -145,15 +156,13 @@ struct EditRoutineView: View {
                         .foregroundStyle(Color(.text))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: save) {
-                        if saving { ProgressView() }
-                        else { Text("Save").fontWeight(.semibold) }
-                    }
-                    .foregroundStyle(Color(.text))
-                    .disabled(saving)
+                    SaveToolbarButton(saving: saving, hasChanges: hasChanges, action: save)
                 }
             }
-            .onAppear(perform: loadRoutines)
+            .onAppear {
+                loadRoutines()
+                if !loaded { initialSignature = routineSignature(routines); loaded = true }
+            }
             .alert("Couldn't save", isPresented: saveErrorBinding) {
                 Button("OK", role: .cancel) {}
             } message: { Text(saveError ?? "") }

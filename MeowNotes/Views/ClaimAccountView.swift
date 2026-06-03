@@ -24,7 +24,7 @@ struct ClaimAccountView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Create your account.")
                         .font(.system(size: 26, weight: .bold))

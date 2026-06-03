@@ -102,7 +102,7 @@ struct ShareView: View {
                 .padding(.top)
                 .padding(.horizontal)
                 
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
                         Text("Sitters open this in any browser. No app install on their side.")
                             .font(.subheadline)

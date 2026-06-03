@@ -22,7 +22,7 @@ struct ForgotPasswordView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
                     Text(headline)
                         .font(.system(size: 26, weight: .bold))

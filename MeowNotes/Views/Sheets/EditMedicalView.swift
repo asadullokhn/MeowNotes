@@ -53,7 +53,7 @@ struct EditMedicalView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
                         Text("Health & vet.")
                             .font(.largeTitle)

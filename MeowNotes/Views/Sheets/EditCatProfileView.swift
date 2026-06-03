@@ -41,7 +41,7 @@ struct EditCatProfileView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
                         Text("A little more about them.")
                             .font(.largeTitle)

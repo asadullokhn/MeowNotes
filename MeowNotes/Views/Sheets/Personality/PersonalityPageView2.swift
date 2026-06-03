@@ -24,7 +24,7 @@ struct PersonalityPageView2: View {
     var body: some View {
         NavigationStack{
             VStack{
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 28) {
                         // MARK: Description
                         VStack(alignment: .leading, spacing: 8) {

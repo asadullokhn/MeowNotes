@@ -18,7 +18,7 @@ struct AddBubble: View {
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: { Haptics.tap(); onTap() }) {
             HStack(spacing: 8) {
                 Image(systemName: "plus")
                     .font(.system(size: 10, weight: .bold))

@@ -9,29 +9,33 @@ struct AccountView: View {
     @Environment(AuthManager.self) private var auth
     @State private var showChangePassword = false
     @State private var showClaim = false
-    @State private var showProfileEdit = false
     @State private var showDeleteConfirm = false
     @State private var showLogoutConfirm = false
     @State private var deleting = false
     @State private var deleteError: String?
+    // Inline profile editing (name + phone), right here in Settings.
+    @State private var name = ""
+    @State private var phone = ""
+    @State private var savingProfile = false
+    @State private var profileError = ""
+    @State private var loadedProfile = false
     @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
+    @AppStorage("haptics") private var hapticsEnabled = true
 
     var body: some View {
         ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     profileHeader
 
+                    profileSection
+
                     VStack(spacing: 0) {
-                        row(icon: "person.text.rectangle", title: "Edit profile") {
-                            showProfileEdit = true
-                        }
                         if !auth.isGuest {
-                            Divider().padding(.leading, 56)
                             row(icon: "key.fill", title: "Change password") {
                                 showChangePassword = true
                             }
+                            Divider().padding(.leading, 56)
                         }
-                        Divider().padding(.leading, 56)
                         row(icon: "rectangle.portrait.and.arrow.right",
                             title: "Log out", tint: Color(red: 0.79, green: 0.44, blue: 0.42)) {
                             showLogoutConfirm = true
@@ -46,6 +50,8 @@ struct AccountView: View {
 
                     appearanceCard
 
+                    hapticsCard
+
                     if auth.isGuest {
                         guestCard
                     }
@@ -55,16 +61,14 @@ struct AccountView: View {
                 .padding(24)
             }
             .background(Color("AppBg").ignoresSafeArea())
-            .navigationTitle("Account")
+            .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear { loadProfile() }
             .sheet(isPresented: $showChangePassword) {
                 ChangePasswordView()
             }
             .sheet(isPresented: $showClaim) {
                 ClaimAccountView()
-            }
-            .sheet(isPresented: $showProfileEdit) {
-                ProfileEditView()
             }
             .alert(auth.isGuest ? "Delete data?" : "Delete account?", isPresented: $showDeleteConfirm) {
                 Button("Cancel", role: .cancel) {}
@@ -98,6 +102,28 @@ struct AccountView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color("BubbleBg"))
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color("BubbleBorder"), lineWidth: 1)
+        )
+    }
+
+    private var hapticsCard: some View {
+        Toggle(isOn: $hapticsEnabled) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Haptic feedback")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(Color("TextColor"))
+                Text("Subtle taps on buttons and actions")
+                    .font(.caption)
+                    .foregroundColor(Color("TextColor").opacity(0.6))
+            }
+        }
+        .tint(Color(.bubbleSelectedBg))
+        .onChange(of: hapticsEnabled) { _, on in if on { Haptics.tap(.medium) } }
+        .padding(16)
         .background(Color("BubbleBg"))
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(
@@ -187,14 +213,24 @@ struct AccountView: View {
         )
     }
 
+    // No uploaded photo — show the owner's initials (or a paw for an unnamed
+    // guest) in a tinted circle.
     private var profileHeader: some View {
         VStack(spacing: 10) {
-            Image(systemName: "person.crop.circle.fill")
-                .font(.system(size: 64))
-                .foregroundColor(Color("XBtnBg"))
-            Text(auth.user?.name ?? "MeowNotes")
-                .font(.title2.weight(.bold))
-                .foregroundColor(Color("TextColor"))
+            ZStack {
+                Circle().fill(Color(.bubbleSelectedBg))
+                if initials.isEmpty {
+                    Image(systemName: "pawprint.fill")
+                        .font(.system(size: 30))
+                        .foregroundStyle(.white)
+                } else {
+                    Text(initials)
+                        .font(.system(size: 30, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+            }
+            .frame(width: 78, height: 78)
+
             if let email = auth.user?.email {
                 Text(email)
                     .font(.subheadline)
@@ -211,6 +247,60 @@ struct AccountView: View {
             }
         }
         .padding(.top, 12)
+    }
+
+    private var initials: String {
+        (auth.user?.name ?? "")
+            .split(separator: " ").prefix(2)
+            .compactMap { $0.first }
+            .map(String.init)
+            .joined()
+            .uppercased()
+    }
+
+    private var canSaveProfile: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty }
+
+    private var profileChanged: Bool {
+        name.trimmingCharacters(in: .whitespaces) != (auth.user?.name ?? "") ||
+        phone.trimmingCharacters(in: .whitespaces) != (auth.user?.phone ?? "")
+    }
+
+    // Edit name + phone inline. "Save changes" dims until something changes.
+    private var profileSection: some View {
+        VStack(spacing: 12) {
+            AuthField(label: "Your name", text: $name, textContentType: .name)
+            AuthField(label: "Phone · optional", placeholder: "+62 812 3456 7890", text: $phone,
+                      keyboard: .phonePad, textContentType: .telephoneNumber,
+                      submitLabel: .done, onSubmit: saveProfile)
+            if !profileError.isEmpty { AuthErrorBanner(message: profileError) }
+            AuthPrimaryButton(title: "Save changes", loading: savingProfile,
+                              disabled: !canSaveProfile || !profileChanged, action: saveProfile)
+        }
+    }
+
+    private func loadProfile() {
+        guard !loadedProfile, let user = auth.user else { return }
+        name = user.name
+        phone = user.phone ?? ""
+        loadedProfile = true
+    }
+
+    private func saveProfile() {
+        guard canSaveProfile, profileChanged, !savingProfile else { return }
+        profileError = ""
+        savingProfile = true
+        Task {
+            do {
+                try await auth.updateProfile(
+                    name: name.trimmingCharacters(in: .whitespaces),
+                    phone: phone.trimmingCharacters(in: .whitespaces)
+                )
+                Haptics.success()
+            } catch {
+                profileError = error.localizedDescription
+            }
+            savingProfile = false
+        }
     }
 
     private func row(icon: String, title: String, tint: Color = Color("TextColor"),

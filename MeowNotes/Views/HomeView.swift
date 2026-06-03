@@ -108,6 +108,7 @@ struct HomeView: View {
                     .foregroundStyle(Color(.text).opacity(0.4))
                     .frame(width: 28, height: 28)
             }
+            .padding(6)
         }
         .padding(.horizontal, 20)
     }
@@ -301,8 +302,11 @@ struct GridCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.bubbleBg))
-            .cornerRadius(20)
+            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color(.bubbleBorder), lineWidth: 1)
+            )
         }
         // 3. This stops SwiftUI from turning all the text inside the button blue!
         .buttonStyle(.plain)

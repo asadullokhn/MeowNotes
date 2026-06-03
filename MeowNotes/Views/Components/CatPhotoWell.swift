@@ -100,6 +100,7 @@ private struct PhotoWellLabel: View {
                     Text("PHOTO").font(.system(size: 9, weight: .semibold)).tracking(0.5)
                 }
                 .foregroundStyle(Color(.text).opacity(0.45))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 
             if showActionLabel {

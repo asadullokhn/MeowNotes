@@ -65,6 +65,7 @@ struct CatDOBField: View {
                 HStack {
                     DatePicker("Date of birth", selection: bound, in: ...Date(), displayedComponents: .date)
                         .labelsHidden()
+                        .accessibilityLabel("Date of birth")
                     Spacer()
                     Button { self.dob = nil } label: {
                         Text("Clear")

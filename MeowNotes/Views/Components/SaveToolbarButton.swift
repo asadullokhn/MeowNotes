@@ -20,5 +20,7 @@ struct SaveToolbarButton: View {
             }
         }
         .disabled(saving || disabled)
+        // The dirty state is otherwise conveyed only by color — announce it.
+        .accessibilityValue(hasChanges ? "Unsaved changes" : "No changes")
     }
 }

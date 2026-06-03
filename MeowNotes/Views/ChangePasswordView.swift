@@ -25,7 +25,7 @@ struct ChangePasswordView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
                     if succeeded {
                         successState

@@ -116,7 +116,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             // Using a ScrollView so the grid can scroll on smaller screens
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
                     // MARK: - Hero Image
                     // The photo is an overlay on a fixed-size container so its

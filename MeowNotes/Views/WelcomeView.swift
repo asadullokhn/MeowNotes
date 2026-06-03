@@ -25,7 +25,7 @@ struct WelcomeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     // First-launch escape hatch: a back button returns an
                     // (often accidental) guest to the sign-in screen.

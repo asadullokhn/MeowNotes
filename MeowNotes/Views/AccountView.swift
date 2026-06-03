@@ -17,7 +17,7 @@ struct AccountView: View {
     @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
 
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     profileHeader
 

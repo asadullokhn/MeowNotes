@@ -12,17 +12,30 @@ struct ShareIconButton: View {
     let label: String
     let color: Color
     let bgColor: Color
- 
+    // `false` when `icon` names an asset-catalog image (e.g. a brand logo) rather
+    // than an SF Symbol — rendered as a template so `color` still tints it.
+    var isSystemImage: Bool = true
+
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
                 Circle()
                     .fill(bgColor)
                     .frame(width: 56, height: 56)
- 
-                Image(systemName: icon)
-                    .font(.system(size: 22))
-                    .foregroundColor(color)
+
+                Group {
+                    if isSystemImage {
+                        Image(systemName: icon)
+                            .font(.system(size: 22))
+                    } else {
+                        Image(icon)
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 26, height: 26)
+                    }
+                }
+                .foregroundColor(color)
             }
  
             Text(label)

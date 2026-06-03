@@ -171,7 +171,7 @@ struct ShareView: View {
                                     .font(.system(size: 15, weight: .medium))
                                     .foregroundColor(Color(.bubbleSelectedBg))
 
-                                Text("Open it in a new tab — see what the sitter sees")
+                                Text("Preview the guide — see what the sitter sees")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(Color(.bubbleSelectedBorder))
                             }
@@ -188,16 +188,18 @@ struct ShareView: View {
                             Button {
                                 openShare("https://wa.me/?text=\(enc(shareMessage))")
                             } label: {
-                                ShareIconButton(icon: "phone.fill", label: "WhatsApp",
-                                                color: .green, bgColor: .green.opacity(0.15))
+                                ShareIconButton(icon: "whatsapp", label: "WhatsApp",
+                                                color: .green, bgColor: .green.opacity(0.15),
+                                                isSystemImage: false)
                             }
                             .buttonStyle(.plain)
 
                             Button {
                                 openShare("https://t.me/share/url?url=\(enc(shareURLString))&text=\(enc("\(catName)'s care guide"))")
                             } label: {
-                                ShareIconButton(icon: "paperplane.fill", label: "Telegram",
-                                                color: .blue.opacity(0.7), bgColor: .blue.opacity(0.1))
+                                ShareIconButton(icon: "telegram", label: "Telegram",
+                                                color: .blue.opacity(0.7), bgColor: .blue.opacity(0.1),
+                                                isSystemImage: false)
                             }
                             .buttonStyle(.plain)
 
@@ -220,7 +222,7 @@ struct ShareView: View {
                             ShareLink(item: shareURL ?? URL(string: "https://meownotes.teztun.uz")!,
                                       message: Text(shareMessage)) {
                                 ShareIconButton(icon: "ellipsis", label: "More",
-                                                color: Color(.white), bgColor: Color(.white).opacity(0.08))
+                                                color: Color(.text).opacity(0.7), bgColor: Color(.text).opacity(0.1))
                             }
                         }
 

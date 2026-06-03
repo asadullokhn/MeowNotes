@@ -29,11 +29,12 @@ final class AuthManager {
         selectedCatID = id
     }
 
-    // On launch: hydrate a stored session, or silently create a guest one so a
-    // first-time user lands straight in the app without a login wall.
+    // On launch: hydrate a stored session. With no stored token we show the auth
+    // landing (sign in / create account / continue as guest) and let the user
+    // pick how to start, rather than silently creating a guest.
     func boot() async {
         guard TokenStore.token != nil else {
-            await signInAsGuest()
+            phase = .unauthenticated
             return
         }
         do {
@@ -51,18 +52,16 @@ final class AuthManager {
         }
     }
 
-    // Anonymous sign-in. The token (365-day) is stored like any other; the cat,
-    // photo, sharing, etc. features all work against a guest the same way.
-    private func signInAsGuest() async {
-        do {
-            let auth: AuthResponse = try await API.post(
-                "/api/auth/guest", GuestRequest(name: nil), headers: ["X-App-Key": API.appKey]
-            )
-            TokenStore.token = auth.token
-            try await loadMe()
-        } catch {
-            phase = .unauthenticated
-        }
+    // Anonymous sign-in, triggered by "Continue as guest" on the auth screen.
+    // Throws so the caller can surface a failure. A guest has no cats yet, so
+    // ContentView routes to onboarding next. The token (365-day) is stored like
+    // any other; cat, photo, sharing, etc. all work against a guest the same way.
+    func continueAsGuest() async throws {
+        let auth: AuthResponse = try await API.post(
+            "/api/auth/guest", GuestRequest(name: nil), headers: ["X-App-Key": API.appKey]
+        )
+        TokenStore.token = auth.token
+        try await loadMe()
     }
 
     // Convert the current guest into a full account, keeping all their cats.

@@ -18,6 +18,7 @@ struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var loading = false
+    @State private var guestLoading = false
     @State private var error = ""
     @State private var showForgot = false
 
@@ -80,8 +81,8 @@ struct LoginView: View {
                         .padding(.top, 8)
                 }
 
-                demoAccounts
-                    .padding(.top, 36)
+                guestSection
+                    .padding(.top, 32)
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 32)
@@ -109,61 +110,44 @@ struct LoginView: View {
         .padding(.bottom, 28)
     }
 
-    private var demoAccounts: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Text("DEMO")
-                    .font(.system(size: 10, weight: .bold))
-                    .tracking(1.2)
-                    .foregroundColor(Color("SaveBg"))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Color("XBtnBg").opacity(0.25))
-                    .clipShape(Capsule())
-                Text("Quick-fill a seeded account")
+    // Start without an account. Lands in onboarding (a guest has no cats yet);
+    // the user can claim a full account later from the profile screen.
+    private var guestSection: some View {
+        VStack(spacing: 14) {
+            HStack(spacing: 12) {
+                Rectangle().fill(Color("TextColor").opacity(0.12)).frame(height: 1)
+                Text("or")
                     .font(.caption)
-                    .foregroundColor(Color("TextColor").opacity(0.6))
+                    .foregroundColor(Color("TextColor").opacity(0.4))
+                Rectangle().fill(Color("TextColor").opacity(0.12)).frame(height: 1)
             }
 
-            HStack(spacing: 10) {
-                demoCard(name: "Edward", subtitle: "Owns Mochi", symbol: "person.fill") {
-                    fillDemo(email: "edward@meownotes.app", password: "mochi123")
+            Button(action: continueAsGuest) {
+                ZStack {
+                    if guestLoading {
+                        ProgressView().tint(Color("TextColor"))
+                    } else {
+                        Text("Continue as guest").fontWeight(.semibold)
+                    }
                 }
-                demoCard(name: "Anya", subtitle: "Owns Luna", symbol: "person.fill") {
-                    fillDemo(email: "anya@meownotes.app", password: "luna123")
-                }
+                .foregroundColor(Color("TextColor"))
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(Color("BubbleBg"))
+                .clipShape(RoundedRectangle(cornerRadius: 26))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 26)
+                        .stroke(Color("BubbleBorder"), lineWidth: 1)
+                )
+                .opacity(guestLoading ? 0.6 : 1)
             }
-        }
-    }
+            .disabled(guestLoading || loading)
 
-    private func demoCard(name: String, subtitle: String, symbol: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                Image(systemName: symbol)
-                    .foregroundColor(Color("SaveBg"))
-                    .frame(width: 36, height: 36)
-                    .background(Color("AppBg"))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(name)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(Color("TextColor"))
-                    Text(subtitle)
-                        .font(.caption2)
-                        .foregroundColor(Color("TextColor").opacity(0.6))
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(10)
-            .frame(maxWidth: .infinity)
-            .background(Color("BubbleBg"))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color("BubbleBorder"), lineWidth: 1)
-            )
+            Text("No account needed — claim one later to keep your cats safe.")
+                .font(.caption2)
+                .foregroundColor(Color("TextColor").opacity(0.5))
+                .multilineTextAlignment(.center)
         }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Actions
@@ -192,11 +176,19 @@ struct LoginView: View {
         error = ""
     }
 
-    private func fillDemo(email: String, password: String) {
-        self.email = email
-        self.password = password
-        mode = .login
+    private func continueAsGuest() {
+        guard !guestLoading, !loading else { return }
         error = ""
+        guestLoading = true
+        Task {
+            do {
+                try await auth.continueAsGuest()
+                onSignIn()
+            } catch {
+                self.error = error.localizedDescription
+            }
+            guestLoading = false
+        }
     }
 }
 

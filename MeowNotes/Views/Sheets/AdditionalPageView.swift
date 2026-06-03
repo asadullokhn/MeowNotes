@@ -15,7 +15,6 @@ struct AdditionalPageView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
     private var catName: String { auth.currentCat?.name ?? "your cat" }
-    @FocusState private var isFocused: Bool
 
     private var saveErrorBinding: Binding<Bool> {
         Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
@@ -52,42 +51,11 @@ struct AdditionalPageView: View {
                                 
                                 //MARK: ADD CUSTOM
                                 Section {
-                                    HStack(spacing: 12) {
-                                        TextField(
-                                            "e.g 'Will run if you let the window open'",
-                                            text: $vm.newTag
-                                        )
-                                        .focused($isFocused)
-                                        .padding(.horizontal, 14)
-                                        .frame(height: 48)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 20)
-                                                .fill(Color("AddBg"))
-                                        )
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 20)
-                                                .stroke(Color("BubbleSelectedBg"), lineWidth: 1)
-                                                .opacity(isFocused ? 1 : 0)
-                                        )
-                                        .animation(.easeInOut, value: isFocused)
-                                        
-                                        Button {
-                                            vm.addCustomTag()
-                                        } label: {
-                                            Text("Add")
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(.white)
-                                                .padding(.horizontal, 18)
-                                                .frame(height: 48)
-                                                .background(
-                                                    vm.newTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                                    ? Color.gray
-                                                    : Color("SaveBg")
-                                                )
-                                                .clipShape(RoundedRectangle(cornerRadius: 30))
-                                        }
-                                        .disabled(vm.newTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                                    }
+                                    TagInputField(
+                                        placeholder: "e.g 'Will run if you let the window open'",
+                                        text: $vm.newTag,
+                                        onAdd: vm.addCustomTag
+                                    )
                                     .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0))
                                     .listRowBackground(Color.clear)
                                     .listRowSeparator(.hidden)
@@ -95,14 +63,11 @@ struct AdditionalPageView: View {
                                 
                                 //MARK: INFOS
                                 if !vm.selectedTags.isEmpty {
-                                    Section(header: Text("INFOS")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(Color("TextColor"))
-                                    ) {
+                                    Section(header: SectionLabel("Infos")) {
                                         ForEach(vm.selectedTags, id: \.self) { tag in
-                                            SelectedBubbleEdit(
+                                            EditableListRow(
                                                 text: tag,
+                                                accessory: .dot,
                                                 onRemove: { vm.removeTag(tag) },
                                                 onSave: { newValue in
                                                     vm.updateTag(old: tag, new: newValue)
@@ -118,29 +83,15 @@ struct AdditionalPageView: View {
                                 //MARK: PRE-DEFINE
                                 Section {
                                     VStack(alignment: .leading, spacing: 14) {
-                                        Text("NEED A NUDGE?")
-                                            .font(.caption)
-                                            .fontWeight(.bold)
-                                            .foregroundColor(Color("TextColor"))
-                                        
+                                        SectionLabel("Need a nudge?")
+
                                         ForEach(vm.availableTags, id: \.self) { tag in
-                                            let isSelected = vm.selectedTags.contains(tag)
-                                            
-                                            Button {
-                                                if !isSelected {
-                                                    vm.addTag(tag)
-                                                }
-                                            } label: {
-                                                Text(tag)
-                                                    .padding(.horizontal, 14)
-                                                    .padding(.vertical, 8)
-                                                    .background(isSelected ? Color.gray.opacity(0.4) : Color("BubbleBg"))
-                                                    .foregroundColor(isSelected ? Color.gray.opacity(0.8) : Color("TextColor"))
-                                                    .clipShape(Capsule())
-                                            }
-                                            .buttonStyle(.plain)
+                                            AddBubble(
+                                                text: tag,
+                                                isSelected: vm.selectedTags.contains(tag)
+                                            ) { vm.addTag(tag) }
                                         }
-                                        
+
                                         ForEach(vm.customAvailableTags, id: \.self) { tag in
                                             CustomAddBubble(
                                                 text: tag,

@@ -1,43 +1,36 @@
-//
-//  SelectedBubbleCautionEdit.swift
-//  MeowNotes
-//
-//  Created by Yimei Winata on 02/06/26.
-//
-
 import SwiftUI
 
-struct SelectedBubbleCautionEdit: View {
+// A tap-to-edit row used in the care sheets: shows its text, and on tap turns
+// into an inline field that commits on submit. Merges the former
+// SelectedBubbleEdit (a small dot) and SelectedBubbleCautionEdit (a red
+// warning) into one component — pick the leading accessory.
+struct EditableListRow: View {
+    enum Accessory { case dot, warning }
+
     @State private var isEditing = false
     @State private var editedText: String
     @FocusState private var isFocused: Bool
-    
+
+    let accessory: Accessory
     let onRemove: () -> Void
     let onSave: (String) -> Void
-    
+
     init(
         text: String,
+        accessory: Accessory = .dot,
         onRemove: @escaping () -> Void,
         onSave: @escaping (String) -> Void
     ) {
         _editedText = State(initialValue: text)
+        self.accessory = accessory
         self.onRemove = onRemove
         self.onSave = onSave
     }
-    
+
     var body: some View {
         HStack(spacing: 8) {
-            
-            ZStack {
-                Circle()
-                    .fill(Color.red.opacity(0.6))
-                    .frame(width: 32, height: 32)
-                
-                Image(systemName: "exclamationmark")
-                    .foregroundColor(.white)
-                    .font(.system(size: 14, weight: .bold))
-            }
-            
+            leadingAccessory
+
             Group {
                 if isEditing {
                     TextField("Edit", text: $editedText)
@@ -54,55 +47,65 @@ struct SelectedBubbleCautionEdit: View {
                 }
             }
             .layoutPriority(1)
-            
+
             Spacer(minLength: 0)
-            
+
             Image(systemName: "pencil")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(.gray.opacity(0.8))
-            
-            Button(action: onRemove) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(Color("TextColor"))
-                    .padding(6)
-                    .background(Color("BubbleBorder"))
-                    .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
+
+            RemoveCircleButton(size: 26, action: onRemove)
         }
-        .foregroundColor(Color("TextColor"))
+        .foregroundStyle(Color(.text))
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("BubbleBg"))
+        .background(Color(.bubbleBg))
         .clipShape(RoundedRectangle(cornerRadius: 15))
         .overlay(
             RoundedRectangle(cornerRadius: 15)
-                .stroke(Color("BubbleBorder"), lineWidth: 1)
+                .stroke(Color(.bubbleBorder), lineWidth: 1)
         )
         .contentShape(Rectangle())
-        
-        .onTapGesture {
-            enterEdit()
-        }
-        
+        .onTapGesture { isEditing = true }
         .onChange(of: isEditing) { _, newValue in
             if newValue {
-                DispatchQueue.main.async {
-                    isFocused = true
-                }
+                DispatchQueue.main.async { isFocused = true }
             }
         }
     }
-    
-    private func enterEdit() {
-        isEditing = true
+
+    @ViewBuilder
+    private var leadingAccessory: some View {
+        switch accessory {
+        case .dot:
+            Circle()
+                .fill(Color(.bubbleSelectedBg))
+                .frame(width: 7, height: 7)
+        case .warning:
+            ZStack {
+                Circle()
+                    .fill(Color.red.opacity(0.6))
+                    .frame(width: 32, height: 32)
+                Image(systemName: "exclamationmark")
+                    .foregroundStyle(.white)
+                    .font(.system(size: 14, weight: .bold))
+            }
+        }
     }
-    
+
     private func save() {
         isEditing = false
         isFocused = false
         onSave(editedText.trimmingCharacters(in: .whitespacesAndNewlines))
     }
+}
+
+#Preview {
+    VStack(spacing: 10) {
+        EditableListRow(text: "Hides under the bed", accessory: .dot, onRemove: {}, onSave: { _ in })
+        EditableListRow(text: "Allergic to chicken", accessory: .warning, onRemove: {}, onSave: { _ in })
+    }
+    .padding()
+    .background(Color("AppBg"))
 }

@@ -68,20 +68,9 @@ struct EditBasicCareView: View {
                                         .foregroundStyle(.secondary)
                                         .accessibilityHidden(true)
                                         .opacity(0.5)
-                                    Button {
+                                    RemoveCircleButton(size: 32) {
                                         removeChecklistItem(at: index)
-                                    } label: {
-                                        ZStack {
-                                            Circle()
-                                                .fill(Color(.backgroundPredefined))
-                                            Image(systemName: "xmark")
-                                                .font(.system(size: 10, weight: .bold))
-                                                .foregroundStyle(Color(.xIcon).opacity(0.5))
-                                        }
-                                        .frame(width: 32, height: 32)
                                     }
-                                    .buttonStyle(.plain)
-                                    .accessibilityLabel("Remove check")
                                 }
                                 .padding(.vertical, 10)
                                 .padding(.horizontal, 14)
@@ -94,27 +83,11 @@ struct EditBasicCareView: View {
                             
                             Spacer()
 
-                            HStack(spacing: 10) {
-                                TextField("Add your own - e.g. 'curtains open'", text: $newChecklistItem)
-                                    .textInputAutocapitalization(.sentences)
-                                    .foregroundStyle(Color(.text))
-                                    .padding(.vertical, 14)
-                                    .padding(.horizontal, 14)
-                                    .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 14))
-
-                                Button {
-                                    addChecklistItem()
-                                } label: {
-                                    Text("Add")
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(Color.white)
-                                        .padding(.vertical, 10)
-                                        .padding(.horizontal, 16)
-                                        .background(newChecklistItem != "" ? Color(.addButtonBasicCare) : Color(.addButtonBasicCare).opacity(0.5))
-                                        .clipShape(RoundedRectangle(cornerRadius: 120))
-                                }
-                                .disabled(newChecklistItem.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                            }
+                            TagInputField(
+                                placeholder: "Add your own - e.g. 'curtains open'",
+                                text: $newChecklistItem,
+                                onAdd: addChecklistItem
+                            )
                         }
                     }
                     .listRowBackground(Color.clear)
@@ -122,25 +95,13 @@ struct EditBasicCareView: View {
 
                     Section {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("COMMON ONES")
-                                .font(.headline)
-                                .bold()
-                                .foregroundColor(Color("TextColor"))
-                            
+                            SectionLabel("Common ones")
+
                             FlowLayout(spacing: 12) {
                                 ForEach(commonChecklistItems, id: \.self) { item in
-                                    let isAdded = isCommonItemAdded(item)
-                                    Button {
+                                    AddBubble(text: item, isSelected: isCommonItemAdded(item)) {
                                         addCommonChecklistItem(item)
-                                    } label: {
-                                        ViewThatFits(in: .horizontal) {
-                                            commonItemLabel(item, expanded: false)
-                                            commonItemLabel(item, expanded: true)
-                                        }
                                     }
-                                    .buttonStyle(.plain)
-                                    .disabled(isAdded)
-                                    .opacity(isAdded ? 0.4 : 1)
                                 }
                             }
                             .padding(.vertical, 4)
@@ -226,24 +187,6 @@ struct EditBasicCareView: View {
     private func isCommonItemAdded(_ item: String) -> Bool {
         let trimmed = item.trimmingCharacters(in: .whitespacesAndNewlines)
         return checklistItems.contains { $0.trimmingCharacters(in: .whitespacesAndNewlines) == trimmed }
-    }
-
-    private func commonItemLabel(_ item: String, expanded: Bool) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: "plus")
-            Text(item)
-                .lineLimit(expanded ? nil : 1)
-                .multilineTextAlignment(.leading)
-                .foregroundStyle(Color("TextColor"))
-        }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 10)
-        .frame(maxWidth: expanded ? .infinity : nil, alignment: .leading)
-        .background(
-            Capsule()
-                .fill(Color.secondary.opacity(0.15))
-        )
-        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

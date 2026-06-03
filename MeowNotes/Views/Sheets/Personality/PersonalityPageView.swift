@@ -13,8 +13,7 @@ struct PersonalityPageView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
     private var catName: String { auth.currentCat?.name ?? "your cat" }
-    @FocusState private var isFocused: Bool
-    
+
     var body: some View {
         NavigationStack{
             VStack{
@@ -39,53 +38,21 @@ struct PersonalityPageView: View {
                         
                         // MARK: Add Custom
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("ADD YOUR OWN")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color("TextColor"))
-                            
-                            HStack(spacing: 12) {
-                                TextField(
-                                    "Enter personality",
-                                    text: $vm.newTag
-                                )
-                                .focused($isFocused)
-                                .padding(.horizontal, 14)
-                                .frame(height: 48)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color("AddBg"))
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color("BubbleSelectedBg"), lineWidth: 1)
-                                        .opacity(isFocused ? 1 : 0)
-                                )
-                                .animation(.easeInOut, value: isFocused)
-                                
-                                Button(action: vm.addCustomTag) {
-                                    Text("Add")
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 18)
-                                        .frame(height: 48)
-                                        .background(vm.newTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray : Color("SaveBg"))
-                                        .clipShape(RoundedRectangle(cornerRadius: 30))
-                                }
-                                .disabled(vm.newTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                            }
-                            
+                            SectionLabel("Add your own")
+
+                            TagInputField(
+                                placeholder: "Enter personality",
+                                text: $vm.newTag,
+                                onAdd: vm.addCustomTag
+                            )
                         }
                         
                         // MARK: Selected
                         if !vm.selectedTags.isEmpty {
                             VStack(alignment: .leading, spacing: 14) {
-                                Text("SELECTED")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(Color("TextColor"))
+                                SectionLabel("Selected")
                                 
-                                WrapView {
+                                FlowLayout {
                                     ForEach(vm.selectedTags, id: \.self) { tag in
                                         SelectedBubble(text: tag) {
                                             vm.removeTag(tag)
@@ -98,12 +65,9 @@ struct PersonalityPageView: View {
                         // MARK: Available
                         if !vm.availableTags.isEmpty {
                             VStack(alignment: .leading, spacing: 14) {
-                                Text("TAP TO ADD")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(Color("TextColor"))
+                                SectionLabel("Tap to add")
                                 
-                                WrapView {
+                                FlowLayout {
                                     ForEach(vm.availableTags, id: \.self) { tag in
                                         AddBubble(text: tag) {
                                             vm.addTag(tag)

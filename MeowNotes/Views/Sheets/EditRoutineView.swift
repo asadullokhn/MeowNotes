@@ -115,7 +115,7 @@ struct EditRoutineView: View {
                                         }
                                     }
 
-                                    CareTextField(placeholder: "Description", text: routineBinding.details, axis: .vertical)
+                                    CareTextField(placeholder: "Description", text: routineBinding.details, axis: .vertical, limit: 280)
                                 }
                                 .padding(14)
                                 .background(Color("BubbleBg"), in: RoundedRectangle(cornerRadius: 20))

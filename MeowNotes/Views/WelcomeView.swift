@@ -83,6 +83,7 @@ struct WelcomeView: View {
                         .textInputAutocapitalization(.words)
                         .submitLabel(.done)
                         .onSubmit(create)
+                        .characterLimit(50, $name)
                         .padding(.horizontal, 16)
                         .frame(height: 56)
                         .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))

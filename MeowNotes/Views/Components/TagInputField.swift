@@ -7,6 +7,7 @@ struct TagInputField: View {
     let placeholder: String
     @Binding var text: String
     var onAdd: () -> Void
+    var limit: Int = 80
 
     @FocusState private var isFocused: Bool
 
@@ -20,6 +21,7 @@ struct TagInputField: View {
                 .focused($isFocused)
                 .submitLabel(.done)
                 .onSubmit(add)
+                .characterLimit(limit, $text)
                 .foregroundStyle(Color(.text))
                 .padding(.horizontal, 14)
                 .frame(height: 48)

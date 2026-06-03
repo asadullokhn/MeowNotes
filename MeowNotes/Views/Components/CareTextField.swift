@@ -11,6 +11,7 @@ struct CareTextField: View {
     var bold: Bool = false
     var keyboard: UIKeyboardType = .default
     var fill: Color = Color(.bubbleSectionBg)
+    var limit: Int = 120
 
     @FocusState private var focused: Bool
 
@@ -21,6 +22,7 @@ struct CareTextField: View {
             .textInputAutocapitalization(.sentences)
             .keyboardType(keyboard)
             .focused($focused)
+            .characterLimit(limit, $text)
             .padding(.horizontal, 14)
             .padding(.vertical, 11)
             .background(fill, in: RoundedRectangle(cornerRadius: 12))

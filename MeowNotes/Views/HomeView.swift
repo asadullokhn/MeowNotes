@@ -119,44 +119,49 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     // MARK: - Hero Image
-                    ZStack(alignment: .bottomLeading) {
-                        CachedCatImage(cat?.photo) { image in
-                            image.resizable().scaledToFill()
-                        } placeholder: {
-                            Image("Cat").resizable().scaledToFill()
-                        }
+                    // The photo is an overlay on a fixed-size container so its
+                    // scaledToFill overflow is clipped here and can never leak into
+                    // the layout — otherwise an off-aspect cropped photo shifts the
+                    // whole screen's margins (the default asset happened not to).
+                    Color.gray.opacity(0.3)
                         .frame(maxWidth: .infinity)
                         .frame(height: 200)
-                        .background(Color.gray.opacity(0.3))
-                        .clipShape(RoundedRectangle(cornerRadius: 30))
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(catName)
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .shadow(color: .black.opacity(0.3), radius: 3)
-
-                            if !catSubtitle.isEmpty {
-                                Text(catSubtitle)
-                                    .font(.subheadline)
-                                    .foregroundColor(.white.opacity(0.9))
-                                    .shadow(color: .black.opacity(0.3), radius: 3)
+                        .overlay {
+                            CachedCatImage(cat?.photo) { image in
+                                image.resizable().scaledToFill()
+                            } placeholder: {
+                                Image("Cat").resizable().scaledToFill()
                             }
                         }
-                        .padding(20)
-                    }
-                    .overlay(alignment: .topTrailing) {
-                        Button(action: { activeSheet = .editCat }) {
-                            Image(systemName: "pencil")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color(.text))
-                                .frame(width: 44, height: 44)
-                                .background(.ultraThinMaterial, in: Circle())
+                        .clipShape(RoundedRectangle(cornerRadius: 30))
+                        .overlay(alignment: .bottomLeading) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(catName)
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .shadow(color: .black.opacity(0.3), radius: 3)
+
+                                if !catSubtitle.isEmpty {
+                                    Text(catSubtitle)
+                                        .font(.subheadline)
+                                        .foregroundColor(.white.opacity(0.9))
+                                        .shadow(color: .black.opacity(0.3), radius: 3)
+                                }
+                            }
+                            .padding(20)
                         }
-                        .accessibilityLabel("Edit profile")
-                        .padding(12)
-                    }
-                    .padding(.horizontal, 20)
+                        .overlay(alignment: .topTrailing) {
+                            Button(action: { activeSheet = .editCat }) {
+                                Image(systemName: "pencil")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundStyle(Color(.text))
+                                    .frame(width: 44, height: 44)
+                                    .background(.ultraThinMaterial, in: Circle())
+                            }
+                            .accessibilityLabel("Edit profile")
+                            .padding(12)
+                        }
+                        .padding(.horizontal, 20)
                     
                     // MARK: - Share Banner
                     Button(action: { activeSheet = .share }) {

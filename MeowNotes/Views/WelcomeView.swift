@@ -14,7 +14,8 @@ struct WelcomeView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""
-    @State private var ageYears = 0          // 0 = unset (optional)
+    @State private var ageValue = ""         // "" = unset (optional)
+    @State private var ageUnit: CatAgeUnit = .years
     @State private var sex = ""              // "" = unset (optional)
     @State private var pickedDataURL: String?
     @State private var saving = false
@@ -27,6 +28,22 @@ struct WelcomeView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
+                    // First-launch escape hatch: a back button returns an
+                    // (often accidental) guest to the sign-in screen.
+                    if !isAdditional {
+                        Button { auth.logout() } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 17, weight: .semibold))
+                                Text("Back")
+                                    .font(.system(size: 17))
+                            }
+                            .foregroundStyle(Color(.text))
+                        }
+                        .padding(.top, 4)
+                        .padding(.bottom, 16)
+                    }
+
                     HStack(spacing: 10) {
                         Image(systemName: "pawprint.fill")
                             .font(.system(size: 22))
@@ -44,16 +61,6 @@ struct WelcomeView: View {
                                     .foregroundStyle(Color(.text).opacity(0.6))
                                     .frame(width: 36, height: 36)
                                     .background(Color(.bubbleBg), in: Circle())
-                            }
-                        } else {
-                            // First-launch escape hatch: a freshly-landed (often
-                            // accidental) guest can get back to the sign-in screen.
-                            Spacer()
-                            Button { auth.logout() } label: {
-                                Text(auth.isGuest ? "Sign in instead" : "Log out")
-                                    .font(.subheadline.weight(.semibold))
-                                    .underline()
-                                    .foregroundStyle(Color(.text).opacity(0.7))
                             }
                         }
                     }
@@ -103,29 +110,7 @@ struct WelcomeView: View {
                         .padding(.top, 16)
                         .padding(.bottom, 6)
 
-                    Menu {
-                        Button("Not set") { ageYears = 0 }
-                        ForEach(1...25, id: \.self) { y in
-                            Button("\(y) year\(y == 1 ? "" : "s")") { ageYears = y }
-                        }
-                    } label: {
-                        HStack {
-                            Text(ageYears == 0 ? "Not set" : "\(ageYears) year\(ageYears == 1 ? "" : "s")")
-                                .font(.system(size: 17))
-                                .foregroundStyle(ageYears == 0 ? Color(.text).opacity(0.4) : Color(.text))
-                            Spacer()
-                            Image(systemName: "chevron.up.chevron.down")
-                                .font(.caption)
-                                .foregroundStyle(Color(.text).opacity(0.4))
-                        }
-                        .padding(.horizontal, 16)
-                        .frame(height: 52)
-                        .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(Color(.bubbleBorder), lineWidth: 1)
-                        )
-                    }
+                    CatAgeField(value: $ageValue, unit: $ageUnit)
 
                     SectionLabel("Sex · optional", dimmed: true)
                         .padding(.top, 16)
@@ -183,7 +168,7 @@ struct WelcomeView: View {
         guard canSave, !saving else { return }
         saving = true
         errorMessage = nil
-        let ageString = ageYears > 0 ? "\(ageYears) year\(ageYears == 1 ? "" : "s")" : nil
+        let ageString = CatAgeField.compose(value: ageValue, unit: ageUnit)
         Task {
             do {
                 try await auth.addCat(

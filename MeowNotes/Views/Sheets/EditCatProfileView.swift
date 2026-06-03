@@ -16,9 +16,9 @@ struct EditCatProfileView: View {
     @State private var breed = ""
     @State private var gender = ""
     @State private var ageValue = ""
-    @State private var ageUnit: AgeUnit = .years
+    @State private var ageUnit: CatAgeUnit = .years
     @State private var initialAgeValue = ""
-    @State private var initialAgeUnit: AgeUnit = .years
+    @State private var initialAgeUnit: CatAgeUnit = .years
     @State private var loadedAgeRaw = ""
     @State private var existingPhoto = ""
     @State private var pickedDataURL: String?
@@ -52,11 +52,6 @@ struct EditCatProfileView: View {
                             .fontWeight(.bold)
                             .foregroundStyle(Color(.text))
 
-                        field("Name") {
-                            textField("Mochi", $name)
-                                .textInputAutocapitalization(.words)
-                        }
-
                         field("Photo") {
                             CatPhotoWell(
                                 existingPhotoURL: existingPhoto,
@@ -69,6 +64,11 @@ struct EditCatProfileView: View {
                             )
                         }
 
+                        field("Name") {
+                            textField("Mochi", $name)
+                                .textInputAutocapitalization(.words)
+                        }
+
                         field("Breed") { textField("Mixed", $breed) }
 
                         FlowLayout(spacing: 8) {
@@ -78,7 +78,9 @@ struct EditCatProfileView: View {
                             }
                         }
 
-                        ageField
+                        field("Age") {
+                            CatAgeField(value: $ageValue, unit: $ageUnit, unsetCaption: ageUnsetCaption)
+                        }
 
                         sexField
 
@@ -325,150 +327,17 @@ struct EditCatProfileView: View {
 
     // MARK: - Age
 
-    private enum AgeUnit: String, CaseIterable, Identifiable {
-        case weeks, months, years
-        var id: String { rawValue }
-        var label: String {
-            switch self {
-            case .weeks: return "Weeks"
-            case .months: return "Months"
-            case .years: return "Years"
-            }
-        }
-        var singular: String {
-            switch self {
-            case .weeks: return "week"
-            case .months: return "month"
-            case .years: return "year"
-            }
-        }
-    }
-
-    // An age-specific two-wheel picker: a number wheel whose range adapts to the
-    // chosen unit (so "53 weeks" isn't offerable), plus a unit wheel. The first
-    // row is "—" so a cat with no age reads as unset instead of defaulting to a
-    // value nobody chose. The live "born around …" line surfaces the hidden birth
-    // date the backend anchors to, so the auto-advancing age isn't a surprise.
-    private var ageField: some View {
-        field("Age") {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 0) {
-                    Picker("Age value", selection: ageNumberSelection) {
-                        ForEach(ageNumberOptions, id: \.self) { n in
-                            Text(n == 0 ? "—" : "\(n)").tag(n)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(maxWidth: .infinity)
-                    .clipped()
-
-                    Picker("Age unit", selection: $ageUnit) {
-                        ForEach(AgeUnit.allCases) { unit in
-                            Text(unit.label).tag(unit)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(maxWidth: .infinity)
-                    .clipped()
-                }
-                .frame(height: 130)
-                .padding(.horizontal, 8)
-                .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color(.bubbleBorder), lineWidth: 1)
-                )
-                .onChange(of: ageUnit) { _, _ in clampAgeToUnit() }
-
-                Text(ageCaption)
-                    .font(.caption)
-                    .foregroundStyle(Color(.text).opacity(0.5))
-            }
-        }
-    }
-
-    // Sensible upper bound per unit so the wheel rolls into the next unit instead
-    // of offering nonsense like "40 months". 0 is the leading "—" (unset) row.
-    private var ageNumberOptions: [Int] {
-        let upper: Int
-        switch ageUnit {
-        case .weeks: upper = 51
-        case .months: upper = 23
-        case .years: upper = 30
-        }
-        return [0] + Array(1...upper)
-    }
-
-    // Bridges the Int-based wheel to the String `ageValue`; 0 means "unset".
-    private var ageNumberSelection: Binding<Int> {
-        Binding(
-            get: { Int(ageValue.trimmingCharacters(in: .whitespaces)) ?? 0 },
-            set: { ageValue = $0 == 0 ? "" : String($0) }
-        )
-    }
-
-    // After a unit switch, pull a now-out-of-range number back in (e.g. 40 weeks
-    // → switch to months → 23) so the wheel never shows a value it can't select.
-    private func clampAgeToUnit() {
-        guard let n = Int(ageValue.trimmingCharacters(in: .whitespaces)), n > 0,
-              let maxN = ageNumberOptions.last, n > maxN else { return }
-        ageValue = String(maxN)
-    }
-
-    private var ageCaption: String {
-        if let born = bornAroundText {
-            return "\(born) · keeps itself up to date"
-        }
+    // Context-aware caption the shared age picker shows when no age is set: nudge
+    // toward keeping an existing stored value when the user hasn't touched it.
+    private var ageUnsetCaption: String {
         if initialAgeValue.isEmpty && !loadedAgeRaw.isEmpty {
             return "Currently \(loadedAgeRaw). Set a value to change it."
         }
         return "Set it once — their age keeps itself up to date."
     }
 
-    // The approximate birth date the backend will anchor to, shown so the
-    // auto-advancing age is transparent rather than surprising.
-    private var bornAroundText: String? {
-        guard let value = Int(ageValue.trimmingCharacters(in: .whitespaces)), value > 0 else { return nil }
-        var comp = DateComponents()
-        switch ageUnit {
-        case .weeks: comp.day = -value * 7
-        case .months: comp.month = -value
-        case .years: comp.year = -value
-        }
-        guard let date = Calendar.current.date(byAdding: comp, to: Date()) else { return nil }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return "Born around \(formatter.string(from: date))"
-    }
-
     private var ageChanged: Bool {
         ageValue.trimmingCharacters(in: .whitespaces) != initialAgeValue || ageUnit != initialAgeUnit
-    }
-
-    // Build the "8 months" / "2 years" string the backend parses, or nil when
-    // there's nothing valid to send.
-    private func composedAge() -> String? {
-        let trimmed = ageValue.trimmingCharacters(in: .whitespaces)
-        guard let value = Int(trimmed), value > 0 else { return nil }
-        let unit = value == 1 ? ageUnit.singular : ageUnit.label.lowercased()
-        return "\(value) \(unit)"
-    }
-
-    // Split a stored age string ("8 months", "2 years", legacy "3") back into the
-    // picker's value + unit. Days or unparseable text return a blank value so the
-    // picker never misrepresents — and so we never resend something it can't hold.
-    private func parseAge(_ raw: String) -> (String, AgeUnit) {
-        let lower = raw.lowercased()
-        let fromFirstDigit = lower.drop(while: { !$0.isNumber })
-        let number = fromFirstDigit.prefix(while: { $0.isNumber })
-        guard !number.isEmpty else { return ("", .months) }
-        let afterNumber = fromFirstDigit.drop(while: { $0.isNumber || $0 == "." })
-        switch afterNumber.first(where: { $0.isLetter }) {
-        case .some("w"): return (String(number), .weeks)
-        case .some("m"): return (String(number), .months)
-        case .some("y"), .none: return (String(number), .years)   // bare number = years
-        default: return ("", .months)                             // days / unknown unit
-        }
     }
 
     // MARK: - Load / Save
@@ -480,7 +349,7 @@ struct EditCatProfileView: View {
         gender = cat.gender ?? ""
         let raw = cat.age?.display ?? ""
         loadedAgeRaw = raw
-        let (value, unit) = parseAge(raw)
+        let (value, unit) = CatAgeField.parse(raw)
         ageValue = value
         ageUnit = unit
         initialAgeValue = value
@@ -496,7 +365,7 @@ struct EditCatProfileView: View {
         // Only send age when the picker actually changed — re-sending re-anchors
         // the hidden birth date and drops sub-unit precision, so an untouched age
         // is left exactly as the server has it.
-        let agePatch = ageChanged ? composedAge() : nil
+        let agePatch = ageChanged ? CatAgeField.compose(value: ageValue, unit: ageUnit) : nil
         Task {
             do {
                 try await auth.updateBasics(

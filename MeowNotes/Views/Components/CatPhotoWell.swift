@@ -140,15 +140,18 @@ private struct PhotoWellLabel: View {
             }
 
             if showActionLabel {
+                // A solid pill so the hint stays legible over any photo (a faint
+                // full-width bar washed out on light images).
                 HStack(spacing: 6) {
                     Image(systemName: "camera.fill")
                     Text(actionLabelText)
                 }
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(.black.opacity(0.45))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(.black.opacity(0.6), in: Capsule())
+                .padding(.bottom, 10)
             }
         }
         .frame(width: fillWidth ? nil : height, height: height)

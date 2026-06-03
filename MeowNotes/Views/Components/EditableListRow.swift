@@ -59,6 +59,7 @@ struct EditableListRow: View {
         .animation(.easeInOut(duration: 0.15), value: isFocused)
         .contentShape(Rectangle())
         .onTapGesture { isEditing = true }
+        .accessibilityAction(named: "Delete") { onRemove() }
         .onChange(of: isEditing) { _, editing in
             if editing { DispatchQueue.main.async { isFocused = true } }
         }

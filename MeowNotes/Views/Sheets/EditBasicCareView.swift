@@ -85,6 +85,7 @@ struct EditBasicCareView: View {
                                     .stroke(focusedCheck == index ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: 1)
                             )
                             .animation(.easeInOut(duration: 0.15), value: focusedCheck)
+                            .accessibilityAction(named: "Delete") { removeChecklistItem(at: index) }
                         }
 
                         TagInputField(

@@ -123,6 +123,9 @@ struct EditRoutineView: View {
                                     RoundedRectangle(cornerRadius: 20)
                                         .stroke(Color("BubbleBorder"), lineWidth: 1)
                                 )
+                                .accessibilityAction(named: "Delete routine") {
+                                    removeRoutine(id: routine.id)
+                                }
                             }
                         }
                     }

@@ -17,6 +17,7 @@ struct EditBasicCareView: View {
     @State private var saving = false
     @State private var saveError: String?
     @State private var loaded = false
+    @FocusState private var focusedCheck: Int?
 
     private var saveErrorBinding: Binding<Bool> {
         Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
@@ -58,13 +59,17 @@ struct EditBasicCareView: View {
                                     .frame(width: 6, height: 6)
                                 TextField("Check", text: binding(for: index))
                                     .textInputAutocapitalization(.sentences)
-                                    .font(.callout.weight(.semibold))
+                                    .font(.body.weight(.semibold))
                                     .foregroundStyle(Color(.text))
+                                    .focused($focusedCheck, equals: index)
                                 Spacer(minLength: 8)
-                                Image(systemName: "pencil")
-                                    .foregroundStyle(.secondary)
-                                    .accessibilityHidden(true)
-                                    .opacity(0.5)
+                                Button { focusedCheck = index } label: {
+                                    Image(systemName: "pencil")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundStyle(Color(.text).opacity(0.45))
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Edit check")
                                 RemoveCircleButton(size: 32) {
                                     removeChecklistItem(at: index)
                                 }
@@ -74,8 +79,9 @@ struct EditBasicCareView: View {
                             .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 18)
-                                    .stroke(Color(.bubbleBorder), lineWidth: 1)
+                                    .stroke(focusedCheck == index ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: 1)
                             )
+                            .animation(.easeInOut(duration: 0.15), value: focusedCheck)
                         }
 
                         TagInputField(

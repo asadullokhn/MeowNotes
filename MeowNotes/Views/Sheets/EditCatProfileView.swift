@@ -187,7 +187,7 @@ struct EditCatProfileView: View {
                     Spacer()
                     Button { applyDeceased(true) } label: {
                         HStack(spacing: 6) {
-                            Image(systemName: "heart")
+                            Image(systemName: "camera.macro")
                             Text("Mark as deceased")
                         }
                         .font(.subheadline.weight(.semibold))

@@ -96,26 +96,14 @@ struct EditRoutineView: View {
                                         DatePicker("", selection: routineBinding.time, displayedComponents: .hourAndMinute)
                                             .labelsHidden()
 
-                                        TextField("Routine", text: routineBinding.title)
-                                            .textInputAutocapitalization(.sentences)
-                                            .foregroundStyle(Color("TextColor"))
-                                            .fontWeight(.semibold)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 9)
-                                            .background(Color(.bubbleSectionBg), in: RoundedRectangle(cornerRadius: 12))
+                                        CareTextField(placeholder: "Routine", text: routineBinding.title, bold: true)
 
                                         RemoveCircleButton(size: 40) {
                                             removeRoutine(id: routine.id)
                                         }
                                     }
 
-                                    TextField("Description", text: routineBinding.details, axis: .vertical)
-                                        .lineLimit(2...4)
-                                        .textInputAutocapitalization(.sentences)
-                                        .foregroundStyle(Color("TextColor"))
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 9)
-                                        .background(Color(.bubbleSectionBg), in: RoundedRectangle(cornerRadius: 12))
+                                    CareTextField(placeholder: "Description", text: routineBinding.details, axis: .vertical)
                                 }
                                 .padding(14)
                                 .background(Color("BubbleBg"), in: RoundedRectangle(cornerRadius: 20))

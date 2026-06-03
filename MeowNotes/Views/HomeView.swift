@@ -154,13 +154,16 @@ struct HomeView: View {
                             Button(action: { activeSheet = .editCat }) {
                                 Image(systemName: "pencil")
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundStyle(Color(.text))
+                                    .foregroundStyle(.white)
                                     .frame(width: 44, height: 44)
-                                    .background(.ultraThinMaterial, in: Circle())
+                                    .background(.black.opacity(0.4), in: Circle())
                             }
                             .accessibilityLabel("Edit profile")
                             .padding(12)
                         }
+                        // The whole hero opens the cat's profile, like the grid cards.
+                        .contentShape(RoundedRectangle(cornerRadius: 30))
+                        .onTapGesture { activeSheet = .editCat }
                         .padding(.horizontal, 20)
                     
                     // MARK: - Share Banner
@@ -231,7 +234,7 @@ struct HomeView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .foregroundStyle(Color(.text))
                     }
-                    .padding(.leading, 10)
+                    .padding(.leading, 20)
                     Spacer()
                     Button {
                         showAccount = true

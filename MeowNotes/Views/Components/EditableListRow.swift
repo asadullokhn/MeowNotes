@@ -64,8 +64,9 @@ struct EditableListRow: View {
         .clipShape(RoundedRectangle(cornerRadius: 15))
         .overlay(
             RoundedRectangle(cornerRadius: 15)
-                .stroke(Color(.bubbleBorder), lineWidth: 1)
+                .stroke(isFocused ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: 1)
         )
+        .animation(.easeInOut(duration: 0.15), value: isFocused)
         .contentShape(Rectangle())
         .onTapGesture { isEditing = true }
         .onChange(of: isEditing) { _, newValue in

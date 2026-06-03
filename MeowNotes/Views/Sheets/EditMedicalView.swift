@@ -222,7 +222,7 @@ struct EditMedicalView: View {
             ForEach($vaccines) { $vaccine in
                 VStack(spacing: 8) {
                     HStack(spacing: 8) {
-                        inputField("FVRCP", text: $vaccine.name, fill: Color(.bubbleBg), bold: true)
+                        CareTextField(placeholder: "FVRCP", text: $vaccine.name, bold: true, fill: Color(.bubbleBg))
                         RemoveCircleButton(size: 28) {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
                                 vaccines.removeAll { $0.id == vaccine.id }
@@ -230,8 +230,8 @@ struct EditMedicalView: View {
                         }
                     }
                     HStack(spacing: 8) {
-                        inputField("Last · Feb 2026", text: $vaccine.last, fill: Color(.bubbleBg))
-                        inputField("Next · Feb 2027", text: $vaccine.next, fill: Color(.bubbleBg))
+                        CareTextField(placeholder: "Last · Feb 2026", text: $vaccine.last, fill: Color(.bubbleBg))
+                        CareTextField(placeholder: "Next · Feb 2027", text: $vaccine.next, fill: Color(.bubbleBg))
                     }
                 }
                 .padding(10)
@@ -244,12 +244,9 @@ struct EditMedicalView: View {
                         vaccines.append(Vaccine(name: name, last: "", next: ""))
                     }
                 }
-                Button {
+                AddBubble(text: "Custom", dashed: true) {
                     vaccines.append(Vaccine(name: "", last: "", next: ""))
-                } label: {
-                    chip("+ Custom", dashed: true)
                 }
-                .buttonStyle(.plain)
             }
         }
     }
@@ -261,7 +258,7 @@ struct EditMedicalView: View {
             ForEach($medications) { $med in
                 VStack(spacing: 8) {
                     HStack(spacing: 8) {
-                        inputField("Joint vitamin", text: $med.name, fill: Color(.bubbleBg), bold: true)
+                        CareTextField(placeholder: "Joint vitamin", text: $med.name, bold: true, fill: Color(.bubbleBg))
                         RemoveCircleButton(size: 28) {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
                                 medications.removeAll { $0.id == med.id }
@@ -269,8 +266,8 @@ struct EditMedicalView: View {
                         }
                     }
                     HStack(spacing: 8) {
-                        inputField("½ tab", text: $med.dose, fill: Color(.bubbleBg))
-                        inputField("Daily with breakfast", text: $med.schedule, fill: Color(.bubbleBg))
+                        CareTextField(placeholder: "½ tab", text: $med.dose, fill: Color(.bubbleBg))
+                        CareTextField(placeholder: "Daily with breakfast", text: $med.schedule, fill: Color(.bubbleBg))
                     }
                 }
                 .padding(10)
@@ -304,40 +301,8 @@ struct EditMedicalView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             SectionLabel(title, dimmed: true)
-            inputField(placeholder, text: text, fill: Color(.bubbleSectionBg), keyboard: keyboard)
+            CareTextField(placeholder: placeholder, text: text, keyboard: keyboard, fill: Color(.bubbleSectionBg))
         }
-    }
-
-    private func inputField(
-        _ placeholder: String,
-        text: Binding<String>,
-        fill: Color,
-        bold: Bool = false,
-        keyboard: UIKeyboardType = .default
-    ) -> some View {
-        TextField(placeholder, text: text)
-            .font(.subheadline.weight(bold ? .semibold : .regular))
-            .foregroundStyle(Color(.text))
-            .keyboardType(keyboard)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 9)
-            .background(fill, in: RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func chip(_ text: String, dashed: Bool) -> some View {
-        Text(text)
-            .font(.caption.weight(.medium))
-            .foregroundStyle(Color(.text).opacity(0.75))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color(.bubbleSectionBg), in: Capsule())
-            .overlay(
-                Capsule()
-                    .stroke(
-                        Color(.bubbleBorder),
-                        style: StrokeStyle(lineWidth: 1, dash: dashed ? [4] : [])
-                    )
-            )
     }
 }
 

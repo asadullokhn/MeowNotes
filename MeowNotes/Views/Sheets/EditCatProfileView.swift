@@ -15,11 +15,7 @@ struct EditCatProfileView: View {
     @State private var name = ""
     @State private var breed = ""
     @State private var gender = ""
-    @State private var ageValue = ""
-    @State private var ageUnit: CatAgeUnit = .years
-    @State private var initialAgeValue = ""
-    @State private var initialAgeUnit: CatAgeUnit = .years
-    @State private var loadedAgeRaw = ""
+    @State private var dob: Date?
     @State private var existingPhoto = ""
     @State private var pickedDataURL: String?
     @State private var saving = false
@@ -78,8 +74,8 @@ struct EditCatProfileView: View {
                             }
                         }
 
-                        field("Age") {
-                            CatAgeField(value: $ageValue, unit: $ageUnit, unsetCaption: ageUnsetCaption)
+                        field("Date of birth") {
+                            CatDOBField(dob: $dob)
                         }
 
                         sexField
@@ -325,20 +321,6 @@ struct EditCatProfileView: View {
             .overlay(Capsule().stroke(Color(.bubbleBorder), lineWidth: 1))
     }
 
-    // MARK: - Age
-
-    // Context-aware caption the shared age picker shows when no age is set: nudge
-    // toward keeping an existing stored value when the user hasn't touched it.
-    private var ageUnsetCaption: String {
-        if initialAgeValue.isEmpty && !loadedAgeRaw.isEmpty {
-            return "Currently \(loadedAgeRaw). Set a value to change it."
-        }
-        return "Set it once — their age keeps itself up to date."
-    }
-
-    private var ageChanged: Bool {
-        ageValue.trimmingCharacters(in: .whitespaces) != initialAgeValue || ageUnit != initialAgeUnit
-    }
 
     // MARK: - Load / Save
 
@@ -347,13 +329,7 @@ struct EditCatProfileView: View {
         name = cat.name
         breed = cat.breed ?? ""
         gender = cat.gender ?? ""
-        let raw = cat.age?.display ?? ""
-        loadedAgeRaw = raw
-        let (value, unit) = CatAgeField.parse(raw)
-        ageValue = value
-        ageUnit = unit
-        initialAgeValue = value
-        initialAgeUnit = unit
+        dob = cat.dob.flatMap(AgeFormat.date(fromISO:))
         existingPhoto = cat.photo ?? ""
     }
 
@@ -362,10 +338,6 @@ struct EditCatProfileView: View {
         saving = true
         errorMessage = nil
         let trimmedBreed = breed.trimmingCharacters(in: .whitespaces)
-        // Only send age when the picker actually changed — re-sending re-anchors
-        // the hidden birth date and drops sub-unit precision, so an untouched age
-        // is left exactly as the server has it.
-        let agePatch = ageChanged ? CatAgeField.compose(value: ageValue, unit: ageUnit) : nil
         Task {
             do {
                 try await auth.updateBasics(
@@ -373,7 +345,7 @@ struct EditCatProfileView: View {
                     name: trimmedName,
                     photo: pickedDataURL,                          // nil unless a new image was picked
                     breed: trimmedBreed.isEmpty ? nil : trimmedBreed,
-                    age: agePatch,
+                    dob: dob.map(AgeFormat.iso),                   // ISO date, or null to clear
                     gender: gender.isEmpty ? nil : gender
                 )
                 dismiss()

@@ -14,9 +14,9 @@ enum API {
     }
 
     static func post<Body: Encodable, Response: Decodable>(
-        _ path: String, _ body: Body, headers: [String: String] = [:]
+        _ path: String, _ body: Body, headers: [String: String] = [:], timeout: TimeInterval? = nil
     ) async throws -> Response {
-        try await request("POST", path, body: body, headers: headers)
+        try await request("POST", path, body: body, headers: headers, timeout: timeout)
     }
 
     static func patch<Body: Encodable, Response: Decodable>(_ path: String, _ body: Body) async throws -> Response {
@@ -28,10 +28,11 @@ enum API {
     }
 
     private static func request<Body: Encodable, Response: Decodable>(
-        _ method: String, _ path: String, body: Body?, headers: [String: String] = [:]
+        _ method: String, _ path: String, body: Body?, headers: [String: String] = [:], timeout: TimeInterval? = nil
     ) async throws -> Response {
         var req = URLRequest(url: baseURL.appendingPathComponent(path))
         req.httpMethod = method
+        if let timeout { req.timeoutInterval = timeout }
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if let token = TokenStore.token {
             req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

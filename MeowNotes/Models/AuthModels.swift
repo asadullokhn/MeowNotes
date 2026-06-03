@@ -226,3 +226,14 @@ struct ClaimRequest: Encodable {
     let name: String
     let password: String
 }
+
+// POST /api/generate/personality — server-side sitter-note generation from the
+// picked traits. `name` is optional server-side (falls back to "my cat").
+struct GeneratePersonalityRequest: Encodable {
+    let name: String
+    let traits: [String]
+}
+
+struct GeneratedPersonality: Decodable {
+    let summary: String
+}

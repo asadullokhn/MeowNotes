@@ -1,8 +1,7 @@
 // Owner: TBD (claim by editing this line)
 //
-// Modal sheet to share the cat's sitter guide link.
-// Presented from HomeView. Replace the placeholder body with a real
-// share UI (link copy, ShareLink, QR code, etc.).
+// Modal sheet to share the cat's sitter guide link: QR on top, the link to copy,
+// and one native Share button. Presented from HomeView.
 
 import SwiftUI
 import CoreImage.CIFilterBuiltins
@@ -10,17 +9,12 @@ import CoreImage.CIFilterBuiltins
 struct ShareView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
-    @Environment(\.openURL) private var openURL
 
-    @State private var isQRExpanded = false
     @State private var copied = false
     // Token fetched/created on appear. A brand-new cat (every guest's first cat)
-    // has no share row yet, so we lazily create one via the API instead of
-    // relying on a pre-existing link in the cached cat.
+    // has no share row yet, so we lazily create one via the API.
     @State private var fetchedToken: String?
     @State private var loadingLink = false
-
-    @State private var selectedDetent: PresentationDetent = .fraction(0.70)
 
     private var cat: Cat? { auth.currentCat }
     private var catName: String { cat?.name ?? "Your cat" }
@@ -44,16 +38,7 @@ struct ShareView: View {
         return UIImage(cgImage: cgImage)
     }
 
-    private func openShare(_ urlString: String) {
-        if let url = URL(string: urlString) { openURL(url) }
-    }
-
-    private func enc(_ string: String) -> String {
-        string.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-    }
-
-    // Fetch (creating if needed) the cat's share link the first time the sheet
-    // opens. No-op once we already have a token.
+    // Fetch (creating if needed) the cat's share link the first time the sheet opens.
     private func ensureLink() async {
         guard fetchedToken == nil, cat?.shareToken == nil, let cat else { return }
         loadingLink = true
@@ -61,7 +46,7 @@ struct ShareView: View {
         loadingLink = false
     }
 
-    // Rotate to a fresh link (the "Refresh" action).
+    // Rotate to a fresh link (the "Refresh" action) — the old one stops working.
     private func rotateLink() async {
         guard let cat, !loadingLink else { return }
         loadingLink = true
@@ -75,24 +60,18 @@ struct ShareView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 // HEADER
-                HStack() {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Share the link")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color(.text))
-                            .padding(.top, 10)
-                    }
-
+                HStack {
+                    Text("Share the link")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color(.text))
                     Spacer()
-
                     Button(action: { dismiss() }) {
                         ZStack {
                             Circle()
                                 .fill(Color.white)
                                 .frame(width: 44, height: 44)
                                 .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
-
                             Image(systemName: "xmark")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(Color(.saveBg))
@@ -101,15 +80,23 @@ struct ShareView: View {
                 }
                 .padding(.top)
                 .padding(.horizontal)
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        Text("Sitters open this in any browser. No app install on their side.")
-                            .font(.subheadline)
-                            .foregroundColor(Color(.text))
-                            .frame(maxWidth: .infinity, alignment: .leading)
 
-                        // COPY LINK
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        // QR — top, always visible
+                        if let qr = qrImage(from: shareURLString) {
+                            Image(uiImage: qr)
+                                .interpolation(.none)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 220, height: 220)
+                                .padding(16)
+                                .background(Color.white, in: RoundedRectangle(cornerRadius: 24))
+                                .frame(maxWidth: .infinity)
+                                .opacity(hasLink ? 1 : 0.4)
+                        }
+
+                        // LINK
                         HStack(spacing: 12) {
                             Image(systemName: "link")
                                 .font(.system(size: 15))
@@ -119,168 +106,45 @@ struct ShareView: View {
                                 .font(.system(size: 14, design: .monospaced))
                                 .foregroundColor(Color(.saveBg).opacity(hasLink ? 1 : 0.5))
                                 .lineLimit(1)
-                                .truncationMode(.tail)
+                                .truncationMode(.middle)
 
                             Spacer()
 
-                            Button(action: {
+                            Button {
                                 UIPasteboard.general.string = shareURLString
-
-                                withAnimation(.spring(response: 0.3)) {
-                                    copied = true
-                                }
-
+                                Haptics.tap()
+                                withAnimation(.spring(response: 0.3)) { copied = true }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                    withAnimation {
-                                        copied = false
-                                    }
+                                    withAnimation { copied = false }
                                 }
-                            }) {
+                            } label: {
                                 Text(copied ? "Copied!" : "Copy")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
-                                    .background(
-                                        Capsule()
-                                            .fill(
-                                                copied
-                                                ? Color(.bubbleSelectedBg)
-                                                : Color(.saveBg)
-                                            )
-                                    )
+                                    .background(Capsule().fill(copied ? Color(.bubbleSelectedBg) : Color(.saveBg)))
                             }
                             .disabled(!hasLink)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(Color.white.opacity(0.7))
-                        )
+                        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.7)))
 
-                        // PREVIEW BUTTON
-                        Button {
-                            if let url = shareURL { openURL(url) }
-                        } label: {
+                        // ONE NATIVE SHARE BUTTON
+                        ShareLink(item: shareURL ?? URL(string: "https://meownotes.teztun.uz")!,
+                                  message: Text(shareMessage)) {
                             HStack(spacing: 10) {
-                                Image(systemName: "eye")
-                                    .font(.system(size: 15, weight: .medium))
-                                    .foregroundColor(Color(.bubbleSelectedBg))
-
-                                Text("Preview the guide — see what the sitter sees")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(Color(.bubbleSelectedBorder))
+                                Image(systemName: "square.and.arrow.up")
+                                Text("Share link")
                             }
+                            .font(.headline)
+                            .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .fill(Color(.bubbleSelectedBg).opacity(0.12))
-                            )
+                            .frame(height: 54)
+                            .background(Color(.saveBg), in: RoundedRectangle(cornerRadius: 16))
                         }
-
-                        // SHARE OPTIONS
-                        HStack(spacing: 0) {
-                            Button {
-                                openShare("https://wa.me/?text=\(enc(shareMessage))")
-                            } label: {
-                                ShareIconButton(icon: "whatsapp", label: "WhatsApp",
-                                                color: .green, bgColor: .green.opacity(0.15),
-                                                isSystemImage: false)
-                            }
-                            .buttonStyle(.plain)
-
-                            Button {
-                                openShare("https://t.me/share/url?url=\(enc(shareURLString))&text=\(enc("\(catName)'s care guide"))")
-                            } label: {
-                                ShareIconButton(icon: "telegram", label: "Telegram",
-                                                color: .blue.opacity(0.7), bgColor: .blue.opacity(0.1),
-                                                isSystemImage: false)
-                            }
-                            .buttonStyle(.plain)
-
-                            Button {
-                                openShare("sms:&body=\(enc(shareMessage))")
-                            } label: {
-                                ShareIconButton(icon: "message.fill", label: "Messages",
-                                                color: Color(.bubbleSelectedBg), bgColor: Color(.bubbleSelectedBg).opacity(0.15))
-                            }
-                            .buttonStyle(.plain)
-
-                            Button {
-                                openShare("mailto:?subject=\(enc("\(catName)'s Care Guide"))&body=\(enc(shareMessage))")
-                            } label: {
-                                ShareIconButton(icon: "envelope.fill", label: "Mail",
-                                                color: .indigo, bgColor: .indigo.opacity(0.1))
-                            }
-                            .buttonStyle(.plain)
-
-                            ShareLink(item: shareURL ?? URL(string: "https://meownotes.teztun.uz")!,
-                                      message: Text(shareMessage)) {
-                                ShareIconButton(icon: "ellipsis", label: "More",
-                                                color: Color(.text).opacity(0.7), bgColor: Color(.text).opacity(0.1))
-                            }
-                        }
-
-                        // QR DROPDOWN
-                        VStack(spacing: 0) {
-                            Button(action: {
-                                withAnimation(.spring(response: 0.35)) {
-                                    isQRExpanded.toggle()
-
-                                    // EXPAND SHEET
-                                    selectedDetent = isQRExpanded
-                                        ? .large
-                                        : .medium
-                                }
-                            }) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "qrcode")
-                                        .font(.system(size: 18, weight: .medium))
-                                        .foregroundColor(Color(.saveBg))
-
-                                    Text("In person · show a QR")
-                                        .font(.system(size: 15, weight: .semibold))
-                                        .foregroundColor(Color(.saveBg))
-
-                                    Spacer()
-
-                                    Image(systemName: isQRExpanded ? "chevron.up" : "chevron.down")
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundColor(Color(.saveBg).opacity(0.5))
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 16)
-                            }
-
-                            if isQRExpanded {
-                                Divider()
-                                    .padding(.horizontal, 16)
-
-                                if let qr = qrImage(from: shareURLString) {
-                                    Image(uiImage: qr)
-                                        .interpolation(.none)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 220, height: 220)
-                                        .padding(.top, 24)
-                                }
-
-                                Text("Point a phone at this and they'll get the guide instantly.")
-                                    .font(.footnote)
-                                    .foregroundStyle(Color(.saveBg))
-                                    .padding(20)
-                            }
-                        }
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(Color.white.opacity(0.55))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color(.saveBg).opacity(0.1), lineWidth: 1)
-                                )
-                        )
+                        .disabled(!hasLink)
 
                         // REFRESH LINK
                         HStack(spacing: 16) {
@@ -309,22 +173,12 @@ struct ShareView: View {
                                     .fill(Color.white)
                                     .shadow(color: .black.opacity(0.07), radius: 4, y: 2)
                             )
-                        
-
-                            
                         }
-                        
-
                     }
                     .padding()
                 }
-                .listRowBackground(Color.clear)
-                .listRowInsets(.init())
                 .presentationBackground(Color(.background))
-                .presentationDetents(
-                    [.medium, .large],
-                    selection: $selectedDetent
-                )
+                .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
             }
         }

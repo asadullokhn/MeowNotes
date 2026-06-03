@@ -25,6 +25,10 @@ struct CatPhotoWell: View {
     @State private var pickedImage: Image?
     @State private var cropTarget: CropTarget?
     @State private var wellWidth: CGFloat = 0
+    @State private var showSourceChoice = false
+    @State private var showCamera = false
+    @State private var showLibrary = false
+    @State private var capturedImage: UIImage?
 
     // The crop window matches the well's shape, so what you frame is what shows.
     private var cropAspect: CGFloat {
@@ -39,7 +43,7 @@ struct CatPhotoWell: View {
         // already-read values is fine.
         let preview = pickedImage
         let actionLabelText = (pickedImage != nil || !existingPhotoURL.isEmpty) ? "Change photo" : "Upload photo"
-        return PhotosPicker(selection: $item, matching: .images) {
+        return Button(action: presentSourceChoice) {
             PhotoWellLabel(
                 preview: preview,
                 existingPhotoURL: existingPhotoURL,
@@ -58,9 +62,22 @@ struct CatPhotoWell: View {
                     .onChange(of: proxy.size.width) { _, w in wellWidth = w }
             }
         )
+        .confirmationDialog("Add a photo", isPresented: $showSourceChoice, titleVisibility: .visible) {
+            Button("Take Photo") { showCamera = true }
+            Button("Choose from Library") { showLibrary = true }
+            Button("Cancel", role: .cancel) {}
+        }
+        .photosPicker(isPresented: $showLibrary, selection: $item, matching: .images)
         .onChange(of: item) { _, newItem in
             guard let newItem else { return }
             Task { await load(newItem) }
+        }
+        .fullScreenCover(isPresented: $showCamera, onDismiss: presentCropFromCapture) {
+            CameraPicker(
+                onImage: { image in capturedImage = image; showCamera = false },
+                onCancel: { showCamera = false }
+            )
+            .ignoresSafeArea()
         }
         .fullScreenCover(item: $cropTarget) { target in
             PhotoCropView(
@@ -70,6 +87,22 @@ struct CatPhotoWell: View {
                 onCrop: { cropped in commit(cropped); cropTarget = nil; item = nil }
             )
         }
+    }
+
+    private var cameraAvailable: Bool { UIImagePickerController.isSourceTypeAvailable(.camera) }
+
+    // Offer camera vs library; skip straight to the library when there's no
+    // camera (e.g. Simulator).
+    private func presentSourceChoice() {
+        Haptics.tap()
+        if cameraAvailable { showSourceChoice = true } else { showLibrary = true }
+    }
+
+    // After the camera sheet closes, run the captured photo through the cropper.
+    private func presentCropFromCapture() {
+        guard let image = capturedImage else { return }
+        capturedImage = nil
+        cropTarget = CropTarget(image: image.downscaled(maxDimension: 2048))
     }
 
     // Load the picked image and hand it to the cropper. Downscale a little first

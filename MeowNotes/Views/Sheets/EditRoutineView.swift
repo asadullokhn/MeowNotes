@@ -66,7 +66,8 @@ struct EditRoutineView: View {
                                     addCommonRoutine(routine)
                                 } label: {
                                     HStack(spacing: 8) {
-                                        Text(formatTime(routine.time))
+                                        // Follow the device's 12h/24h setting, like the DatePicker rows below.
+                                        Text(routine.time, style: .time)
                                             .font(.footnote)
                                             .foregroundStyle(timeChipColor)
                                             .padding(.vertical, 2)

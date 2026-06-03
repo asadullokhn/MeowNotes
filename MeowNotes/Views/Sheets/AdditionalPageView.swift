@@ -53,12 +53,11 @@ struct AdditionalPageView: View {
                         VStack(alignment: .leading, spacing: 14) {
                             SectionLabel("Infos")
                             VStack(spacing: 8) {
-                                ForEach(vm.selectedTags, id: \.self) { tag in
+                                ForEach(vm.selectedTags.indices, id: \.self) { index in
                                     EditableListRow(
-                                        text: tag,
+                                        text: $vm.selectedTags[index],
                                         accessory: .dot,
-                                        onRemove: { vm.removeTag(tag) },
-                                        onSave: { newValue in vm.updateTag(old: tag, new: newValue) }
+                                        onRemove: { vm.removeTag(vm.selectedTags[index]) }
                                     )
                                 }
                             }

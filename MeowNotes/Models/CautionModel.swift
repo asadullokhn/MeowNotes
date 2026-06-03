@@ -69,12 +69,6 @@ final class CautionModel {
     func deleteCustomTag(_ tag: String) {
         customAvailableTags.removeAll { $0 == tag }
     }
-    
-    func updateTag(old: String, new: String) {
-        guard let index = selectedTags.firstIndex(of: old) else { return }
-        
-        selectedTags[index] = new
-    }
 }
 
 

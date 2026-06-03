@@ -25,46 +25,23 @@ struct CatPhotoWell: View {
     @State private var pickedImage: Image?
 
     var body: some View {
-        PhotosPicker(selection: $item, matching: .images) {
-            ZStack(alignment: .bottom) {
-                Color(.bubbleSectionBg)
-
-                if let pickedImage {
-                    pickedImage.resizable().scaledToFill()
-                } else if !existingPhotoURL.isEmpty {
-                    CachedCatImage(existingPhotoURL) { image in
-                        image.resizable().scaledToFill()
-                    } placeholder: {
-                        Color.clear
-                    }
-                } else {
-                    VStack(spacing: 4) {
-                        Image(systemName: "camera.fill").font(.system(size: 18))
-                        Text("PHOTO").font(.system(size: 9, weight: .semibold)).tracking(0.5)
-                    }
-                    .foregroundStyle(Color(.text).opacity(0.45))
-                }
-
-                if showActionLabel {
-                    HStack(spacing: 6) {
-                        Image(systemName: "camera.fill")
-                        Text(pickedImage != nil || !existingPhotoURL.isEmpty ? "Change photo" : "Upload photo")
-                    }
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(.black.opacity(0.45))
-                }
-            }
-            .frame(width: fillWidth ? nil : height, height: height)
-            .frame(maxWidth: fillWidth ? .infinity : nil)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(Color(.bubbleBorder), lineWidth: 1)
+        // Read the main-actor @State here in `body` (which is main-actor), then
+        // hand plain Sendable values to the label's child view. PhotosPicker's
+        // @escaping label closure is nonisolated under strict concurrency, so it
+        // can't touch `pickedImage` or build a view directly — but capturing
+        // already-read values is fine.
+        let preview = pickedImage
+        let actionLabelText = (pickedImage != nil || !existingPhotoURL.isEmpty) ? "Change photo" : "Upload photo"
+        return PhotosPicker(selection: $item, matching: .images) {
+            PhotoWellLabel(
+                preview: preview,
+                existingPhotoURL: existingPhotoURL,
+                showActionLabel: showActionLabel,
+                actionLabelText: actionLabelText,
+                fillWidth: fillWidth,
+                height: height,
+                cornerRadius: cornerRadius
             )
-            .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
         }
         .buttonStyle(.plain)
         .onChange(of: item) { _, newItem in
@@ -91,6 +68,60 @@ struct CatPhotoWell: View {
         }
         pickedImage = Image(uiImage: resized)
         dataURL = "data:image/jpeg;base64,\(jpeg.base64EncodedString())"
+    }
+}
+
+// The picker's label content as its own view, so its body is main-actor isolated
+// and can freely build `CachedCatImage` and show the picked image.
+private struct PhotoWellLabel: View {
+    let preview: Image?
+    let existingPhotoURL: String
+    let showActionLabel: Bool
+    let actionLabelText: String
+    let fillWidth: Bool
+    let height: CGFloat
+    let cornerRadius: CGFloat
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color(.bubbleSectionBg)
+
+            if let preview {
+                preview.resizable().scaledToFill()
+            } else if !existingPhotoURL.isEmpty {
+                CachedCatImage(existingPhotoURL) { image in
+                    image.resizable().scaledToFill()
+                } placeholder: {
+                    Color.clear
+                }
+            } else {
+                VStack(spacing: 4) {
+                    Image(systemName: "camera.fill").font(.system(size: 18))
+                    Text("PHOTO").font(.system(size: 9, weight: .semibold)).tracking(0.5)
+                }
+                .foregroundStyle(Color(.text).opacity(0.45))
+            }
+
+            if showActionLabel {
+                HStack(spacing: 6) {
+                    Image(systemName: "camera.fill")
+                    Text(actionLabelText)
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(.black.opacity(0.45))
+            }
+        }
+        .frame(width: fillWidth ? nil : height, height: height)
+        .frame(maxWidth: fillWidth ? .infinity : nil)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(Color(.bubbleBorder), lineWidth: 1)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 }
 

@@ -57,6 +57,20 @@ final class AuthManager {
     // ContentView routes to onboarding next. The token (365-day) is stored like
     // any other; cat, photo, sharing, etc. all work against a guest the same way.
     func continueAsGuest() async throws {
+        // Resume the previous guest if we still hold its token, so logging out
+        // and choosing "Continue as guest" again returns to the same cats
+        // instead of starting an empty account.
+        if let saved = TokenStore.guestToken {
+            TokenStore.token = saved
+            do {
+                try await loadMe()
+                return
+            } catch {
+                // Stale/invalid guest token — forget it and make a fresh guest.
+                TokenStore.token = nil
+                TokenStore.guestToken = nil
+            }
+        }
         let auth: AuthResponse = try await API.post(
             "/api/auth/guest", GuestRequest(name: nil), headers: ["X-App-Key": API.appKey]
         )
@@ -71,6 +85,8 @@ final class AuthManager {
         )
         TokenStore.token = auth.token
         try await loadMe()
+        // It's a real account now — forget the remembered guest token.
+        TokenStore.guestToken = nil
     }
 
     func login(email: String, password: String) async throws {
@@ -116,6 +132,7 @@ final class AuthManager {
     // local session afterward so the app returns to the unauthenticated state.
     func deleteAccount() async throws {
         try await API.delete("/api/me")
+        TokenStore.guestToken = nil   // data is gone — don't offer to resume it
         logout()
     }
 
@@ -320,5 +337,8 @@ final class AuthManager {
             selectedCatID = cats.first?.id
         }
         phase = user == nil ? .unauthenticated : .authenticated
+        // Remember the active guest's token so it survives logout and can be
+        // resumed from "Continue as guest".
+        if user?.isGuest == true { TokenStore.guestToken = TokenStore.token }
     }
 }

@@ -90,6 +90,11 @@ final class AuthManager {
     func logout() {
         TokenStore.token = nil
         hydrate(user: nil, cats: [])
+        // Clear device-local preferences tied to the session so the next person
+        // (or a fresh guest) starts clean — appearance otherwise persists in
+        // UserDefaults. Reset to System rather than removing the key so the
+        // @AppStorage binding in ContentView picks up the change immediately.
+        UserDefaults.standard.set(AppAppearance.system.rawValue, forKey: "appearance")
     }
 
     // PATCH /api/me — update the owner's profile (works for guests too). The
@@ -136,8 +141,10 @@ final class AuthManager {
 
     // POST /api/cats with a new cat draft, then add it to the cache and select
     // it so it becomes the current cat (mirrors the web's addCat).
-    func addCat(name: String, photo: String?) async throws {
-        let created: Cat = try await API.post("/api/cats", CatDraft(name: name, photo: photo))
+    func addCat(name: String, photo: String?, age: String? = nil, gender: String? = nil) async throws {
+        let created: Cat = try await API.post(
+            "/api/cats", CatDraft(name: name, photo: photo, age: age, gender: gender)
+        )
         cats.append(created)
         selectedCatID = created.id
     }
@@ -145,6 +152,8 @@ final class AuthManager {
     private struct CatDraft: Encodable {
         let name: String
         let photo: String?
+        let age: String?
+        let gender: String?
     }
 
     // PATCH /api/cats/:id with the cat's medical record, then replace the cached
@@ -157,10 +166,10 @@ final class AuthManager {
     // PATCH the cat's basics. Only non-nil fields are encoded, and the server
     // only updates the keys it receives — so leaving a field blank preserves it
     // instead of overwriting it with an empty value.
-    func updateBasics(catID: String, name: String, photo: String?, breed: String?, age: String?) async throws {
+    func updateBasics(catID: String, name: String, photo: String?, breed: String?, age: String?, gender: String?) async throws {
         let updated: Cat = try await API.patch(
             "/api/cats/\(catID)",
-            BasicsPatch(name: name, photo: photo, breed: breed, age: age)
+            BasicsPatch(name: name, photo: photo, breed: breed, age: age, gender: gender)
         )
         replaceCachedCat(updated)
     }
@@ -265,6 +274,7 @@ final class AuthManager {
         let photo: String?
         let breed: String?
         let age: String?
+        let gender: String?
     }
 
     // Custom encoding so `deceasedDate` is sent as an explicit null when nil

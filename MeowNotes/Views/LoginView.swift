@@ -35,7 +35,7 @@ struct LoginView: View {
             VStack(alignment: .leading, spacing: 0) {
                 header
 
-                Text(isRegister ? "Make a calm space for your cat." : "Sign in to your cats.")
+                Text(isRegister ? "Make a calm space for your cat." : "Sign in to continue.")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(Color("TextColor"))
                     .fixedSize(horizontal: false, vertical: true)
@@ -67,18 +67,20 @@ struct LoginView: View {
 
                 Button(action: flip) {
                     Text(isRegister ? "Have an account? Sign in" : "New here? Create an account")
-                        .font(.footnote.weight(.medium))
-                        .foregroundColor(Color("TextColor").opacity(0.6))
+                        .font(.footnote.weight(.semibold))
+                        .foregroundColor(Color("XBtnBg"))
+                        .underline()
                         .frame(maxWidth: .infinity)
                 }
-                .padding(.top, 14)
+                .padding(.top, 16)
 
                 if !isRegister {
                     Button("Forgot password?") { showForgot = true }
-                        .font(.footnote.weight(.medium))
+                        .font(.footnote.weight(.semibold))
                         .foregroundColor(Color("XBtnBg"))
+                        .underline()
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 8)
+                        .padding(.top, 10)
                 }
 
                 guestSection

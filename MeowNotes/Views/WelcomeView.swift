@@ -14,6 +14,8 @@ struct WelcomeView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""
+    @State private var ageYears = 0          // 0 = unset (optional)
+    @State private var sex = ""              // "" = unset (optional)
     @State private var pickedDataURL: String?
     @State private var saving = false
     @State private var errorMessage: String?
@@ -43,6 +45,16 @@ struct WelcomeView: View {
                                     .frame(width: 36, height: 36)
                                     .background(Color(.bubbleBg), in: Circle())
                             }
+                        } else {
+                            // First-launch escape hatch: a freshly-landed (often
+                            // accidental) guest can get back to the sign-in screen.
+                            Spacer()
+                            Button { auth.logout() } label: {
+                                Text(auth.isGuest ? "Sign in instead" : "Log out")
+                                    .font(.subheadline.weight(.semibold))
+                                    .underline()
+                                    .foregroundStyle(Color(.text).opacity(0.7))
+                            }
                         }
                     }
                     .padding(.top, 12)
@@ -67,10 +79,7 @@ struct WelcomeView: View {
                         showActionLabel: true
                     )
 
-                    Text("NAME")
-                        .font(.caption2.weight(.semibold))
-                        .tracking(0.5)
-                        .foregroundStyle(Color(.text).opacity(0.5))
+                    SectionLabel("Name", dimmed: true)
                         .padding(.top, 16)
                         .padding(.bottom, 6)
 
@@ -87,6 +96,55 @@ struct WelcomeView: View {
                             RoundedRectangle(cornerRadius: 18)
                                 .stroke(Color(.bubbleBorder), lineWidth: 1)
                         )
+
+                    // Optional details — a cat is fine with just a name; these can
+                    // also be set later from Edit profile.
+                    SectionLabel("Age · optional", dimmed: true)
+                        .padding(.top, 16)
+                        .padding(.bottom, 6)
+
+                    Menu {
+                        Button("Not set") { ageYears = 0 }
+                        ForEach(1...25, id: \.self) { y in
+                            Button("\(y) year\(y == 1 ? "" : "s")") { ageYears = y }
+                        }
+                    } label: {
+                        HStack {
+                            Text(ageYears == 0 ? "Not set" : "\(ageYears) year\(ageYears == 1 ? "" : "s")")
+                                .font(.system(size: 17))
+                                .foregroundStyle(ageYears == 0 ? Color(.text).opacity(0.4) : Color(.text))
+                            Spacer()
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption)
+                                .foregroundStyle(Color(.text).opacity(0.4))
+                        }
+                        .padding(.horizontal, 16)
+                        .frame(height: 52)
+                        .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(Color(.bubbleBorder), lineWidth: 1)
+                        )
+                    }
+
+                    SectionLabel("Sex · optional", dimmed: true)
+                        .padding(.top, 16)
+                        .padding(.bottom, 6)
+
+                    HStack(spacing: 10) {
+                        ForEach(["Male", "Female"], id: \.self) { option in
+                            Button { sex = (sex == option ? "" : option) } label: {
+                                Text(option)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(sex == option ? .white : Color(.text).opacity(0.75))
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 48)
+                                    .background(sex == option ? Color(.saveBg) : Color(.bubbleBg), in: Capsule())
+                                    .overlay(Capsule().stroke(Color(.bubbleBorder), lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
 
                     if let errorMessage {
                         AuthErrorBanner(message: errorMessage)
@@ -125,9 +183,15 @@ struct WelcomeView: View {
         guard canSave, !saving else { return }
         saving = true
         errorMessage = nil
+        let ageString = ageYears > 0 ? "\(ageYears) year\(ageYears == 1 ? "" : "s")" : nil
         Task {
             do {
-                try await auth.addCat(name: trimmedName, photo: pickedDataURL)
+                try await auth.addCat(
+                    name: trimmedName,
+                    photo: pickedDataURL,
+                    age: ageString,
+                    gender: sex.isEmpty ? nil : sex
+                )
                 // First launch: cats becomes non-empty and ContentView shows Home
                 // (dismiss is a no-op). Adding another: closes the sheet.
                 dismiss()

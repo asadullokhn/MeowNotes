@@ -20,6 +20,8 @@ struct Cat: Codable, Identifiable, Equatable {
     let name: String
     let breed: String?
     let age: CatAge?
+    // "Male" / "Female" (or nil/unset). Maps to the server's `gender` field.
+    let gender: String?
     let photo: String?
     let personalitySummary: String?
     let sharedLinks: [SharedLink]?

@@ -32,10 +32,6 @@ struct ProfileEditView: View {
                               submitLabel: .done, onSubmit: submit)
 
                     if !error.isEmpty { AuthErrorBanner(message: error) }
-
-                    AuthPrimaryButton(title: "Save", loading: loading,
-                                      disabled: !canSubmit, action: submit)
-                        .padding(.top, 4)
                 }
                 .padding(24)
             }
@@ -43,9 +39,17 @@ struct ProfileEditView: View {
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Close") { dismiss() }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
                         .foregroundColor(Color("TextColor"))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: submit) {
+                        if loading { ProgressView() }
+                        else { Text("Save").fontWeight(.semibold) }
+                    }
+                    .foregroundColor(Color("TextColor"))
+                    .disabled(!canSubmit || loading)
                 }
             }
             .onAppear {

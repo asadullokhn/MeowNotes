@@ -20,6 +20,8 @@ struct Cat: Codable, Identifiable, Equatable {
     let name: String
     let breed: String?
     let age: CatAge?
+    // Date of birth as ISO `yyyy-MM-dd` (the server's source of truth for age).
+    let dob: String?
     // "Male" / "Female" (or nil/unset). Maps to the server's `gender` field.
     let gender: String?
     let photo: String?
@@ -44,6 +46,15 @@ struct Cat: Codable, Identifiable, Equatable {
     var checkCount: Int { checks?.count ?? 0 }
     var cautionCount: Int { notes?.lazy.filter { $0.urgent == true }.count ?? 0 }
     var noteCount: Int { notes?.lazy.filter { $0.urgent != true }.count ?? 0 }
+
+    // Relative age for display ("3 weeks", "1 year 4 months"), derived from the
+    // DOB. Falls back to a legacy stored age string for cats without a DOB yet.
+    var ageDisplay: String? {
+        if let dob, let relative = AgeFormat.relative(fromISO: dob) { return relative }
+        if let display = age?.display, !display.isEmpty { return display }
+        return nil
+    }
+
     var vetName: String? {
         guard let name = medical?.vet.name, !name.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
         return name

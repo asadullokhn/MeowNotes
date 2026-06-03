@@ -23,7 +23,7 @@ struct HomeView: View {
     private var cat: Cat? { auth.currentCat }
     private var catName: String { cat?.name ?? "Your cat" }
     private var catSubtitle: String {
-        [cat?.breed, cat?.age?.display]
+        [cat?.breed, cat?.ageDisplay]
             .compactMap { $0 }
             .filter { !$0.isEmpty }
             .joined(separator: ", ")

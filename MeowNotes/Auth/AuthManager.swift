@@ -141,9 +141,9 @@ final class AuthManager {
 
     // POST /api/cats with a new cat draft, then add it to the cache and select
     // it so it becomes the current cat (mirrors the web's addCat).
-    func addCat(name: String, photo: String?, age: String? = nil, gender: String? = nil) async throws {
+    func addCat(name: String, photo: String?, dob: String? = nil, gender: String? = nil) async throws {
         let created: Cat = try await API.post(
-            "/api/cats", CatDraft(name: name, photo: photo, age: age, gender: gender)
+            "/api/cats", CatDraft(name: name, photo: photo, dob: dob, gender: gender)
         )
         cats.append(created)
         selectedCatID = created.id
@@ -152,7 +152,7 @@ final class AuthManager {
     private struct CatDraft: Encodable {
         let name: String
         let photo: String?
-        let age: String?
+        let dob: String?
         let gender: String?
     }
 
@@ -166,10 +166,10 @@ final class AuthManager {
     // PATCH the cat's basics. Only non-nil fields are encoded, and the server
     // only updates the keys it receives — so leaving a field blank preserves it
     // instead of overwriting it with an empty value.
-    func updateBasics(catID: String, name: String, photo: String?, breed: String?, age: String?, gender: String?) async throws {
+    func updateBasics(catID: String, name: String, photo: String?, breed: String?, dob: String?, gender: String?) async throws {
         let updated: Cat = try await API.patch(
             "/api/cats/\(catID)",
-            BasicsPatch(name: name, photo: photo, breed: breed, age: age, gender: gender)
+            BasicsPatch(name: name, photo: photo, breed: breed, dob: dob, gender: gender)
         )
         replaceCachedCat(updated)
     }
@@ -269,12 +269,25 @@ final class AuthManager {
         let medical: Medical
     }
 
+    // dob is sent explicitly (string or null) so clearing it clears on the
+    // server; the rest only encode when present (blank = leave unchanged).
     private struct BasicsPatch: Encodable {
         let name: String
         let photo: String?
         let breed: String?
-        let age: String?
+        let dob: String?
         let gender: String?
+
+        enum CodingKeys: String, CodingKey { case name, photo, breed, dob, gender }
+
+        func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(name, forKey: .name)
+            try c.encodeIfPresent(photo, forKey: .photo)
+            try c.encodeIfPresent(breed, forKey: .breed)
+            try c.encode(dob, forKey: .dob)
+            try c.encodeIfPresent(gender, forKey: .gender)
+        }
     }
 
     // Custom encoding so `deceasedDate` is sent as an explicit null when nil

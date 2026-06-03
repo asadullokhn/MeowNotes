@@ -14,8 +14,7 @@ struct WelcomeView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""
-    @State private var ageValue = ""         // "" = unset (optional)
-    @State private var ageUnit: CatAgeUnit = .years
+    @State private var dob: Date?            // nil = unset (optional)
     @State private var sex = ""              // "" = unset (optional)
     @State private var pickedDataURL: String?
     @State private var saving = false
@@ -104,11 +103,11 @@ struct WelcomeView: View {
 
                     // Optional details — a cat is fine with just a name; these can
                     // also be set later from Edit profile.
-                    SectionLabel("Age · optional", dimmed: true)
+                    SectionLabel("Date of birth · optional", dimmed: true)
                         .padding(.top, 16)
                         .padding(.bottom, 6)
 
-                    CatAgeField(value: $ageValue, unit: $ageUnit)
+                    CatDOBField(dob: $dob)
 
                     SectionLabel("Sex · optional", dimmed: true)
                         .padding(.top, 16)
@@ -166,13 +165,13 @@ struct WelcomeView: View {
         guard canSave, !saving else { return }
         saving = true
         errorMessage = nil
-        let ageString = CatAgeField.compose(value: ageValue, unit: ageUnit)
+        let dobString = dob.map(AgeFormat.iso)
         Task {
             do {
                 try await auth.addCat(
                     name: trimmedName,
                     photo: pickedDataURL,
-                    age: ageString,
+                    dob: dobString,
                     gender: sex.isEmpty ? nil : sex
                 )
                 // First launch: cats becomes non-empty and ContentView shows Home

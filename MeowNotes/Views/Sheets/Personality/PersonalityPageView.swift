@@ -142,6 +142,7 @@ struct PersonalityPageView: View {
                         Text("Next").fontWeight(.semibold)
                     }
                     .foregroundStyle(Color(.text))
+                    .disabled(vm.selectedTags.isEmpty)
                 }
             }
             

@@ -213,6 +213,19 @@ final class AuthManager {
         replaceCachedCat(updated)
     }
 
+    // POST /api/generate/personality — server-side note generation (a local model
+    // over the tunnel). Returns the summary text and throws on any non-2xx so the
+    // caller can fall back to an on-device template. 35s client timeout matches
+    // the web (the server aborts at 30s).
+    func generatePersonality(name: String, traits: [String]) async throws -> String {
+        let result: GeneratedPersonality = try await API.post(
+            "/api/generate/personality",
+            GeneratePersonalityRequest(name: name, traits: traits),
+            timeout: 35
+        )
+        return result.summary
+    }
+
     private struct RoutinePatch: Encodable { let feedingRoutine: [RoutineItem] }
     private struct ChecksPatch: Encodable { let checks: [CheckItem] }
     private struct NotesPatch: Encodable { let notes: [Note] }

@@ -58,7 +58,7 @@ struct HomeView: View {
         var out: [MissingSection] = []
         if cat.traitCount == 0   { out.append(.init(title: "Personality", sheet: .personality)) }
         if cat.routineCount == 0 { out.append(.init(title: "Routine", sheet: .routine)) }
-        if cat.checkCount == 0   { out.append(.init(title: "Basic Care", sheet: .basicCare)) }
+        if cat.checkCount == 0   { out.append(.init(title: "Daily Check", sheet: .basicCare)) }
         if cat.cautionCount == 0 { out.append(.init(title: "Caution", sheet: .caution)) }
         if cat.vetName == nil    { out.append(.init(title: "Medical", sheet: .medical)) }
         if cat.noteCount == 0    { out.append(.init(title: "Additions", sheet: .notes)) }
@@ -184,7 +184,7 @@ struct HomeView: View {
                     LazyVGrid(columns: columns, spacing: 16) {
                         GridCard(icon: "pawprint", title: "Personality", subtitle: personalitySubtitle) { activeSheet = .personality }
                         GridCard(icon: "clock", title: "Routine", subtitle: routineSubtitle) { activeSheet = .routine }
-                        GridCard(icon: "list.bullet", title: "Basic Care", subtitle: basicCareSubtitle) { activeSheet = .basicCare }
+                        GridCard(icon: "list.bullet", title: "Daily Check", subtitle: basicCareSubtitle) { activeSheet = .basicCare }
                         GridCard(icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle) { activeSheet = .caution }
                         GridCard(icon: "cross.case", title: "Medical", subtitle: medicalSubtitle) { activeSheet = .medical}
                         GridCard(icon: "doc.text", title: "Additions", subtitle: notesSubtitle) { activeSheet = .notes }

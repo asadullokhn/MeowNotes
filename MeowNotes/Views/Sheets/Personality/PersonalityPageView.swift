@@ -106,12 +106,10 @@ struct PersonalityPageView: View {
                         Text("Next").fontWeight(.semibold)
                     }
                     .foregroundStyle(Color(.text))
+                    .opacity(vm.selectedTags.isEmpty ? 0.35 : 1)
                     .disabled(vm.selectedTags.isEmpty)
                 }
             }
-            
-            //to show sheet handle
-            .presentationDragIndicator(.visible)
         }
     }
 }

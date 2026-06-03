@@ -7,7 +7,6 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct ShareView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var auth
 
     @State private var copied = false
@@ -59,28 +58,15 @@ struct ShareView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // HEADER
-                HStack {
-                    Text("Share the link")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color(.text))
-                    Spacer()
-                    Button(action: { dismiss() }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 44, height: 44)
-                                .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
-                            Image(systemName: "xmark")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color(.saveBg))
-                        }
-                    }
-                    .accessibilityLabel("Close")
-                }
-                .padding(.top)
-                .padding(.horizontal)
+                // HEADER — swipe down (drag indicator) to dismiss.
+                Text("Share the link")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color(.text))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .padding(.bottom, 8)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
@@ -90,8 +76,8 @@ struct ShareView: View {
                                 .interpolation(.none)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 220, height: 220)
-                                .padding(16)
+                                .frame(width: 180, height: 180)
+                                .padding(14)
                                 .background(Color.white, in: RoundedRectangle(cornerRadius: 24))
                                 .frame(maxWidth: .infinity)
                                 .opacity(hasLink ? 1 : 0.4)
@@ -179,7 +165,7 @@ struct ShareView: View {
                     .padding()
                 }
                 .presentationBackground(Color(.background))
-                .presentationDetents([.large])
+                .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
             }
         }

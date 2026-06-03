@@ -1,31 +1,18 @@
 import SwiftUI
 
 // A tap-to-edit row used in the care sheets: shows its text, and on tap turns
-// into an inline field that commits on submit. Merges the former
-// SelectedBubbleEdit (a small dot) and SelectedBubbleCautionEdit (a red
-// warning) into one component — pick the leading accessory.
+// into an inline field. It binds the text directly, so an edit is reflected
+// immediately — saving works even if the field is still focused. Pick the
+// leading accessory (a dot, or a red warning).
 struct EditableListRow: View {
     enum Accessory { case dot, warning }
 
-    @State private var isEditing = false
-    @State private var editedText: String
-    @FocusState private var isFocused: Bool
-
-    let accessory: Accessory
+    @Binding var text: String
+    var accessory: Accessory = .dot
     let onRemove: () -> Void
-    let onSave: (String) -> Void
 
-    init(
-        text: String,
-        accessory: Accessory = .dot,
-        onRemove: @escaping () -> Void,
-        onSave: @escaping (String) -> Void
-    ) {
-        _editedText = State(initialValue: text)
-        self.accessory = accessory
-        self.onRemove = onRemove
-        self.onSave = onSave
-    }
+    @State private var isEditing = false
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         HStack(spacing: 8) {
@@ -33,13 +20,13 @@ struct EditableListRow: View {
 
             Group {
                 if isEditing {
-                    TextField("Edit", text: $editedText)
+                    TextField("Edit", text: $text)
                         .textFieldStyle(.plain)
                         .focused($isFocused)
                         .submitLabel(.done)
-                        .onSubmit { save() }
+                        .onSubmit { isFocused = false }
                 } else {
-                    Text(editedText)
+                    Text(text)
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .lineLimit(2)
@@ -69,10 +56,11 @@ struct EditableListRow: View {
         .animation(.easeInOut(duration: 0.15), value: isFocused)
         .contentShape(Rectangle())
         .onTapGesture { isEditing = true }
-        .onChange(of: isEditing) { _, newValue in
-            if newValue {
-                DispatchQueue.main.async { isFocused = true }
-            }
+        .onChange(of: isEditing) { _, editing in
+            if editing { DispatchQueue.main.async { isFocused = true } }
+        }
+        .onChange(of: isFocused) { _, focused in
+            if !focused { isEditing = false }
         }
     }
 
@@ -94,18 +82,14 @@ struct EditableListRow: View {
             }
         }
     }
-
-    private func save() {
-        isEditing = false
-        isFocused = false
-        onSave(editedText.trimmingCharacters(in: .whitespacesAndNewlines))
-    }
 }
 
 #Preview {
-    VStack(spacing: 10) {
-        EditableListRow(text: "Hides under the bed", accessory: .dot, onRemove: {}, onSave: { _ in })
-        EditableListRow(text: "Allergic to chicken", accessory: .warning, onRemove: {}, onSave: { _ in })
+    @Previewable @State var a = "Hides under the bed"
+    @Previewable @State var b = "Allergic to chicken"
+    return VStack(spacing: 10) {
+        EditableListRow(text: $a, accessory: .dot, onRemove: {})
+        EditableListRow(text: $b, accessory: .warning, onRemove: {})
     }
     .padding()
     .background(Color("AppBg"))

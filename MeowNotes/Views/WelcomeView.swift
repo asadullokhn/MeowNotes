@@ -27,29 +27,9 @@ struct WelcomeView: View {
         VStack(spacing: 0) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
-                    // First-launch escape hatch: a back button returns an
-                    // (often accidental) guest to the sign-in screen.
-                    if !isAdditional {
-                        Button { auth.logout() } label: {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundStyle(Color(.text).opacity(0.6))
-                                .frame(width: 36, height: 36)
-                                .background(Color(.bubbleBg), in: Circle())
-                        }
-                        .accessibilityLabel("Back to sign in")
-                        .padding(.bottom, 16)
-                    }
-
-                    HStack(spacing: 10) {
-                        Image(systemName: "pawprint.fill")
-                            .font(.system(size: 22))
-                            .foregroundStyle(Color(.appBg))
-                            .frame(width: 44, height: 44)
-                            .background(Color(.saveBg), in: RoundedRectangle(cornerRadius: 14))
-                        Text("MeowNotes")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundStyle(Color(.text))
+                    // Top bar: navigation only (no app branding) — back to sign-in
+                    // on first launch, or a close button when adding another cat.
+                    HStack {
                         if isAdditional {
                             Spacer()
                             Button { dismiss() } label: {
@@ -59,10 +39,20 @@ struct WelcomeView: View {
                                     .frame(width: 36, height: 36)
                                     .background(Color(.bubbleBg), in: Circle())
                             }
+                        } else {
+                            Button { auth.logout() } label: {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundStyle(Color(.text).opacity(0.6))
+                                    .frame(width: 36, height: 36)
+                                    .background(Color(.bubbleBg), in: Circle())
+                            }
+                            .accessibilityLabel("Back to sign in")
+                            Spacer()
                         }
                     }
                     .padding(.top, 12)
-                    .padding(.bottom, 28)
+                    .padding(.bottom, 24)
 
                     Text(isAdditional ? "Add another cat." : "Let's meet your cat.")
                         .font(.system(size: 30, weight: .bold))

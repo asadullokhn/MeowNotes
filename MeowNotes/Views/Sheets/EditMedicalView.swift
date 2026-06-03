@@ -238,10 +238,8 @@ struct EditMedicalView: View {
                             }
                         }
                     }
-                    HStack(spacing: 8) {
-                        CareTextField(placeholder: "Last · Feb 2026", text: $vaccine.last, fill: Color(.bubbleBg))
-                        CareTextField(placeholder: "Next · Feb 2027", text: $vaccine.next, fill: Color(.bubbleBg))
-                    }
+                    VaccineDateField(title: "Last given", value: $vaccine.last)
+                    VaccineDateField(title: "Next due", value: $vaccine.next)
                 }
                 .padding(10)
                 .background(Color(.bubbleSectionBg), in: RoundedRectangle(cornerRadius: 14))
@@ -312,6 +310,65 @@ struct EditMedicalView: View {
             SectionLabel(title, dimmed: true)
             CareTextField(placeholder: placeholder, text: text, keyboard: keyboard, fill: Color(.bubbleSectionBg))
         }
+    }
+}
+
+// An optional date for a vaccine's "last given" / "next due": a compact date
+// picker, or an "Add date" prompt when unset. Stored as a readable string so the
+// sitter guide shows it as-is; parses existing free-text dates best-effort.
+private struct VaccineDateField: View {
+    let title: String
+    @Binding var value: String
+
+    private static let display: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        return f
+    }()
+
+    private static func parse(_ raw: String) -> Date? {
+        let trimmed = raw.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return nil }
+        if let d = display.date(from: trimmed) { return d }
+        for pattern in ["MMM yyyy", "MMMM yyyy", "yyyy-MM-dd", "MM/dd/yyyy"] {
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.dateFormat = pattern
+            if let d = f.date(from: trimmed) { return d }
+        }
+        return nil
+    }
+
+    private var date: Binding<Date> {
+        Binding(
+            get: { Self.parse(value) ?? Date() },
+            set: { value = Self.display.string(from: $0) }
+        )
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(Color(.text).opacity(0.6))
+            Spacer()
+            if Self.parse(value) != nil {
+                DatePicker("", selection: date, displayedComponents: .date)
+                    .labelsHidden()
+                Button { value = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color(.text).opacity(0.3))
+                }
+                .buttonStyle(.plain)
+            } else {
+                Button("Add date") { value = Self.display.string(from: Date()) }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color(.bubbleSelectedBg))
+            }
+        }
+        .padding(.horizontal, 12)
+        .frame(height: 44)
+        .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 12))
     }
 }
 

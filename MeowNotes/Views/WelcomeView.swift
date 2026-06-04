@@ -19,6 +19,7 @@ struct WelcomeView: View {
     @State private var pickedDataURL: String?
     @State private var saving = false
     @State private var errorMessage: String?
+    @FocusState private var nameFocused: Bool
 
     private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
     private var canSave: Bool { !trimmedName.isEmpty }
@@ -86,6 +87,7 @@ struct WelcomeView: View {
                         .textInputAutocapitalization(.words)
                         .submitLabel(.done)
                         .onSubmit(create)
+                        .focused($nameFocused)
                         .characterLimit(50, $name)
                         .padding(.horizontal, 16)
                         .frame(height: 56)
@@ -153,6 +155,9 @@ struct WelcomeView: View {
             .padding(.vertical, 12)
         }
         .background(Color(.background))
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { nameFocused = true }
+        }
     }
 
     private func create() {

@@ -16,6 +16,11 @@ struct AuthField: View {
     var submitLabel: SubmitLabel = .next
     var onSubmit: () -> Void = {}
     var limit: Int = 120
+    // Pull the keyboard to this field when its screen appears (the first field
+    // of a form). Self-managed so callers just set `autofocus: true`.
+    var autofocus: Bool = false
+
+    @FocusState private var fieldFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -38,6 +43,7 @@ struct AuthField: View {
             .textContentType(textContentType)
             .submitLabel(submitLabel)
             .onSubmit(onSubmit)
+            .focused($fieldFocused)
             .characterLimit(limit, $text)
             .foregroundColor(Color("TextColor"))
             .padding(.horizontal, 16)
@@ -48,6 +54,10 @@ struct AuthField: View {
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(Color("BubbleBorder"), lineWidth: 1)
             )
+        }
+        .onAppear {
+            guard autofocus else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { fieldFocused = true }
         }
     }
 }

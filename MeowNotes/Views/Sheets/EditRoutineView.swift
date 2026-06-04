@@ -57,48 +57,25 @@ struct EditRoutineView: View {
                             .foregroundStyle(Color("TextColor"))
                     }
 
-                    // MARK: Tap to add (Raffi's chip design)
-                    VStack(alignment: .leading, spacing: 14) {
-                        SectionLabel("Tap to add")
-                        FlowLayout(spacing: 12) {
-                            ForEach(commonRoutines) { routine in
-                                let isAdded = isCommonRoutineAdded(routine)
-                                Button {
-                                    Haptics.tap()
-                                    addCommonRoutine(routine)
-                                } label: {
-                                    HStack(spacing: 8) {
-                                        // Follow the device's 12h/24h setting, like the DatePicker rows below.
-                                        Text(routine.time, style: .time)
-                                            .font(.footnote)
-                                            .foregroundStyle(timeChipColor)
-                                            .padding(.vertical, 2)
-                                            .padding(.horizontal, 6)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 6)
-                                                    .fill(Color("BubbleBg"))
-                                            )
-                                        Text(routine.title)
-                                            .lineLimit(1)
-                                            .foregroundStyle(textColor)
-                                    }
-                                    .padding(.vertical, 6)
-                                    .padding(.horizontal, 10)
-                                    .background(
-                                        Capsule()
-                                            .fill(Color("BubbleBg"))
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                                .disabled(isAdded)
-                                .opacity(isAdded ? 0.8 : 1)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 32)
-                                        .stroke(textColor.opacity(0.1), lineWidth: 2)
-                                )
-                            }
-                        }
+                    // MARK: Add custom routine — at the top, like the other categories
+                    Button {
+                        Haptics.tap()
+                        addRoutine()
+                    } label: {
+                        Text("+ Custom Routine")
+                            .foregroundStyle(textColor)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color("BubbleBg"))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(textColor.opacity(0.1), lineWidth: 2)
+                            )
                     }
+                    .buttonStyle(.plain)
 
                     // MARK: Routine rows
                     if !routines.isEmpty {
@@ -132,25 +109,48 @@ struct EditRoutineView: View {
                         }
                     }
 
-                    // MARK: Add custom routine
-                    Button {
-                        Haptics.tap()
-                        addRoutine()
-                    } label: {
-                        Text("+ Custom Routine")
-                            .foregroundStyle(textColor)
-                            .padding(.vertical, 12)
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color("BubbleBg"))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(textColor.opacity(0.1), lineWidth: 2)
-                            )
+                    // MARK: Tap to add (Raffi's chip design) — added ones drop out of the pool
+                    let availableCommon = commonRoutines.filter { !isCommonRoutineAdded($0) }
+                    if !availableCommon.isEmpty {
+                        VStack(alignment: .leading, spacing: 14) {
+                            SectionLabel("Tap to add")
+                            FlowLayout(spacing: 12) {
+                                ForEach(availableCommon) { routine in
+                                    Button {
+                                        Haptics.tap()
+                                        addCommonRoutine(routine)
+                                    } label: {
+                                        HStack(spacing: 8) {
+                                            // Follow the device's 12h/24h setting, like the DatePicker rows below.
+                                            Text(routine.time, style: .time)
+                                                .font(.footnote)
+                                                .foregroundStyle(timeChipColor)
+                                                .padding(.vertical, 2)
+                                                .padding(.horizontal, 6)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: 6)
+                                                        .fill(Color("BubbleBg"))
+                                                )
+                                            Text(routine.title)
+                                                .lineLimit(1)
+                                                .foregroundStyle(textColor)
+                                        }
+                                        .padding(.vertical, 6)
+                                        .padding(.horizontal, 10)
+                                        .background(
+                                            Capsule()
+                                                .fill(Color("BubbleBg"))
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 32)
+                                            .stroke(textColor.opacity(0.1), lineWidth: 2)
+                                    )
+                                }
+                            }
+                        }
                     }
-                    .buttonStyle(.plain)
                 }
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)

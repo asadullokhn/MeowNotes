@@ -48,45 +48,32 @@ struct PersonalityPageView: View {
                             )
                         }
                         
-                        // MARK: Selected
-                        if !vm.selectedTags.isEmpty {
-                            VStack(alignment: .leading, spacing: 14) {
-                                SectionLabel("Selected")
-                                
-                                FlowLayout {
-                                    ForEach(vm.selectedTags, id: \.self) { tag in
-                                        SelectedBubble(text: tag) {
-                                            vm.removeTag(tag)
-                                        }
-                                    }
+                        // MARK: Traits — selected pills and tap-to-add chips in one
+                        // pool (not split). Tapping an option moves it up to a pill;
+                        // tapping a pill's x sends it back.
+                        FlowLayout {
+                            ForEach(vm.selectedTags, id: \.self) { tag in
+                                SelectedBubble(text: tag) {
+                                    vm.removeTag(tag)
                                 }
                             }
-                        }
-                        
-                        // MARK: Available
-                        if !vm.availableTags.isEmpty {
-                            VStack(alignment: .leading, spacing: 14) {
-                                SectionLabel("Tap to add")
-                                
-                                FlowLayout {
-                                    ForEach(vm.availableTags, id: \.self) { tag in
-                                        AddBubble(text: tag) {
-                                            vm.addTag(tag)
-                                        }
-                                    }
-                                    
-                                    ForEach(vm.customAvailableTags, id: \.self) { tag in
-                                        CustomAddBubble(
-                                            text: tag,
-                                            onAdd: {
-                                                vm.addCustomAvailableTag(tag)
-                                            },
-                                            onDelete: {
-                                                vm.deleteCustomTag(tag)
-                                            }
-                                        )
-                                    }
+
+                            ForEach(vm.availableTags, id: \.self) { tag in
+                                AddBubble(text: tag) {
+                                    vm.addTag(tag)
                                 }
+                            }
+
+                            ForEach(vm.customAvailableTags, id: \.self) { tag in
+                                CustomAddBubble(
+                                    text: tag,
+                                    onAdd: {
+                                        vm.addCustomAvailableTag(tag)
+                                    },
+                                    onDelete: {
+                                        vm.deleteCustomTag(tag)
+                                    }
+                                )
                             }
                         }
                     }

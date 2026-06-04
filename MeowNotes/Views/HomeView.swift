@@ -194,12 +194,12 @@ struct HomeView: View {
 
                     // MARK: - 2-Column Grid
                     LazyVGrid(columns: columns, spacing: 16) {
-                        GridCard(icon: "pawprint", title: "Personality", subtitle: personalitySubtitle) { activeSheet = .personality }
-                        GridCard(icon: "clock", title: "Routine", subtitle: routineSubtitle) { activeSheet = .routine }
-                        GridCard(icon: "list.bullet", title: "Daily Check", subtitle: basicCareSubtitle) { activeSheet = .basicCare }
-                        GridCard(icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle) { activeSheet = .caution }
-                        GridCard(icon: "cross.case", title: "Medical", subtitle: medicalSubtitle) { activeSheet = .medical}
-                        GridCard(icon: "doc.text", title: "Additions", subtitle: notesSubtitle) { activeSheet = .notes }
+                        GridCard(icon: "pawprint", title: "Personality", subtitle: personalitySubtitle, isSet: (cat?.traitCount ?? 0) > 0) { activeSheet = .personality }
+                        GridCard(icon: "clock", title: "Routine", subtitle: routineSubtitle, isSet: (cat?.routineCount ?? 0) > 0) { activeSheet = .routine }
+                        GridCard(icon: "list.bullet", title: "Daily Check", subtitle: basicCareSubtitle, isSet: (cat?.checkCount ?? 0) > 0) { activeSheet = .basicCare }
+                        GridCard(icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle, isSet: (cat?.cautionCount ?? 0) > 0) { activeSheet = .caution }
+                        GridCard(icon: "cross.case", title: "Medical", subtitle: medicalSubtitle, isSet: cat?.vetName != nil) { activeSheet = .medical}
+                        GridCard(icon: "doc.text", title: "Additions", subtitle: notesSubtitle, isSet: (cat?.noteCount ?? 0) > 0) { activeSheet = .notes }
                     }
                     .padding(.horizontal, 20)
                 }
@@ -289,19 +289,21 @@ struct GridCard: View {
     let icon: String
     let title: String
     let subtitle: String
-    let action: () -> Void // 1. Add an action property
-    
+    // Filled in (has data) → the icon and border light up in the accent color;
+    // not set yet → muted icon and a plain border, so the two read differently.
+    var isSet: Bool = false
+    let action: () -> Void
+
     var body: some View {
-        // 2. Wrap everything in a Button
         Button(action: { Haptics.tap(); action() }) {
             VStack(alignment: .leading) {
                 Image(systemName: icon)
                     .font(.system(size: 18))
                     .frame(width: 44, height: 44)
-                    .background(Color("AppBg"))
+                    .background(isSet ? Color(.bubbleSelectedBg) : Color("AppBg"))
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color(.bubbleBorder), lineWidth: 1))
-                    .foregroundStyle(Color(.text))
+                    .overlay(Circle().stroke(Color(.bubbleBorder), lineWidth: isSet ? 0 : 1))
+                    .foregroundStyle(isSet ? .white : Color(.text).opacity(0.5))
 
                 Spacer(minLength: 20)
 
@@ -320,10 +322,9 @@ struct GridCard: View {
             .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color(.bubbleBorder), lineWidth: 1)
+                    .stroke(isSet ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: isSet ? 1.5 : 1)
             )
         }
-        // 3. This stops SwiftUI from turning all the text inside the button blue!
         .buttonStyle(.plain)
     }
 }

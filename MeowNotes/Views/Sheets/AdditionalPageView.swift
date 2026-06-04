@@ -18,7 +18,7 @@ struct AdditionalPageView: View {
 
     private var hasChanges: Bool {
         let initial = (auth.currentCat?.notes ?? []).filter { $0.urgent != true }.map { $0.text }
-        return vm.selectedTags != initial
+        return vm.selectedTags.map(\.text) != initial
     }
 
     private var saveErrorBinding: Binding<Bool> {
@@ -54,11 +54,11 @@ struct AdditionalPageView: View {
                         VStack(alignment: .leading, spacing: 14) {
                             SectionLabel("Infos")
                             VStack(spacing: 8) {
-                                ForEach(vm.selectedTags.indices, id: \.self) { index in
+                                ForEach($vm.selectedTags) { $tag in
                                     EditableListRow(
-                                        text: $vm.selectedTags[index],
+                                        text: $tag.text,
                                         accessory: .dot,
-                                        onRemove: { vm.removeTag(vm.selectedTags[index]) }
+                                        onRemove: { vm.removeTag(tag) }
                                     )
                                 }
                             }
@@ -69,7 +69,7 @@ struct AdditionalPageView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         SectionLabel("Need a nudge?")
                         ForEach(vm.availableTags, id: \.self) { tag in
-                            AddBubble(text: tag, isSelected: vm.selectedTags.contains(tag)) {
+                            AddBubble(text: tag, isSelected: vm.selectedTags.contains { $0.text == tag }) {
                                 vm.addTag(tag)
                             }
                         }
@@ -108,7 +108,7 @@ struct AdditionalPageView: View {
         loaded = true
         vm.selectedTags = (auth.currentCat?.notes ?? [])
             .filter { $0.urgent != true }
-            .map { $0.text }
+            .map { TagItem(text: $0.text) }
     }
 
     private func save() {
@@ -118,7 +118,7 @@ struct AdditionalPageView: View {
         // Keep the urgent (Caution) notes; replace only the non-urgent half.
         let others = (auth.currentCat?.notes ?? []).filter { $0.urgent == true }
         let additions = vm.selectedTags
-            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .map { $0.text.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
             .map { Note(text: $0, urgent: false) }
         let combined = others + additions

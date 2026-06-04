@@ -16,8 +16,8 @@ final class AdditionalViewModel {
         "Doesn't like being picked up."
     ]
     
-    var selectedTags: [String] = []
-    
+    var selectedTags: [TagItem] = []
+
     var availableTags: [String] = [
         "Hides when hears the vaccum.",
         "Wants attention before sleep.",
@@ -30,12 +30,13 @@ final class AdditionalViewModel {
     
     // MARK: - Functions
     func addTag(_ tag: String) {
-        selectedTags.append(tag)
+        selectedTags.append(TagItem(text: tag))
     }
-    
-    func removeTag(_ tag: String) {
-        selectedTags.removeAll { $0 == tag }
-        
+
+    func removeTag(_ item: TagItem) {
+        selectedTags.removeAll { $0.id == item.id }
+
+        let tag = item.text
         if predefinedTags.contains(tag) {
             if !availableTags.contains(tag) {
                 availableTags.append(tag)
@@ -46,18 +47,18 @@ final class AdditionalViewModel {
             }
         }
     }
-    
+
     func addCustomTag() {
         let trimmed = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        
-        selectedTags.append(trimmed)
+
+        selectedTags.append(TagItem(text: trimmed))
         newTag = ""
     }
-    
+
     func addCustomAvailableTag(_ tag: String) {
         customAvailableTags.removeAll { $0 == tag }
-        selectedTags.append(tag)
+        selectedTags.append(TagItem(text: tag))
     }
     
     func deleteCustomTag(_ tag: String) {

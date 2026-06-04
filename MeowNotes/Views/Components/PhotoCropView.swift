@@ -26,78 +26,79 @@ struct PhotoCropView: View {
     private let maxScale: CGFloat = 5
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
+        GeometryReader { geo in
+            ZStack {
+                Color.black
 
-            GeometryReader { geo in
-                ZStack {
-                    // The full photo — not clipped — so the dimmed overscan shows
-                    // exactly what falls outside the crop window.
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: baseSize.width, height: baseSize.height)
-                        .scaleEffect(scale)
-                        .offset(offset)
-                        .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                // The full photo — not clipped — so the dimmed overscan shows
+                // exactly what falls outside the crop window.
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: baseSize.width, height: baseSize.height)
+                    .scaleEffect(scale)
+                    .offset(offset)
+                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
 
-                    // Dim everything outside the crop window.
-                    Color.black.opacity(0.55)
-                        .reverseMask {
-                            Rectangle()
-                                .frame(width: cropSize.width, height: cropSize.height)
-                                .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                // Dim everything outside the crop window.
+                Color.black.opacity(0.55)
+                    .reverseMask {
+                        Rectangle()
+                            .frame(width: cropSize.width, height: cropSize.height)
+                            .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                    }
+                    .allowsHitTesting(false)
+
+                // Crop window outline.
+                Rectangle()
+                    .stroke(Color.white.opacity(0.9), lineWidth: 2)
+                    .frame(width: cropSize.width, height: cropSize.height)
+                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                    .allowsHitTesting(false)
+
+                // Full-area gesture layer so dragging anywhere pans/zooms. Empty
+                // Spacers in the controls stack above let drags fall through here.
+                Color.clear
+                    .contentShape(Rectangle())
+                    .gesture(gesture)
+
+                // Controls, padded by the real device insets the GeometryReader
+                // reports (it ignores the safe area, so safeAreaInsets are the
+                // actual notch/home-indicator insets). Keeps Cancel below the
+                // notch and Use photo above the home indicator, both tappable —
+                // safeAreaInset resolved to zero here because the canvas is
+                // full-bleed, dropping Cancel under the status bar.
+                VStack {
+                    HStack {
+                        Button("Cancel") { onCancel() }
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(.white)
+                        Spacer()
+                    }
+                    Spacer()
+                    VStack(spacing: 14) {
+                        Text("Drag to reposition · pinch to zoom")
+                            .font(.footnote)
+                            .foregroundStyle(.white.opacity(0.7))
+                        Button(action: crop) {
+                            Text("Use photo")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 52)
+                                .background(Color(.saveBg))
+                                .clipShape(RoundedRectangle(cornerRadius: 26))
                         }
-                        .allowsHitTesting(false)
-
-                    // Crop window outline.
-                    Rectangle()
-                        .stroke(Color.white.opacity(0.9), lineWidth: 2)
-                        .frame(width: cropSize.width, height: cropSize.height)
-                        .position(x: geo.size.width / 2, y: geo.size.height / 2)
-                        .allowsHitTesting(false)
-
-                    // Full-area gesture layer so dragging anywhere pans/zooms.
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .gesture(gesture)
+                    }
                 }
-                .onAppear { setup(geo.size) }
-                .onChange(of: geo.size) { _, newSize in setup(newSize) }
+                .padding(.horizontal)
+                .padding(.top, geo.safeAreaInsets.top + 8)
+                .padding(.bottom, geo.safeAreaInsets.bottom + 12)
             }
-            .ignoresSafeArea()
+            .onAppear { setup(geo.size) }
+            .onChange(of: geo.size) { _, newSize in setup(newSize) }
         }
-        // Controls live in real safe-area insets so Cancel / Use photo are never
-        // under the status bar or home indicator. The old overlay stretched
-        // full-bleed (its ZStack siblings ignore the safe area), leaving Cancel
-        // beneath the notch where it wasn't tappable.
-        .safeAreaInset(edge: .top, spacing: 0) {
-            HStack {
-                Button("Cancel") { onCancel() }
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(.white)
-                Spacer()
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 12)
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(spacing: 14) {
-                Text("Drag to reposition · pinch to zoom")
-                    .font(.footnote)
-                    .foregroundStyle(.white.opacity(0.7))
-                Button(action: crop) {
-                    Text("Use photo")
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Color(.saveBg))
-                        .clipShape(RoundedRectangle(cornerRadius: 26))
-                }
-            }
-            .padding()
-        }
+        .ignoresSafeArea()
     }
 
     private var gesture: some Gesture {

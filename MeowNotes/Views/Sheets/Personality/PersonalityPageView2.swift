@@ -124,6 +124,7 @@ struct PersonalityPageView2: View {
     }
 
     private func save() {
+        guard hasChanges else { onSaved(); return }   // nothing changed — no network, no spinner
         guard !saving, let catID = auth.currentCat?.id else { return }
         saving = true
         saveError = nil

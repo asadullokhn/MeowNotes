@@ -110,6 +110,7 @@ struct EditCautionView: View {
     }
 
     private func save() {
+        guard hasChanges else { dismiss(); return }   // nothing changed — no network, no spinner
         guard !saving, let catID = auth.currentCat?.id else { return }
         saving = true
         saveError = nil

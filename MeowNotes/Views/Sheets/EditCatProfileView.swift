@@ -333,6 +333,7 @@ struct EditCatProfileView: View {
     }
 
     private func save() {
+        guard hasChanges else { dismiss(); return }   // nothing changed — no network, no spinner
         guard let catID = auth.currentCat?.id, canSave, !saving else { return }
         saving = true
         errorMessage = nil

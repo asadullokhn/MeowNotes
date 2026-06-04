@@ -77,38 +77,6 @@ struct EditRoutineView: View {
                     }
                     .buttonStyle(.plain)
 
-                    // MARK: Routine rows
-                    if !routines.isEmpty {
-                        VStack(spacing: 12) {
-                            ForEach(sortedRoutines) { routine in
-                                let routineBinding = binding(for: routine.id)
-                                VStack(alignment: .leading, spacing: 10) {
-                                    HStack(spacing: 10) {
-                                        DatePicker("", selection: routineBinding.time, displayedComponents: .hourAndMinute)
-                                            .labelsHidden()
-
-                                        CareTextField(placeholder: "Routine", text: routineBinding.title, bold: true)
-
-                                        RemoveCircleButton(size: 40) {
-                                            removeRoutine(id: routine.id)
-                                        }
-                                    }
-
-                                    CareTextField(placeholder: "Description", text: routineBinding.details, axis: .vertical, limit: 280)
-                                }
-                                .padding(14)
-                                .background(Color("BubbleBg"), in: RoundedRectangle(cornerRadius: 20))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color("BubbleBorder"), lineWidth: 1)
-                                )
-                                .accessibilityAction(named: "Delete routine") {
-                                    removeRoutine(id: routine.id)
-                                }
-                            }
-                        }
-                    }
-
                     // MARK: Tap to add (Raffi's chip design) — added ones drop out of the pool
                     let availableCommon = commonRoutines.filter { !isCommonRoutineAdded($0) }
                     if !availableCommon.isEmpty {
@@ -121,7 +89,7 @@ struct EditRoutineView: View {
                                         addCommonRoutine(routine)
                                     } label: {
                                         HStack(spacing: 8) {
-                                            // Follow the device's 12h/24h setting, like the DatePicker rows below.
+                                            // Follow the device's 12h/24h setting, like the DatePicker rows.
                                             Text(routine.time, style: .time)
                                                 .font(.footnote)
                                                 .foregroundStyle(timeChipColor)
@@ -147,6 +115,40 @@ struct EditRoutineView: View {
                                         RoundedRectangle(cornerRadius: 32)
                                             .stroke(textColor.opacity(0.1), lineWidth: 2)
                                     )
+                                }
+                            }
+                        }
+                    }
+
+                    // MARK: Routine rows — kept in their current order while editing;
+                    // they're re-sorted by time only on save (so a row doesn't jump
+                    // around as you change its time).
+                    if !routines.isEmpty {
+                        VStack(spacing: 12) {
+                            ForEach(routines) { routine in
+                                let routineBinding = binding(for: routine.id)
+                                VStack(alignment: .leading, spacing: 10) {
+                                    HStack(spacing: 10) {
+                                        DatePicker("", selection: routineBinding.time, displayedComponents: .hourAndMinute)
+                                            .labelsHidden()
+
+                                        CareTextField(placeholder: "Routine", text: routineBinding.title, bold: true)
+
+                                        RemoveCircleButton(size: 40) {
+                                            removeRoutine(id: routine.id)
+                                        }
+                                    }
+
+                                    CareTextField(placeholder: "Description", text: routineBinding.details, axis: .vertical, limit: 280)
+                                }
+                                .padding(14)
+                                .background(Color("BubbleBg"), in: RoundedRectangle(cornerRadius: 20))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color("BubbleBorder"), lineWidth: 1)
+                                )
+                                .accessibilityAction(named: "Delete routine") {
+                                    removeRoutine(id: routine.id)
                                 }
                             }
                         }

@@ -66,8 +66,8 @@ struct EditCautionView: View {
                     // MARK: Common ones
                     VStack(alignment: .leading, spacing: 14) {
                         SectionLabel("Common ones")
-                        ForEach(vm.availableTags, id: \.self) { tag in
-                            AddBubble(text: tag, isSelected: vm.selectedTags.contains { $0.text == tag }) {
+                        ForEach(vm.availableTags.filter { tag in !vm.selectedTags.contains { $0.text == tag } }, id: \.self) { tag in
+                            AddBubble(text: tag) {
                                 vm.addTag(tag)
                             }
                         }

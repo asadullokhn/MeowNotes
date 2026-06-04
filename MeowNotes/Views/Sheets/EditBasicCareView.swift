@@ -100,8 +100,8 @@ struct EditBasicCareView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         SectionLabel("Common ones")
                         FlowLayout(spacing: 12) {
-                            ForEach(commonChecklistItems, id: \.self) { item in
-                                AddBubble(text: item, isSelected: isCommonItemAdded(item)) {
+                            ForEach(commonChecklistItems.filter { !isCommonItemAdded($0) }, id: \.self) { item in
+                                AddBubble(text: item) {
                                     addCommonChecklistItem(item)
                                 }
                             }

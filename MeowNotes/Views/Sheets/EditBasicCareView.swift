@@ -96,13 +96,16 @@ struct EditBasicCareView: View {
                         )
                     }
 
-                    // MARK: Common ones
-                    VStack(alignment: .leading, spacing: 14) {
-                        SectionLabel("Common ones")
-                        FlowLayout(spacing: 12) {
-                            ForEach(commonChecklistItems.filter { !isCommonItemAdded($0) }, id: \.self) { item in
-                                AddBubble(text: item) {
-                                    addCommonChecklistItem(item)
+                    // MARK: Common ones — hidden once everything's been added
+                    let commonChecks = commonChecklistItems.filter { !isCommonItemAdded($0) }
+                    if !commonChecks.isEmpty {
+                        VStack(alignment: .leading, spacing: 14) {
+                            SectionLabel("Common ones")
+                            FlowLayout(spacing: 12) {
+                                ForEach(commonChecks, id: \.self) { item in
+                                    AddBubble(text: item) {
+                                        addCommonChecklistItem(item)
+                                    }
                                 }
                             }
                         }

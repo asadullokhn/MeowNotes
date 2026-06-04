@@ -289,8 +289,8 @@ struct GridCard: View {
     let icon: String
     let title: String
     let subtitle: String
-    // Filled in (has data) → the icon and border light up in the accent color;
-    // not set yet → muted icon and a plain border, so the two read differently.
+    // Not set yet → a dashed border and dimmed icon so the empty categories
+    // stand out as "still to fill in"; filled-in ones read as normal solid cards.
     var isSet: Bool = false
     let action: () -> Void
 
@@ -300,10 +300,10 @@ struct GridCard: View {
                 Image(systemName: icon)
                     .font(.system(size: 18))
                     .frame(width: 44, height: 44)
-                    .background(isSet ? Color(.bubbleSelectedBg) : Color("AppBg"))
+                    .background(Color("AppBg"))
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color(.bubbleBorder), lineWidth: isSet ? 0 : 1))
-                    .foregroundStyle(isSet ? .white : Color(.text).opacity(0.5))
+                    .overlay(Circle().stroke(Color(.bubbleBorder), style: StrokeStyle(lineWidth: 1, dash: isSet ? [] : [4])))
+                    .foregroundStyle(Color(.text).opacity(isSet ? 1 : 0.4))
 
                 Spacer(minLength: 20)
 
@@ -322,7 +322,7 @@ struct GridCard: View {
             .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(isSet ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: isSet ? 1.5 : 1)
+                    .stroke(Color(.bubbleBorder), style: StrokeStyle(lineWidth: 1, dash: isSet ? [] : [5]))
             )
         }
         .buttonStyle(.plain)

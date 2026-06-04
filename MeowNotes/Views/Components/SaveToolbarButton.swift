@@ -4,34 +4,36 @@ import SwiftUI
 // accent color once there are unsaved changes, and sits dimmed when there's
 // nothing to save — so "is there anything to save?" is visible at a glance.
 struct SaveToolbarButton: View {
+    @Environment(\.dismiss) var dismiss
     var saving: Bool
     var hasChanges: Bool
     var disabled: Bool = false
     let action: () -> Void
-
+    
     var body: some View {
-        Button(action: { Haptics.tap(.medium); action() }) {
-            if saving {
-                ProgressView()
-            } else if hasChanges {
-                // Active: a solid pill so it clearly reads as the tappable action.
-                // White on SaveBg keeps contrast in both light and dark.
+        if hasChanges {
+            Button(action: { Haptics.tap(.medium); action() }) {
+                if saving {
+                    ProgressView()
+                } else {
+                    Text("Save")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color(.saveButtonText))
+                }
+            }
+            .disabled(saving || disabled)
+            // The dirty state is otherwise conveyed only by color — announce it.
+            .accessibilityValue(hasChanges ? "Unsaved changes" : "No changes")
+            .tint(Color(.saveBg))
+            .buttonStyle(.glassProminent)
+        }
+        else  {
+            Button(action: {dismiss()}) {
                 Text("Save")
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 6)
-                    .background(Color(.saveBg), in: Capsule())
-            } else {
-                // No changes: still a normal, tappable button (not greyed-out) —
-                // tapping just closes the sheet without hitting the backend.
-                Text("Save")
-                    .fontWeight(.semibold)
+                    .fontWeight(.regular)
                     .foregroundStyle(Color(.text))
             }
+            
         }
-        .disabled(saving || disabled)
-        // The dirty state is otherwise conveyed only by color — announce it.
-        .accessibilityValue(hasChanges ? "Unsaved changes" : "No changes")
     }
 }

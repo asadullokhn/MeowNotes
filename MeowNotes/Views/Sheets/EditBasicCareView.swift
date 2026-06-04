@@ -54,8 +54,14 @@ struct EditBasicCareView: View {
                             .foregroundStyle(Color("TextColor"))
                     }
 
-                    // MARK: Checklist + add custom
+                    // MARK: Add custom (top) + checklist
                     VStack(spacing: 12) {
+                        TagInputField(
+                            placeholder: "Add your own - e.g. 'curtains open'",
+                            text: $newChecklistItem,
+                            onAdd: addChecklistItem
+                        )
+
                         ForEach(checklistItems.indices, id: \.self) { index in
                             HStack(spacing: 12) {
                                 Circle()
@@ -88,12 +94,6 @@ struct EditBasicCareView: View {
                             .animation(.easeInOut(duration: 0.15), value: focusedCheck)
                             .accessibilityAction(named: "Delete") { removeChecklistItem(at: index) }
                         }
-
-                        TagInputField(
-                            placeholder: "Add your own - e.g. 'curtains open'",
-                            text: $newChecklistItem,
-                            onAdd: addChecklistItem
-                        )
                     }
 
                     // MARK: Common ones — hidden once everything's been added
@@ -171,7 +171,7 @@ struct EditBasicCareView: View {
     private func addChecklistItem() {
         let trimmed = newChecklistItem.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        checklistItems.append(trimmed)
+        checklistItems.insert(trimmed, at: 0)   // newest sits right under the input
         newChecklistItem = ""
     }
 

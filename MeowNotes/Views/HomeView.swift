@@ -52,24 +52,6 @@ struct HomeView: View {
         return n > 0 ? "\(n) note\(n == 1 ? "" : "s")" : "Not set yet"
     }
 
-    // The home grid's six cards, in their canonical order.
-    private var categoryCards: [CategoryCard] {
-        [
-            CategoryCard(sheet: .personality, icon: "pawprint", title: "Personality", subtitle: personalitySubtitle, isSet: (cat?.traitCount ?? 0) > 0),
-            CategoryCard(sheet: .routine, icon: "clock", title: "Routine", subtitle: routineSubtitle, isSet: (cat?.routineCount ?? 0) > 0),
-            CategoryCard(sheet: .basicCare, icon: "list.bullet", title: "Daily Check", subtitle: basicCareSubtitle, isSet: (cat?.checkCount ?? 0) > 0),
-            CategoryCard(sheet: .caution, icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle, isSet: (cat?.cautionCount ?? 0) > 0),
-            CategoryCard(sheet: .medical, icon: "cross.case", title: "Medical", subtitle: medicalSubtitle, isSet: cat?.vetName != nil),
-            CategoryCard(sheet: .notes, icon: "doc.text", title: "Additions", subtitle: notesSubtitle, isSet: (cat?.noteCount ?? 0) > 0),
-        ]
-    }
-
-    // Not-set cards float to the top (keeping their relative order); once
-    // everything is set the order is unchanged.
-    private var orderedCategoryCards: [CategoryCard] {
-        categoryCards.filter { !$0.isSet } + categoryCards.filter { $0.isSet }
-    }
-
     // What's still empty for this cat — drives the setup hint (mirrors Home.vue).
     private var missingSections: [MissingSection] {
         guard let cat else { return [] }
@@ -88,9 +70,6 @@ struct HomeView: View {
     private var setupHint: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(.text))
                 Text("Still to add for \(catName)'s guide — tap to fill in:")
                     .font(.footnote)
                     .foregroundStyle(Color(.text).opacity(0.7))
@@ -210,16 +189,16 @@ struct HomeView: View {
                         setupHint
                     }
 
-                    // MARK: - 2-Column Grid — not-set categories float to the top
+                    // MARK: - 2-Column Grid
                     LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(orderedCategoryCards) { card in
-                            GridCard(icon: card.icon, title: card.title, subtitle: card.subtitle, isSet: card.isSet) {
-                                activeSheet = card.sheet
-                            }
-                        }
+                        GridCard(icon: "pawprint", title: "Personality", subtitle: personalitySubtitle) { activeSheet = .personality }
+                        GridCard(icon: "clock", title: "Routine", subtitle: routineSubtitle) { activeSheet = .routine }
+                        GridCard(icon: "list.bullet", title: "Daily Check", subtitle: basicCareSubtitle) { activeSheet = .basicCare }
+                        GridCard(icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle) { activeSheet = .caution }
+                        GridCard(icon: "cross.case", title: "Medical", subtitle: medicalSubtitle) { activeSheet = .medical}
+                        GridCard(icon: "doc.text", title: "Additions", subtitle: notesSubtitle) { activeSheet = .notes }
                     }
                     .padding(.horizontal, 20)
-                    .animation(.easeInOut(duration: 0.25), value: categoryCards.map(\.isSet))
                 }
                 .padding(.top, 10)
             }
@@ -302,24 +281,11 @@ private struct MissingSection: Identifiable {
     let sheet: HomeSheet
 }
 
-// One home-grid category card.
-private struct CategoryCard: Identifiable {
-    let sheet: HomeSheet
-    var id: HomeSheet { sheet }
-    let icon: String
-    let title: String
-    let subtitle: String
-    let isSet: Bool
-}
-
-// MARK: - Reusable GridCard Component (Fixes your error!)
+// MARK: - Reusable GridCard Component
 struct GridCard: View {
     let icon: String
     let title: String
     let subtitle: String
-    // Not set yet → an accent-tinted card + accent icon so the empty categories
-    // are clearly visible and read as "to fill in"; filled-in ones are plain.
-    var isSet: Bool = false
     let action: () -> Void
 
     var body: some View {
@@ -328,10 +294,10 @@ struct GridCard: View {
                 Image(systemName: icon)
                     .font(.system(size: 18))
                     .frame(width: 44, height: 44)
-                    .background(isSet ? Color("AppBg") : Color(.bubbleSelectedBg).opacity(0.18))
+                    .background(Color("AppBg"))
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(Color(.bubbleBorder), lineWidth: isSet ? 1 : 0))
-                    .foregroundStyle(isSet ? Color(.text) : Color(.bubbleSelectedBg))
+                    .overlay(Circle().stroke(Color(.bubbleBorder), lineWidth: 1))
+                    .foregroundStyle(Color(.text))
 
                 Spacer(minLength: 20)
 
@@ -347,13 +313,10 @@ struct GridCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                (isSet ? Color(.bubbleBg) : Color(.bubbleSelectedBg).opacity(0.12)),
-                in: RoundedRectangle(cornerRadius: 20)
-            )
+            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(isSet ? Color(.bubbleBorder) : Color(.bubbleSelectedBg), lineWidth: isSet ? 1 : 1.5)
+                    .stroke(Color(.bubbleBorder), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)

@@ -23,6 +23,7 @@ struct EditCatProfileView: View {
     @State private var showingDeleteConfirm = false
     @State private var deceased = false
     @State private var deceasedDate = Date()
+    @FocusState private var nameFocused: Bool
 
     private let commonBreeds = [
         "Domestic Shorthair", "British Shorthair", "Maine Coon",
@@ -77,6 +78,7 @@ struct EditCatProfileView: View {
                         field("Name") {
                             textField("Mochi", $name)
                                 .textInputAutocapitalization(.words)
+                                .focused($nameFocused)
                         }
 
                         field("Breed") { textField("Mixed", $breed) }
@@ -116,7 +118,10 @@ struct EditCatProfileView: View {
                     SaveToolbarButton(saving: saving, hasChanges: hasChanges, disabled: !canSave, action: save)
                 }
             }
-            .onAppear(perform: load)
+            .onAppear {
+                load()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { nameFocused = true }
+            }
             .alert("Remove \(catName)'s profile?", isPresented: $showingDeleteConfirm) {
                 Button("Remove", role: .destructive) { deleteCat() }
                 Button("Cancel", role: .cancel) {}

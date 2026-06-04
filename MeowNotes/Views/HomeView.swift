@@ -16,6 +16,8 @@ struct HomeView: View {
     @Environment(AuthManager.self) private var auth
     @State private var activeSheet: HomeSheet?
     @State private var showAccount = false
+    // Compact card grid vs. an expanded full-guide layout. Remembered across launches.
+    @AppStorage("homeExpandedLayout") private var expandedLayout = false
     // Setup-hint visibility. Unlike the web (dismissed forever in localStorage),
     // we only hide it for this session so it gently returns next launch.
     @State private var hintDismissed = false
@@ -50,6 +52,18 @@ struct HomeView: View {
     private var notesSubtitle: String {
         let n = cat?.noteCount ?? 0
         return n > 0 ? "\(n) note\(n == 1 ? "" : "s")" : "Not set yet"
+    }
+
+    // The six categories, shared by both the grid and list layouts.
+    private var categories: [CategoryItem] {
+        [
+            CategoryItem(sheet: .personality, icon: "pawprint", title: "Personality", subtitle: personalitySubtitle),
+            CategoryItem(sheet: .routine, icon: "clock", title: "Routine", subtitle: routineSubtitle),
+            CategoryItem(sheet: .basicCare, icon: "checkmark", title: "Daily Check", subtitle: basicCareSubtitle),
+            CategoryItem(sheet: .caution, icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle),
+            CategoryItem(sheet: .medical, icon: "cross.case", title: "Medical", subtitle: medicalSubtitle),
+            CategoryItem(sheet: .notes, icon: "doc.text", title: "Additions", subtitle: notesSubtitle),
+        ]
     }
 
     // What's still empty for this cat — drives the setup hint (mirrors Home.vue).
@@ -189,16 +203,47 @@ struct HomeView: View {
                         setupHint
                     }
 
-                    // MARK: - 2-Column Grid
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        GridCard(icon: "pawprint", title: "Personality", subtitle: personalitySubtitle) { activeSheet = .personality }
-                        GridCard(icon: "clock", title: "Routine", subtitle: routineSubtitle) { activeSheet = .routine }
-                        GridCard(icon: "list.bullet", title: "Daily Check", subtitle: basicCareSubtitle) { activeSheet = .basicCare }
-                        GridCard(icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle) { activeSheet = .caution }
-                        GridCard(icon: "cross.case", title: "Medical", subtitle: medicalSubtitle) { activeSheet = .medical}
-                        GridCard(icon: "doc.text", title: "Additions", subtitle: notesSubtitle) { activeSheet = .notes }
+                    // MARK: - Care guide header + view toggle
+                    HStack {
+                        SectionLabel("Care guide")
+                        Spacer()
+                        Button {
+                            Haptics.tap()
+                            withAnimation(.easeInOut(duration: 0.2)) { expandedLayout.toggle() }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: expandedLayout ? "square.grid.2x2" : "list.bullet.rectangle")
+                                    .font(.system(size: 13, weight: .semibold))
+                                Text(expandedLayout ? "Cards" : "Guide")
+                                    .font(.subheadline.weight(.medium))
+                            }
+                            .foregroundStyle(Color(.text))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 7)
+                            .background(Color(.bubbleBg), in: Capsule())
+                            .overlay(Capsule().stroke(Color(.bubbleBorder), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(expandedLayout ? "Switch to card view" : "Switch to guide view")
                     }
                     .padding(.horizontal, 20)
+
+                    // MARK: - Categories — compact cards, or the full expanded guide
+                    if expandedLayout {
+                        ExpandedHomeView(cat: cat) { activeSheet = $0 }
+                            .padding(.horizontal, 20)
+                            .transition(.opacity)
+                    } else {
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(categories) { item in
+                                GridCard(icon: item.icon, title: item.title, subtitle: item.subtitle) {
+                                    activeSheet = item.sheet
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .transition(.opacity)
+                    }
                 }
                 .padding(.top, 10)
             }
@@ -279,6 +324,255 @@ private struct MissingSection: Identifiable {
     let id = UUID()
     let title: String
     let sheet: HomeSheet
+}
+
+// One home-screen category, rendered as either a grid card or a list row.
+private struct CategoryItem: Identifiable {
+    let sheet: HomeSheet
+    var id: HomeSheet { sheet }
+    let icon: String
+    let title: String
+    let subtitle: String
+}
+
+// MARK: - Expanded guide variant — every section's content inline (vs. cards)
+private struct ExpandedHomeView: View {
+    let cat: Cat?
+    let onOpen: (HomeSheet) -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            personality
+            routine
+            dailyCheck
+            caution
+            medical
+            additions
+        }
+    }
+
+    // A section card: a tappable header (opens the editor) plus its content.
+    @ViewBuilder
+    private func section<Content: View>(_ icon: String, _ title: String, _ sheet: HomeSheet,
+                                        @ViewBuilder content: () -> Content) -> some View {
+        // The whole card is tappable (not just the header) — it opens the editor.
+        Button { Haptics.tap(); onOpen(sheet) } label: {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 10) {
+                    Image(systemName: icon)
+                        .font(.system(size: 15))
+                        .frame(width: 34, height: 34)
+                        .background(Color("AppBg"))
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color(.bubbleBorder), lineWidth: 1))
+                        .foregroundStyle(Color(.text))
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(Color(.text))
+                    Spacer()
+                    Image(systemName: "square.and.pencil")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color(.text).opacity(0.35))
+                }
+
+                content()
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color(.bubbleBorder), lineWidth: 1)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 20))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func emptyHint(_ text: String) -> some View {
+        Text(text)
+            .font(.subheadline)
+            .foregroundStyle(Color(.text).opacity(0.4))
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var personality: some View {
+        section("pawprint", "Personality", .personality) {
+            let traits = cat?.personality ?? []
+            let summary = cat?.personalitySummary ?? ""
+            if traits.isEmpty && summary.isEmpty {
+                emptyHint("No traits yet — tap to add.")
+            } else {
+                VStack(alignment: .leading, spacing: 10) {
+                    if !traits.isEmpty {
+                        FlowLayout(spacing: 8) {
+                            ForEach(traits, id: \.self) { trait in
+                                Text(trait)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color(.text))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color("AppBg"), in: Capsule())
+                                    .overlay(Capsule().stroke(Color(.bubbleBorder), lineWidth: 1))
+                            }
+                        }
+                    }
+                    if !summary.isEmpty {
+                        Text(summary)
+                            .font(.subheadline)
+                            .foregroundStyle(Color(.text).opacity(0.75))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+    }
+
+    private var routine: some View {
+        section("clock", "Routine", .routine) {
+            let items = cat?.feedingRoutine ?? []
+            if items.isEmpty {
+                emptyHint("Nothing scheduled — tap to add.")
+            } else {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(items) { item in
+                        HStack(alignment: .top, spacing: 10) {
+                            Text(item.time.isEmpty ? "—" : item.time)
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(Color(.bubbleSelectedBg))
+                                .frame(width: 66, alignment: .leading)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(item.title)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(Color(.text))
+                                if !item.detail.isEmpty {
+                                    Text(item.detail)
+                                        .font(.caption)
+                                        .foregroundStyle(Color(.text).opacity(0.6))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var dailyCheck: some View {
+        section("checkmark", "Daily Check", .basicCare) {
+            let checks = cat?.checks ?? []
+            if checks.isEmpty {
+                emptyHint("No checks yet — tap to add.")
+            } else {
+                VStack(alignment: .leading, spacing: 7) {
+                    ForEach(checks) { check in
+                        HStack(spacing: 8) {
+                            Image(systemName: "circle")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color(.text).opacity(0.4))
+                            Text(check.label)
+                                .font(.subheadline)
+                                .foregroundStyle(Color(.text))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var caution: some View {
+        section("exclamationmark.triangle", "Caution", .caution) {
+            let cautions = (cat?.notes ?? []).filter { $0.urgent == true }
+            if cautions.isEmpty {
+                emptyHint("Nothing flagged — tap to add.")
+            } else {
+                VStack(alignment: .leading, spacing: 7) {
+                    ForEach(cautions) { note in
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.red.opacity(0.7))
+                            Text(note.text)
+                                .font(.subheadline)
+                                .foregroundStyle(Color(.text))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var medical: some View {
+        section("cross.case", "Medical", .medical) {
+            let med = cat?.medical
+            let vet = med?.vet
+            let vaccines = (med?.vaccines ?? []).filter { !$0.name.isEmpty }
+            let meds = (med?.medications ?? []).filter { !$0.name.isEmpty }
+            let hasVet = !(vet?.name.isEmpty ?? true) || !(vet?.clinic.isEmpty ?? true) || !(vet?.phone.isEmpty ?? true)
+            if !hasVet && vaccines.isEmpty && meds.isEmpty {
+                emptyHint("No medical info yet — tap to add.")
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    if hasVet, let vet {
+                        VStack(alignment: .leading, spacing: 1) {
+                            if !vet.name.isEmpty {
+                                Text(vet.name)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(Color(.text))
+                            }
+                            let sub = [vet.clinic, vet.phone].filter { !$0.isEmpty }.joined(separator: " · ")
+                            if !sub.isEmpty {
+                                Text(sub)
+                                    .font(.caption)
+                                    .foregroundStyle(Color(.text).opacity(0.6))
+                            }
+                        }
+                    }
+                    ForEach(vaccines.indices, id: \.self) { i in
+                        let v = vaccines[i]
+                        let dates = [v.last.isEmpty ? nil : "last \(v.last)", v.next.isEmpty ? nil : "next \(v.next)"]
+                            .compactMap { $0 }.joined(separator: ", ")
+                        Text("Vaccine: \(v.name)" + (dates.isEmpty ? "" : " — \(dates)"))
+                            .font(.subheadline)
+                            .foregroundStyle(Color(.text))
+                    }
+                    ForEach(meds.indices, id: \.self) { i in
+                        let m = meds[i]
+                        let detail = [m.dose, m.schedule].filter { !$0.isEmpty }.joined(separator: " · ")
+                        Text("Med: \(m.name)" + (detail.isEmpty ? "" : " — \(detail)"))
+                            .font(.subheadline)
+                            .foregroundStyle(Color(.text))
+                    }
+                }
+            }
+        }
+    }
+
+    private var additions: some View {
+        section("doc.text", "Additions", .notes) {
+            let adds = (cat?.notes ?? []).filter { $0.urgent != true }
+            if adds.isEmpty {
+                emptyHint("Nothing else yet — tap to add.")
+            } else {
+                VStack(alignment: .leading, spacing: 7) {
+                    ForEach(adds) { note in
+                        HStack(alignment: .top, spacing: 8) {
+                            Circle()
+                                .fill(Color(.bubbleSelectedBg))
+                                .frame(width: 6, height: 6)
+                                .padding(.top, 6)
+                            Text(note.text)
+                                .font(.subheadline)
+                                .foregroundStyle(Color(.text))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Reusable GridCard Component

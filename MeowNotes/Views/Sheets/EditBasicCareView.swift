@@ -6,25 +6,24 @@ struct EditBasicCareView: View {
 
     private var catName: String { auth.currentCat?.name ?? "your cat" }
 
-    @State private var checklistItems: [String] = [
-        "Fresh water",
-        "Food served",
-        "Litter box cleaned",
-        "Playtime",
-        "Brushed"
+    @State private var checklistItems: [TagItem] = [
+        TagItem(text: "Fresh water"),
+        TagItem(text: "Food served"),
+        TagItem(text: "Litter box cleaned"),
+        TagItem(text: "Playtime"),
+        TagItem(text: "Brushed")
     ]
     @State private var newChecklistItem = ""
     @State private var saving = false
     @State private var saveError: String?
     @State private var loaded = false
     @State private var initialChecklist: [String] = []
-    @FocusState private var focusedCheck: Int?
 
     private var saveErrorBinding: Binding<Bool> {
         Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
     }
 
-    private var hasChanges: Bool { checklistItems != initialChecklist }
+    private var hasChanges: Bool { checklistItems.map(\.text) != initialChecklist }
 
     private let commonChecklistItems = [
         "Fresh water",
@@ -62,37 +61,16 @@ struct EditBasicCareView: View {
                             onAdd: addChecklistItem
                         )
 
-                        ForEach(checklistItems.indices, id: \.self) { index in
-                            HStack(spacing: 12) {
-                                Circle()
-                                    .fill(Color(.bubbleSelectedBg))
-                                    .frame(width: 6, height: 6)
-                                TextField("Check", text: binding(for: index))
-                                    .textInputAutocapitalization(.sentences)
-                                    .font(.body.weight(.semibold))
-                                    .foregroundStyle(Color(.text))
-                                    .focused($focusedCheck, equals: index)
-                                Spacer(minLength: 8)
-                                Button { Haptics.tap(); focusedCheck = index } label: {
-                                    Image(systemName: "pencil")
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundStyle(Color(.text).opacity(0.45))
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Edit check")
-                                RemoveCircleButton(size: 32) {
-                                    removeChecklistItem(at: index)
+                        if !checklistItems.isEmpty {
+                            VStack(spacing: 8) {
+                                ForEach($checklistItems) { $item in
+                                    EditableListRow(
+                                        text: $item.text,
+                                        accessory: .dot,
+                                        onRemove: { removeChecklistItem(item) }
+                                    )
                                 }
                             }
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 14)
-                            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 18)
-                                    .stroke(focusedCheck == index ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: 1)
-                            )
-                            .animation(.easeInOut(duration: 0.15), value: focusedCheck)
-                            .accessibilityAction(named: "Delete") { removeChecklistItem(at: index) }
                         }
                     }
 
@@ -136,9 +114,9 @@ struct EditBasicCareView: View {
         guard !loaded else { return }
         loaded = true
         if let items = auth.currentCat?.checks {
-            checklistItems = items.map { $0.label }
+            checklistItems = items.map { TagItem(text: $0.label) }
         }
-        initialChecklist = checklistItems
+        initialChecklist = checklistItems.map(\.text)
     }
 
     private func save() {
@@ -147,7 +125,7 @@ struct EditBasicCareView: View {
         saving = true
         saveError = nil
         let items = checklistItems
-            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .map { $0.text.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
             .map { CheckItem(label: $0) }
         Task {
@@ -161,33 +139,26 @@ struct EditBasicCareView: View {
         }
     }
 
-    private func binding(for index: Int) -> Binding<String> {
-        Binding(
-            get: { checklistItems[index] },
-            set: { checklistItems[index] = $0 }
-        )
-    }
-
     private func addChecklistItem() {
         let trimmed = newChecklistItem.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        checklistItems.insert(trimmed, at: 0)   // newest sits right under the input
+        checklistItems.insert(TagItem(text: trimmed), at: 0)   // newest sits right under the input
         newChecklistItem = ""
     }
 
-    private func removeChecklistItem(at index: Int) {
-        checklistItems.remove(at: index)
+    private func removeChecklistItem(_ item: TagItem) {
+        checklistItems.removeAll { $0.id == item.id }
     }
 
     private func addCommonChecklistItem(_ item: String) {
         let trimmed = item.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        checklistItems.append(trimmed)
+        checklistItems.append(TagItem(text: trimmed))
     }
 
     private func isCommonItemAdded(_ item: String) -> Bool {
         let trimmed = item.trimmingCharacters(in: .whitespacesAndNewlines)
-        return checklistItems.contains { $0.trimmingCharacters(in: .whitespacesAndNewlines) == trimmed }
+        return checklistItems.contains { $0.text.trimmingCharacters(in: .whitespacesAndNewlines) == trimmed }
     }
 }
 

@@ -23,14 +23,14 @@ struct SaveToolbarButton: View {
                     .padding(.vertical, 6)
                     .background(Color(.saveBg), in: Capsule())
             } else {
+                // No changes: still a normal, tappable button (not greyed-out) —
+                // tapping just closes the sheet without hitting the backend.
                 Text("Save")
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color(.text).opacity(0.35))
+                    .foregroundStyle(Color(.text))
             }
         }
-        // Dimmed means there's nothing to save — make it genuinely untappable,
-        // not just greyed (it was still firing `action` while looking disabled).
-        .disabled(saving || disabled || !hasChanges)
+        .disabled(saving || disabled)
         // The dirty state is otherwise conveyed only by color — announce it.
         .accessibilityValue(hasChanges ? "Unsaved changes" : "No changes")
     }

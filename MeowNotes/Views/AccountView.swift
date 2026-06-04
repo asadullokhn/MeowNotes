@@ -19,6 +19,7 @@ struct AccountView: View {
     @State private var savingProfile = false
     @State private var profileError = ""
     @State private var loadedProfile = false
+    @State private var saveTask: Task<Void, Never>?
     @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
     @AppStorage("haptics") private var hapticsEnabled = true
 
@@ -64,6 +65,7 @@ struct AccountView: View {
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear { loadProfile() }
+            .onDisappear { flushSave() }
             .sheet(isPresented: $showChangePassword) {
                 ChangePasswordView()
             }
@@ -268,17 +270,18 @@ struct AccountView: View {
         phone.trimmingCharacters(in: .whitespaces) != (auth.user?.phone ?? "")
     }
 
-    // Edit name + phone inline. "Save changes" dims until something changes.
+    // Edit name + phone inline — saved automatically (debounced) as you type,
+    // so there's no Save button. Focuses the name field on entry.
     private var profileSection: some View {
         VStack(spacing: 12) {
-            AuthField(label: "Your name", text: $name, textContentType: .name)
+            AuthField(label: "Your name", text: $name, textContentType: .name, autofocus: true)
             AuthField(label: "Phone · optional", placeholder: "+62 812 3456 7890", text: $phone,
                       keyboard: .phonePad, textContentType: .telephoneNumber,
-                      submitLabel: .done, onSubmit: saveProfile)
+                      submitLabel: .done, onSubmit: flushSave)
             if !profileError.isEmpty { AuthErrorBanner(message: profileError) }
-            AuthPrimaryButton(title: "Save changes", loading: savingProfile,
-                              disabled: !canSaveProfile || !profileChanged, action: saveProfile)
         }
+        .onChange(of: name) { scheduleSave() }
+        .onChange(of: phone) { scheduleSave() }
     }
 
     private func loadProfile() {
@@ -288,22 +291,37 @@ struct AccountView: View {
         loadedProfile = true
     }
 
-    private func saveProfile() {
+    // Auto-save after a short pause so we don't PATCH on every keystroke. Each
+    // edit cancels and reschedules the pending save.
+    private func scheduleSave() {
+        saveTask?.cancel()
+        guard canSaveProfile, profileChanged else { return }
+        saveTask = Task {
+            try? await Task.sleep(nanoseconds: 1_200_000_000)
+            if Task.isCancelled { return }
+            await saveProfileNow()
+        }
+    }
+
+    // Save immediately (on Return, or when leaving the screen) — skip the wait.
+    private func flushSave() {
+        saveTask?.cancel()
+        Task { await saveProfileNow() }
+    }
+
+    private func saveProfileNow() async {
         guard canSaveProfile, profileChanged, !savingProfile else { return }
         profileError = ""
         savingProfile = true
-        Task {
-            do {
-                try await auth.updateProfile(
-                    name: name.trimmingCharacters(in: .whitespaces),
-                    phone: phone.trimmingCharacters(in: .whitespaces)
-                )
-                Haptics.success()
-            } catch {
-                profileError = error.localizedDescription
-            }
-            savingProfile = false
+        do {
+            try await auth.updateProfile(
+                name: name.trimmingCharacters(in: .whitespaces),
+                phone: phone.trimmingCharacters(in: .whitespaces)
+            )
+        } catch {
+            profileError = error.localizedDescription
         }
+        savingProfile = false
     }
 
     private func row(icon: String, title: String, tint: Color = Color("TextColor"),

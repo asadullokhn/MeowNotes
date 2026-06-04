@@ -37,7 +37,7 @@ struct ClaimAccountView: View {
                         .font(.subheadline)
                         .foregroundColor(Color("TextColor").opacity(0.6))
 
-                    AuthField(label: "Your name", text: $name, textContentType: .name, autofocus: true)
+                    AuthField(label: "Your name", text: $name, textContentType: .name)
                     AuthField(label: "Email", placeholder: "you@example.com", text: $email,
                               keyboard: .emailAddress, textContentType: .emailAddress)
                     AuthField(label: "Password", text: $password, isSecure: true,

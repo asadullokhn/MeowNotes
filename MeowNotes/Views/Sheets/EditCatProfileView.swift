@@ -23,7 +23,9 @@ struct EditCatProfileView: View {
     @State private var showingDeleteConfirm = false
     @State private var deceased = false
     @State private var deceasedDate = Date()
-    @FocusState private var nameFocused: Bool
+    @FocusState private var focusedField: ProfileField?
+
+    private enum ProfileField { case name, breed }
 
     private let commonBreeds = [
         "Domestic Shorthair", "British Shorthair", "Maine Coon",
@@ -76,12 +78,11 @@ struct EditCatProfileView: View {
                         }
 
                         field("Name") {
-                            textField("Mochi", $name)
+                            textField("Mochi", $name, field: .name)
                                 .textInputAutocapitalization(.words)
-                                .focused($nameFocused)
                         }
 
-                        field("Breed") { textField("Mixed", $breed) }
+                        field("Breed") { textField("Mixed", $breed, field: .breed) }
 
                         FlowLayout(spacing: 8) {
                             ForEach(commonBreeds, id: \.self) { option in
@@ -118,10 +119,7 @@ struct EditCatProfileView: View {
                     SaveToolbarButton(saving: saving, hasChanges: hasChanges, disabled: !canSave, action: save)
                 }
             }
-            .onAppear {
-                load()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { nameFocused = true }
-            }
+            .onAppear(perform: load)
             .alert("Remove \(catName)'s profile?", isPresented: $showingDeleteConfirm) {
                 Button("Remove", role: .destructive) { deleteCat() }
                 Button("Cancel", role: .cancel) {}
@@ -268,18 +266,20 @@ struct EditCatProfileView: View {
         }
     }
 
-    private func textField(_ placeholder: String, _ text: Binding<String>) -> some View {
+    private func textField(_ placeholder: String, _ text: Binding<String>, field: ProfileField) -> some View {
         TextField(placeholder, text: text)
             .font(.system(size: 16))
             .foregroundStyle(Color(.text))
             .characterLimit(50, text)
+            .focused($focusedField, equals: field)
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 16))
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color(.bubbleBorder), lineWidth: 1)
+                    .stroke(focusedField == field ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: 1)
             )
+            .animation(.easeInOut(duration: 0.15), value: focusedField)
     }
 
     private func breedChip(_ option: String) -> some View {

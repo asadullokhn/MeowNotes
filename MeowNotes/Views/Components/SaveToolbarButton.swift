@@ -13,13 +13,24 @@ struct SaveToolbarButton: View {
         Button(action: { Haptics.tap(.medium); action() }) {
             if saving {
                 ProgressView()
+            } else if hasChanges {
+                // Active: a solid pill so it clearly reads as the tappable action.
+                // White on SaveBg keeps contrast in both light and dark.
+                Text("Save")
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(Color(.saveBg), in: Capsule())
             } else {
                 Text("Save")
                     .fontWeight(.semibold)
-                    .foregroundStyle(hasChanges ? Color(.bubbleSelectedBg) : Color(.text).opacity(0.35))
+                    .foregroundStyle(Color(.text).opacity(0.35))
             }
         }
-        .disabled(saving || disabled)
+        // Dimmed means there's nothing to save — make it genuinely untappable,
+        // not just greyed (it was still firing `action` while looking disabled).
+        .disabled(saving || disabled || !hasChanges)
         // The dirty state is otherwise conveyed only by color — announce it.
         .accessibilityValue(hasChanges ? "Unsaved changes" : "No changes")
     }

@@ -66,29 +66,34 @@ struct PhotoCropView: View {
                 .onChange(of: geo.size) { _, newSize in setup(newSize) }
             }
             .ignoresSafeArea()
-
-            // Controls stay within the safe area so Cancel is always reachable.
-            VStack {
-                HStack {
-                    Button("Cancel") { onCancel() }
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(.white)
-                    Spacer()
-                }
+        }
+        // Controls live in real safe-area insets so Cancel / Use photo are never
+        // under the status bar or home indicator. The old overlay stretched
+        // full-bleed (its ZStack siblings ignore the safe area), leaving Cancel
+        // beneath the notch where it wasn't tappable.
+        .safeAreaInset(edge: .top, spacing: 0) {
+            HStack {
+                Button("Cancel") { onCancel() }
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(.white)
                 Spacer()
-                VStack(spacing: 14) {
-                    Text("Drag to reposition · pinch to zoom")
-                        .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.7))
-                    Button(action: crop) {
-                        Text("Use photo")
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(Color(.saveBg))
-                            .clipShape(RoundedRectangle(cornerRadius: 26))
-                    }
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 12)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 14) {
+                Text("Drag to reposition · pinch to zoom")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.7))
+                Button(action: crop) {
+                    Text("Use photo")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(Color(.saveBg))
+                        .clipShape(RoundedRectangle(cornerRadius: 26))
                 }
             }
             .padding()

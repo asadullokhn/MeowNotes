@@ -20,8 +20,8 @@ final class CautionModel {
         "Medication twice a day — don't skip."
     ]
     
-    var selectedTags: [String] = []
-    
+    var selectedTags: [TagItem] = []
+
     var availableTags: [String] = [
         "Can't eat fish or dairy.",
         "Bolts for the door — keep it shut.",
@@ -36,12 +36,13 @@ final class CautionModel {
     
     // MARK: - Functions
     func addTag(_ tag: String) {
-        selectedTags.append(tag)
+        selectedTags.append(TagItem(text: tag))
     }
-    
-    func removeTag(_ tag: String) {
-        selectedTags.removeAll { $0 == tag }
-        
+
+    func removeTag(_ item: TagItem) {
+        selectedTags.removeAll { $0.id == item.id }
+
+        let tag = item.text
         if predefinedTags.contains(tag) {
             if !availableTags.contains(tag) {
                 availableTags.append(tag)
@@ -52,18 +53,18 @@ final class CautionModel {
             }
         }
     }
-    
+
     func addCustomTag() {
         let trimmed = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        
-        selectedTags.append(trimmed)
+
+        selectedTags.append(TagItem(text: trimmed))
         newTag = ""
     }
-    
+
     func addCustomAvailableTag(_ tag: String) {
         customAvailableTags.removeAll { $0 == tag }
-        selectedTags.append(tag)
+        selectedTags.append(TagItem(text: tag))
     }
     
     func deleteCustomTag(_ tag: String) {

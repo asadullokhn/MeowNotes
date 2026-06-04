@@ -23,7 +23,7 @@ struct EditCautionView: View {
 
     private var hasChanges: Bool {
         let initial = (auth.currentCat?.notes ?? []).filter { $0.urgent == true }.map { $0.text }
-        return vm.selectedTags != initial
+        return vm.selectedTags.map(\.text) != initial
     }
 
     var body: some View {
@@ -53,11 +53,11 @@ struct EditCautionView: View {
                     // MARK: Added cautions
                     if !vm.selectedTags.isEmpty {
                         VStack(spacing: 8) {
-                            ForEach(vm.selectedTags.indices, id: \.self) { index in
+                            ForEach($vm.selectedTags) { $tag in
                                 EditableListRow(
-                                    text: $vm.selectedTags[index],
+                                    text: $tag.text,
                                     accessory: .warning,
-                                    onRemove: { vm.removeTag(vm.selectedTags[index]) }
+                                    onRemove: { vm.removeTag(tag) }
                                 )
                             }
                         }
@@ -67,7 +67,7 @@ struct EditCautionView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         SectionLabel("Common ones")
                         ForEach(vm.availableTags, id: \.self) { tag in
-                            AddBubble(text: tag, isSelected: vm.selectedTags.contains(tag)) {
+                            AddBubble(text: tag, isSelected: vm.selectedTags.contains { $0.text == tag }) {
                                 vm.addTag(tag)
                             }
                         }
@@ -106,7 +106,7 @@ struct EditCautionView: View {
         loaded = true
         vm.selectedTags = (auth.currentCat?.notes ?? [])
             .filter { $0.urgent == true }
-            .map { $0.text }
+            .map { TagItem(text: $0.text) }
     }
 
     private func save() {
@@ -116,7 +116,7 @@ struct EditCautionView: View {
         // Keep the non-urgent (Additions) notes; replace only the urgent half.
         let others = (auth.currentCat?.notes ?? []).filter { $0.urgent != true }
         let urgent = vm.selectedTags
-            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .map { $0.text.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
             .map { Note(text: $0, urgent: true) }
         let combined = others + urgent

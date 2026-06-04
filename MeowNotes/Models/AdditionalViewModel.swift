@@ -52,7 +52,7 @@ final class AdditionalViewModel {
         let trimmed = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        selectedTags.append(TagItem(text: trimmed))
+        selectedTags.insert(TagItem(text: trimmed), at: 0)   // newest sits right under the input
         newTag = ""
     }
 

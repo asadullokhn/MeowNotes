@@ -97,7 +97,7 @@ final class PersonalityViewModel {
         let trimmed = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        selectedTags.append(trimmed)
+        selectedTags.insert(trimmed, at: 0)   // newest sits right under the input
         newTag = ""
     }
 

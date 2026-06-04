@@ -43,6 +43,7 @@ struct PersonalityPageView2: View {
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .foregroundStyle(Color("TextColor"))
+                                .accessibilityAddTraits(.isHeader)
                             Text("Written from the traits you picked. Tweak the wording, or generate a fresh take.")
                                 .font(.subheadline)
                                 .foregroundStyle(Color("TextColor"))

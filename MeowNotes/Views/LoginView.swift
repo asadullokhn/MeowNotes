@@ -40,6 +40,7 @@ struct LoginView: View {
                     .fontWeight(.bold)
                     .foregroundColor(Color("TextColor"))
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
                     .padding(.bottom, 24)
 
                 VStack(spacing: 12) {

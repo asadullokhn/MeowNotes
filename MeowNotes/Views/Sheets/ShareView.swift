@@ -51,6 +51,7 @@ struct ShareView: View {
         loadingLink = true
         if let token = try? await auth.rotateShareLink(catID: cat.id) {
             fetchedToken = token
+            VoiceOver.announce("New link created. The old link no longer works.")
         }
         loadingLink = false
     }
@@ -63,6 +64,7 @@ struct ShareView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(Color(.text))
+                    .accessibilityAddTraits(.isHeader)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
                     .padding(.top, 24)
@@ -100,6 +102,7 @@ struct ShareView: View {
                             Button {
                                 UIPasteboard.general.string = shareURLString
                                 Haptics.tap()
+                                VoiceOver.announce("Link copied")
                                 withAnimation(.spring(response: 0.3)) { copied = true }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                     withAnimation { copied = false }

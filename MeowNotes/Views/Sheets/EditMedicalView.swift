@@ -70,6 +70,7 @@ struct EditMedicalView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundStyle(Color(.text))
+                            .accessibilityAddTraits(.isHeader)
 
                         Text("Tap a row to fill it in — one thing at a time.")
                             .font(.subheadline)
@@ -189,6 +190,8 @@ struct EditMedicalView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            // The chevron rotation is the only open/closed cue — say it aloud too.
+            .accessibilityValue(openRow == row ? "Expanded" : "Collapsed")
 
             if openRow == row {
                 Rectangle()

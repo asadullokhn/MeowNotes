@@ -16,6 +16,9 @@ struct SectionLabel: View {
             .font(.caption.weight(.bold))
             .tracking(0.5)
             .foregroundStyle(Color(.text).opacity(dimmed ? 0.5 : 1))
+            // Section eyebrows become rotor headings; the dimmed form-field
+            // labels stay plain so the rotor isn't cluttered with field names.
+            .accessibilityAddTraits(dimmed ? [] : .isHeader)
     }
 }
 

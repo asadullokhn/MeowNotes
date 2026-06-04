@@ -57,6 +57,7 @@ struct EditCatProfileView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundStyle(Color(.text))
+                            .accessibilityAddTraits(.isHeader)
 
                         field("Photo") {
                             CatPhotoWell(

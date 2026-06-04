@@ -150,6 +150,9 @@ struct HomeView: View {
                                 }
                             }
                             .padding(20)
+                            // Name + breed/age read as one heading, not two stray bits.
+                            .accessibilityElement(children: .combine)
+                            .accessibilityAddTraits(.isHeader)
                         }
                         .overlay(alignment: .topTrailing) {
                             Button(action: { activeSheet = .editCat }) {

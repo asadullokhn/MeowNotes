@@ -29,6 +29,7 @@ struct ForgotPasswordView: View {
                         .fontWeight(.bold)
                         .foregroundColor(Color("TextColor"))
                         .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityAddTraits(.isHeader)
 
                     switch step {
                     case .request: requestStep

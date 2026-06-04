@@ -36,6 +36,7 @@ struct AdditionalPageView: View {
                             .fontWeight(.bold)
                             .fixedSize(horizontal: false, vertical: true)
                             .foregroundStyle(Color("TextColor"))
+                            .accessibilityAddTraits(.isHeader)
                         Text("Quirks, habits, little tips - Anything else worth knowing. Must-read warning go under Caution.")
                             .font(.subheadline)
                             .foregroundStyle(Color("TextColor"))

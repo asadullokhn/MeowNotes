@@ -31,6 +31,7 @@ struct ClaimAccountView: View {
                         .fontWeight(.bold)
                         .foregroundColor(Color("TextColor"))
                         .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityAddTraits(.isHeader)
 
                     Text("Keep your cats and sign in on another device. Your data stays exactly as it is.")
                         .font(.subheadline)

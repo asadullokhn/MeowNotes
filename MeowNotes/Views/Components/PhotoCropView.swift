@@ -62,12 +62,11 @@ struct PhotoCropView: View {
                     .contentShape(Rectangle())
                     .gesture(gesture)
 
-                // Controls, padded by the real device insets the GeometryReader
-                // reports (it ignores the safe area, so safeAreaInsets are the
-                // actual notch/home-indicator insets). Keeps Cancel below the
-                // notch and Use photo above the home indicator, both tappable —
-                // safeAreaInset resolved to zero here because the canvas is
-                // full-bleed, dropping Cancel under the status bar.
+                // Controls, padded by the device insets. The GeometryReader
+                // respects the safe area, so geo.safeAreaInsets are the real
+                // notch / home-indicator insets — keeping Cancel below the notch
+                // and Use photo above the home indicator, while the canvas (the
+                // ZStack) stays full-bleed.
                 VStack {
                     HStack {
                         Button("Cancel") { onCancel() }
@@ -95,10 +94,13 @@ struct PhotoCropView: View {
                 .padding(.top, geo.safeAreaInsets.top + 8)
                 .padding(.bottom, geo.safeAreaInsets.bottom + 12)
             }
+            // .ignoresSafeArea() belongs on the ZStack (the canvas), NOT the
+            // GeometryReader — on the GeometryReader it zeroes geo.safeAreaInsets,
+            // which dropped Cancel back under the notch.
+            .ignoresSafeArea()
             .onAppear { setup(geo.size) }
             .onChange(of: geo.size) { _, newSize in setup(newSize) }
         }
-        .ignoresSafeArea()
     }
 
     private var gesture: some Gesture {

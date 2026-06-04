@@ -63,20 +63,23 @@ struct EditCautionView: View {
                         }
                     }
 
-                    // MARK: Common ones
-                    VStack(alignment: .leading, spacing: 14) {
-                        SectionLabel("Common ones")
-                        ForEach(vm.availableTags.filter { tag in !vm.selectedTags.contains { $0.text == tag } }, id: \.self) { tag in
-                            AddBubble(text: tag) {
-                                vm.addTag(tag)
+                    // MARK: Common ones — hidden once everything's been added
+                    let commonCautions = vm.availableTags.filter { tag in !vm.selectedTags.contains { $0.text == tag } }
+                    if !commonCautions.isEmpty || !vm.customAvailableTags.isEmpty {
+                        VStack(alignment: .leading, spacing: 14) {
+                            SectionLabel("Common ones")
+                            ForEach(commonCautions, id: \.self) { tag in
+                                AddBubble(text: tag) {
+                                    vm.addTag(tag)
+                                }
                             }
-                        }
-                        ForEach(vm.customAvailableTags, id: \.self) { tag in
-                            CustomAddBubble(
-                                text: tag,
-                                onAdd: { vm.addCustomAvailableTag(tag) },
-                                onDelete: { vm.deleteCustomTag(tag) }
-                            )
+                            ForEach(vm.customAvailableTags, id: \.self) { tag in
+                                CustomAddBubble(
+                                    text: tag,
+                                    onAdd: { vm.addCustomAvailableTag(tag) },
+                                    onDelete: { vm.deleteCustomTag(tag) }
+                                )
+                            }
                         }
                     }
                 }

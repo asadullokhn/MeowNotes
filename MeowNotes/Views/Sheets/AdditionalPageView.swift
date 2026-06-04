@@ -65,20 +65,23 @@ struct AdditionalPageView: View {
                         }
                     }
 
-                    // MARK: Need a nudge
-                    VStack(alignment: .leading, spacing: 14) {
-                        SectionLabel("Need a nudge?")
-                        ForEach(vm.availableTags.filter { tag in !vm.selectedTags.contains { $0.text == tag } }, id: \.self) { tag in
-                            AddBubble(text: tag) {
-                                vm.addTag(tag)
+                    // MARK: Need a nudge — hidden once everything's been added
+                    let nudges = vm.availableTags.filter { tag in !vm.selectedTags.contains { $0.text == tag } }
+                    if !nudges.isEmpty || !vm.customAvailableTags.isEmpty {
+                        VStack(alignment: .leading, spacing: 14) {
+                            SectionLabel("Need a nudge?")
+                            ForEach(nudges, id: \.self) { tag in
+                                AddBubble(text: tag) {
+                                    vm.addTag(tag)
+                                }
                             }
-                        }
-                        ForEach(vm.customAvailableTags, id: \.self) { tag in
-                            CustomAddBubble(
-                                text: tag,
-                                onAdd: { vm.addCustomAvailableTag(tag) },
-                                onDelete: { vm.deleteCustomTag(tag) }
-                            )
+                            ForEach(vm.customAvailableTags, id: \.self) { tag in
+                                CustomAddBubble(
+                                    text: tag,
+                                    onAdd: { vm.addCustomAvailableTag(tag) },
+                                    onDelete: { vm.deleteCustomTag(tag) }
+                                )
+                            }
                         }
                     }
                 }

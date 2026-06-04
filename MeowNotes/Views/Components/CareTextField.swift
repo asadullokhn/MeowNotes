@@ -16,21 +16,34 @@ struct CareTextField: View {
     @FocusState private var focused: Bool
 
     var body: some View {
-        field
-            .font(.body.weight(bold ? .semibold : .regular))
-            .foregroundStyle(Color(.text))
-            .textInputAutocapitalization(.sentences)
-            .keyboardType(keyboard)
-            .focused($focused)
-            .characterLimit(limit, $text)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 11)
-            .background(fill, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(focused ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: 1)
-            )
-            .animation(.easeInOut(duration: 0.15), value: focused)
+        HStack(alignment: axis == .vertical ? .top : .center, spacing: 8) {
+            field
+                .font(.body.weight(bold ? .semibold : .regular))
+                .foregroundStyle(Color(.text))
+                .textInputAutocapitalization(.sentences)
+                .keyboardType(keyboard)
+                .focused($focused)
+                .characterLimit(limit, $text)
+
+            // Quick-erase: empties the field while you're editing it.
+            if focused && !text.isEmpty {
+                Button { text = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundStyle(Color(.text).opacity(0.3))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear text")
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .background(fill, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(focused ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: 1)
+        )
+        .animation(.easeInOut(duration: 0.15), value: focused)
     }
 
     @ViewBuilder

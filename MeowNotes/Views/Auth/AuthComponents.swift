@@ -16,9 +16,6 @@ struct AuthField: View {
     var submitLabel: SubmitLabel = .next
     var onSubmit: () -> Void = {}
     var limit: Int = 120
-    // Pull the keyboard to this field when its screen appears (the first field
-    // of a form). Self-managed so callers just set `autofocus: true`.
-    var autofocus: Bool = false
 
     @FocusState private var fieldFocused: Bool
 
@@ -52,12 +49,9 @@ struct AuthField: View {
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color("BubbleBorder"), lineWidth: 1)
+                    .stroke(fieldFocused ? Color("BubbleSelectedBg") : Color("BubbleBorder"), lineWidth: 1)
             )
-        }
-        .onAppear {
-            guard autofocus else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { fieldFocused = true }
+            .animation(.easeInOut(duration: 0.15), value: fieldFocused)
         }
     }
 }

@@ -46,7 +46,7 @@ struct LoginView: View {
                 VStack(spacing: 12) {
                     if isRegister {
                         AuthField(label: "Your name", text: $name,
-                                  textContentType: .name, autofocus: true)
+                                  textContentType: .name)
                     }
                     AuthField(label: "Email", placeholder: "you@example.com", text: $email,
                               keyboard: .emailAddress, textContentType: .emailAddress)

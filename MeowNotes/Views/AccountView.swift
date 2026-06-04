@@ -274,7 +274,7 @@ struct AccountView: View {
     // so there's no Save button. Focuses the name field on entry.
     private var profileSection: some View {
         VStack(spacing: 12) {
-            AuthField(label: "Your name", text: $name, textContentType: .name, autofocus: true)
+            AuthField(label: "Your name", text: $name, textContentType: .name)
             AuthField(label: "Phone · optional", placeholder: "+62 812 3456 7890", text: $phone,
                       keyboard: .phonePad, textContentType: .telephoneNumber,
                       submitLabel: .done, onSubmit: flushSave)

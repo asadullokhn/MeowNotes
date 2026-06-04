@@ -94,8 +94,9 @@ struct WelcomeView: View {
                         .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 18))
                         .overlay(
                             RoundedRectangle(cornerRadius: 18)
-                                .stroke(Color(.bubbleBorder), lineWidth: 1)
+                                .stroke(nameFocused ? Color(.bubbleSelectedBg) : Color(.bubbleBorder), lineWidth: 1)
                         )
+                        .animation(.easeInOut(duration: 0.15), value: nameFocused)
 
                     // Optional details — a cat is fine with just a name; these can
                     // also be set later from Edit profile.
@@ -155,9 +156,6 @@ struct WelcomeView: View {
             .padding(.vertical, 12)
         }
         .background(Color(.background))
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { nameFocused = true }
-        }
     }
 
     private func create() {

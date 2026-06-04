@@ -21,6 +21,7 @@ struct EditCatProfileView: View {
     @State private var saving = false
     @State private var errorMessage: String?
     @State private var showingDeleteConfirm = false
+    @State private var deceased = false
     @State private var deceasedDate = Date()
 
     private let commonBreeds = [
@@ -45,6 +46,8 @@ struct EditCatProfileView: View {
         if breed.trimmingCharacters(in: .whitespaces) != (cat.breed ?? "") { return true }
         if gender != (cat.gender ?? "") { return true }
         if dob != cat.dob.flatMap(AgeFormat.date(fromISO:)) { return true }
+        if deceased != (cat.deceased ?? false) { return true }
+        if deceased && ymd(deceasedDate) != (cat.deceasedDate ?? "") { return true }
         return false
     }
 
@@ -142,7 +145,7 @@ struct EditCatProfileView: View {
     // kind prompt to mark the date otherwise.
     @ViewBuilder
     private var memorialSection: some View {
-        if auth.currentCat?.deceased == true {
+        if deceased {
             VStack(spacing: 10) {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 30))
@@ -151,16 +154,14 @@ struct EditCatProfileView: View {
                     .font(.headline)
                     .foregroundStyle(Color(.text))
                     .multilineTextAlignment(.center)
-                if let date = auth.currentCat?.deceasedDate, !date.isEmpty {
-                    Text(prettyDate(date))
-                        .font(.subheadline)
-                        .foregroundStyle(Color(.text).opacity(0.6))
-                }
+                Text(deceasedDate.formatted(date: .long, time: .omitted))
+                    .font(.subheadline)
+                    .foregroundStyle(Color(.text).opacity(0.6))
                 Text("Their care guide stays here so you can look back any time.")
                     .font(.caption)
                     .foregroundStyle(Color(.text).opacity(0.6))
                     .multilineTextAlignment(.center)
-                Button { Haptics.tap(); applyDeceased(false) } label: {
+                Button { Haptics.tap(); deceased = false } label: {
                     Text("They're still with us — undo")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(memorialColor)
@@ -187,7 +188,7 @@ struct EditCatProfileView: View {
                     DatePicker("", selection: $deceasedDate, in: ...Date(), displayedComponents: .date)
                         .labelsHidden()
                     Spacer()
-                    Button { Haptics.tap(); applyDeceased(true) } label: {
+                    Button { Haptics.tap(); deceased = true } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "camera.macro")
                             Text("Mark as deceased")
@@ -227,33 +228,17 @@ struct EditCatProfileView: View {
         .buttonStyle(.plain)
     }
 
-    private func prettyDate(_ raw: String) -> String {
-        let parser = DateFormatter()
-        parser.dateFormat = "yyyy-MM-dd"
-        guard let date = parser.date(from: raw) else { return raw }
-        let out = DateFormatter()
-        out.dateStyle = .long
-        return out.string(from: date)
+    // The deceased date as the server stores it (device-local yyyy-MM-dd).
+    private func ymd(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: date)
     }
 
-    private func applyDeceased(_ deceased: Bool) {
-        guard let catID = auth.currentCat?.id else { return }
-        errorMessage = nil
-        let dateString: String?
-        if deceased {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            dateString = formatter.string(from: deceasedDate)
-        } else {
-            dateString = nil
-        }
-        Task {
-            do {
-                try await auth.setDeceased(catID: catID, deceased: deceased, date: dateString)
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-        }
+    private func parseYMD(_ raw: String) -> Date? {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f.date(from: raw)
     }
 
     private func deleteCat() {
@@ -338,6 +323,8 @@ struct EditCatProfileView: View {
         gender = cat.gender ?? ""
         dob = cat.dob.flatMap(AgeFormat.date(fromISO:))
         existingPhoto = cat.photo ?? ""
+        deceased = cat.deceased ?? false
+        if let raw = cat.deceasedDate, let d = parseYMD(raw) { deceasedDate = d }
     }
 
     private func save() {
@@ -345,6 +332,12 @@ struct EditCatProfileView: View {
         saving = true
         errorMessage = nil
         let trimmedBreed = breed.trimmingCharacters(in: .whitespaces)
+        // Persist the memorial state here, on Save — it used to PATCH the instant
+        // the button was tapped, changing it without the user saving.
+        let originalDeceased = auth.currentCat?.deceased ?? false
+        let originalDeceasedDate = auth.currentCat?.deceasedDate ?? ""
+        let newDeceasedDate = deceased ? ymd(deceasedDate) : ""
+        let deceasedChanged = deceased != originalDeceased || (deceased && newDeceasedDate != originalDeceasedDate)
         Task {
             do {
                 try await auth.updateBasics(
@@ -355,6 +348,9 @@ struct EditCatProfileView: View {
                     dob: dob.map(AgeFormat.iso),                   // ISO date, or null to clear
                     gender: gender.isEmpty ? nil : gender
                 )
+                if deceasedChanged {
+                    try await auth.setDeceased(catID: catID, deceased: deceased, date: deceased ? newDeceasedDate : nil)
+                }
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription

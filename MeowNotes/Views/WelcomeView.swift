@@ -59,6 +59,7 @@ struct WelcomeView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundStyle(Color(.text))
+                        .accessibilityAddTraits(.isHeader)
                     Text("Start with a name and a photo — you can add routine, quirks, medical and the rest from the home screen.")
                         .font(.subheadline)
                         .foregroundStyle(Color(.text).opacity(0.6))

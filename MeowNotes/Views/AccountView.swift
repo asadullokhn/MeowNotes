@@ -230,6 +230,8 @@ struct AccountView: View {
                 }
             }
             .frame(width: 78, height: 78)
+            // Decorative initials — identity is read from the email/Guest line below.
+            .accessibilityHidden(true)
 
             if let email = auth.user?.email {
                 Text(email)

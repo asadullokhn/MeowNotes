@@ -28,6 +28,7 @@ struct PersonalityPageView: View {
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .foregroundStyle(Color("TextColor"))
+                                .accessibilityAddTraits(.isHeader)
                             Text("Tap the words that fit")
                                 .font(.subheadline)
                                 .foregroundStyle(Color("TextColor"))

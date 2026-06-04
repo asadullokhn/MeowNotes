@@ -14,7 +14,7 @@ struct CustomAddBubble: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Button(action: onAdd) {
+            Button(action: { Haptics.tap(); onAdd() }) {
                 HStack(spacing: 8) {
                     Image(systemName: "plus")
                         .font(.system(size: 10, weight: .bold))
@@ -25,7 +25,7 @@ struct CustomAddBubble: View {
                 }
             }
 
-            Button(action: onDelete) {
+            Button(action: { Haptics.tap(); onDelete() }) {
                 Image(systemName: "xmark")
                     .font(.system(size: 10, weight: .bold))
             }

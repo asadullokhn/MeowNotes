@@ -135,6 +135,7 @@ struct AccountView: View {
     private var dangerCard: some View {
         VStack(spacing: 10) {
             Button {
+                Haptics.tap(.medium)
                 showDeleteConfirm = true
             } label: {
                 HStack(spacing: 16) {
@@ -307,7 +308,7 @@ struct AccountView: View {
 
     private func row(icon: String, title: String, tint: Color = Color("TextColor"),
                      action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        Button(action: { Haptics.tap(); action() }) {
             HStack(spacing: 16) {
                 Image(systemName: icon)
                     .font(.system(size: 16))

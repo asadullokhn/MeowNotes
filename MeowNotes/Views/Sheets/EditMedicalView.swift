@@ -158,6 +158,7 @@ struct EditMedicalView: View {
     private func rowCard(_ row: Row) -> some View {
         VStack(spacing: 0) {
             Button {
+                Haptics.tap()
                 withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) {
                     openRow = (openRow == row) ? nil : row
                 }
@@ -285,6 +286,7 @@ struct EditMedicalView: View {
             }
 
             Button {
+                Haptics.tap()
                 medications.append(Medication(name: "", dose: "", schedule: ""))
             } label: {
                 Text("+ Add medication")
@@ -358,14 +360,14 @@ private struct VaccineDateField: View {
             if Self.parse(value) != nil {
                 DatePicker("", selection: date, displayedComponents: .date)
                     .labelsHidden()
-                Button { value = "" } label: {
+                Button { Haptics.tap(); value = "" } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(Color(.text).opacity(0.4))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Clear \(title.lowercased())")
             } else {
-                Button("Add date") { value = Self.display.string(from: Date()) }
+                Button("Add date") { Haptics.tap(); value = Self.display.string(from: Date()) }
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color(.bubbleSelectedBg))
             }

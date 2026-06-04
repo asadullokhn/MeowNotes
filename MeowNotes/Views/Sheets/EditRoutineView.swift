@@ -64,6 +64,7 @@ struct EditRoutineView: View {
                             ForEach(commonRoutines) { routine in
                                 let isAdded = isCommonRoutineAdded(routine)
                                 Button {
+                                    Haptics.tap()
                                     addCommonRoutine(routine)
                                 } label: {
                                     HStack(spacing: 8) {
@@ -133,6 +134,7 @@ struct EditRoutineView: View {
 
                     // MARK: Add custom routine
                     Button {
+                        Haptics.tap()
                         addRoutine()
                     } label: {
                         Text("+ Custom Routine")

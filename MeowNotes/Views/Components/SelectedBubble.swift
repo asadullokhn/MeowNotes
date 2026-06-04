@@ -17,7 +17,7 @@ struct SelectedBubble: View {
                 .font(.subheadline)
                 .fontWeight(.medium)
 
-            Button(action: onRemove) {
+            Button(action: { Haptics.tap(); onRemove() }) {
                 Image(systemName: "xmark")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(Color.white)

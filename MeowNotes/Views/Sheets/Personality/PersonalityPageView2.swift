@@ -75,6 +75,7 @@ struct PersonalityPageView2: View {
 
                         // MARK: Generate Again Button
                            Button {
+                               Haptics.tap()
                                regenerate()
                            } label: {
                                HStack(spacing: 8) {

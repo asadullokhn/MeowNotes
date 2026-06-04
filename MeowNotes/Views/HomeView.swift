@@ -81,7 +81,7 @@ struct HomeView: View {
 
             FlowLayout(spacing: 8) {
                 ForEach(missingSections) { section in
-                    Button { activeSheet = section.sheet } label: {
+                    Button { Haptics.tap(); activeSheet = section.sheet } label: {
                         Text("+ \(section.title)")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(Color(.text))
@@ -102,7 +102,7 @@ struct HomeView: View {
                 .stroke(Color(.bubbleBorder), lineWidth: 1)
         )
         .overlay(alignment: .topTrailing) {
-            Button { withAnimation { hintDismissed = true } } label: {
+            Button { Haptics.tap(); withAnimation { hintDismissed = true } } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(Color(.text).opacity(0.5))
@@ -155,7 +155,7 @@ struct HomeView: View {
                             .accessibilityAddTraits(.isHeader)
                         }
                         .overlay(alignment: .topTrailing) {
-                            Button(action: { activeSheet = .editCat }) {
+                            Button(action: { Haptics.tap(); activeSheet = .editCat }) {
                                 Image(systemName: "pencil")
                                     .font(.system(size: 18, weight: .semibold))
                                     .foregroundStyle(.white)
@@ -167,11 +167,11 @@ struct HomeView: View {
                         }
                         // The whole hero opens the cat's profile, like the grid cards.
                         .contentShape(RoundedRectangle(cornerRadius: 30))
-                        .onTapGesture { activeSheet = .editCat }
+                        .onTapGesture { Haptics.tap(); activeSheet = .editCat }
                         .padding(.horizontal, 20)
                     
                     // MARK: - Share Banner
-                    Button(action: { activeSheet = .share }) {
+                    Button(action: { Haptics.tap(.medium); activeSheet = .share }) {
                         HStack(spacing: 10) {
                             Image(systemName: "square.and.arrow.up")
                             Text("Share \(catName)'s Care Guide")
@@ -212,6 +212,7 @@ struct HomeView: View {
                     Menu {
                         ForEach(auth.cats) { c in
                             Button {
+                                Haptics.tap()
                                 auth.selectCat(c.id)
                             } label: {
                                 if c.id == cat?.id {
@@ -223,6 +224,7 @@ struct HomeView: View {
                         }
                         Divider()
                         Button {
+                            Haptics.tap()
                             activeSheet = .newCat
                         } label: {
                             Label("Add new cat", systemImage: "plus")
@@ -241,6 +243,7 @@ struct HomeView: View {
                     .padding(.leading, 20)
                     Spacer()
                     Button {
+                        Haptics.tap()
                         showAccount = true
                     } label: {
                         Image(systemName: "person.crop.circle")

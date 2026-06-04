@@ -67,7 +67,7 @@ struct EditBasicCareView: View {
                                     .foregroundStyle(Color(.text))
                                     .focused($focusedCheck, equals: index)
                                 Spacer(minLength: 8)
-                                Button { focusedCheck = index } label: {
+                                Button { Haptics.tap(); focusedCheck = index } label: {
                                     Image(systemName: "pencil")
                                         .font(.system(size: 13, weight: .semibold))
                                         .foregroundStyle(Color(.text).opacity(0.45))

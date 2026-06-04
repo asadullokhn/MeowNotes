@@ -67,7 +67,7 @@ struct CatDOBField: View {
                         .labelsHidden()
                         .accessibilityLabel("Date of birth")
                     Spacer()
-                    Button { self.dob = nil } label: {
+                    Button { Haptics.tap(); self.dob = nil } label: {
                         Text("Clear")
                             .font(.subheadline)
                             .foregroundStyle(Color(.text).opacity(0.6))
@@ -85,7 +85,7 @@ struct CatDOBField: View {
                     .font(.caption)
                     .foregroundStyle(Color(.text).opacity(0.6))
             } else {
-                Button { dob = Self.defaultDOB } label: {
+                Button { Haptics.tap(); dob = Self.defaultDOB } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "calendar")
                         Text("Add date of birth")

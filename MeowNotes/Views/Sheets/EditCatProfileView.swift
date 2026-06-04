@@ -80,7 +80,7 @@ struct EditCatProfileView: View {
 
                         FlowLayout(spacing: 8) {
                             ForEach(commonBreeds, id: \.self) { option in
-                                Button { breed = option } label: { breedChip(option) }
+                                Button { Haptics.tap(); breed = option } label: { breedChip(option) }
                                     .buttonStyle(.plain)
                             }
                         }
@@ -160,7 +160,7 @@ struct EditCatProfileView: View {
                     .font(.caption)
                     .foregroundStyle(Color(.text).opacity(0.6))
                     .multilineTextAlignment(.center)
-                Button { applyDeceased(false) } label: {
+                Button { Haptics.tap(); applyDeceased(false) } label: {
                     Text("They're still with us — undo")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(memorialColor)
@@ -187,7 +187,7 @@ struct EditCatProfileView: View {
                     DatePicker("", selection: $deceasedDate, in: ...Date(), displayedComponents: .date)
                         .labelsHidden()
                     Spacer()
-                    Button { applyDeceased(true) } label: {
+                    Button { Haptics.tap(); applyDeceased(true) } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "camera.macro")
                             Text("Mark as deceased")
@@ -209,7 +209,7 @@ struct EditCatProfileView: View {
 
     // The destructive half — kept visually distinct and lower down.
     private var removeSection: some View {
-        Button(role: .destructive) { showingDeleteConfirm = true } label: {
+        Button(role: .destructive) { Haptics.tap(.medium); showingDeleteConfirm = true } label: {
             HStack(spacing: 6) {
                 Image(systemName: "trash")
                 Text("Remove cat profile")
@@ -309,7 +309,7 @@ struct EditCatProfileView: View {
         field("Sex · optional") {
             HStack(spacing: 8) {
                 ForEach(["Male", "Female"], id: \.self) { option in
-                    Button { gender = (gender == option ? "" : option) } label: { sexChip(option) }
+                    Button { Haptics.tap(); gender = (gender == option ? "" : option) } label: { sexChip(option) }
                         .buttonStyle(.plain)
                 }
             }

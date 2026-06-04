@@ -61,7 +61,7 @@ struct AuthPrimaryButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: { Haptics.tap(.medium); action() }) {
             ZStack {
                 if loading {
                     ProgressView().tint(.white)

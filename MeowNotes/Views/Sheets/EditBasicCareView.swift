@@ -78,7 +78,7 @@ struct EditBasicCareView: View {
                     let commonChecks = commonChecklistItems.filter { !isCommonItemAdded($0) }
                     if !commonChecks.isEmpty {
                         VStack(alignment: .leading, spacing: 14) {
-                            SectionLabel("Common ones")
+                            SectionLabel("TAP TO ADD")
                             FlowLayout(spacing: 12) {
                                 ForEach(commonChecks, id: \.self) { item in
                                     AddBubble(text: item) {

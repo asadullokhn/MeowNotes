@@ -67,7 +67,7 @@ struct EditCautionView: View {
                     let commonCautions = vm.availableTags.filter { tag in !vm.selectedTags.contains { $0.text == tag } }
                     if !commonCautions.isEmpty || !vm.customAvailableTags.isEmpty {
                         VStack(alignment: .leading, spacing: 14) {
-                            SectionLabel("Common ones")
+                            SectionLabel("TAP TO ADD")
                             ForEach(commonCautions, id: \.self) { tag in
                                 AddBubble(text: tag) {
                                     vm.addTag(tag)

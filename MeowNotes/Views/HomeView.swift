@@ -21,7 +21,7 @@ struct HomeView: View {
     // Setup-hint visibility. Unlike the web (dismissed forever in localStorage),
     // we only hide it for this session so it gently returns next launch.
     @State private var hintDismissed = false
-
+    
     private var cat: Cat? { auth.currentCat }
     private var catName: String { cat?.name ?? "Your cat" }
     private var catSubtitle: String {
@@ -30,7 +30,7 @@ struct HomeView: View {
             .filter { !$0.isEmpty }
             .joined(separator: ", ")
     }
-
+    
     // Home-grid subtitles, derived from the current cat (mirrors Home.vue).
     private var personalitySubtitle: String {
         let n = cat?.traitCount ?? 0
@@ -53,19 +53,46 @@ struct HomeView: View {
         let n = cat?.noteCount ?? 0
         return n > 0 ? "\(n) note\(n == 1 ? "" : "s")" : "Not set yet"
     }
-
+    private var personalityCount: Int {
+        let count = cat?.traitCount ?? 0
+        return count
+    }
+    private var routineCount: Int {
+        let count = cat?.traitCount ?? 0
+        return count
+    }
+    private var basicCareCount: Int {
+        let count = cat?.traitCount ?? 0
+        return count
+    }
+    private var medicalCount: Int {
+        var count = 0
+        if(cat?.vetName != nil){
+            count = 1
+        }
+        return count
+    }
+    private var cautionCount: Int {
+        let count = cat?.traitCount ?? 0
+        return count
+    }
+    private var noteCount: Int {
+        let count = cat?.traitCount ?? 0
+        return count
+    }
+    
     // The six categories, shared by both the grid and list layouts.
     private var categories: [CategoryItem] {
         [
-            CategoryItem(sheet: .personality, icon: "pawprint", title: "Personality", subtitle: personalitySubtitle),
-            CategoryItem(sheet: .routine, icon: "clock", title: "Routine", subtitle: routineSubtitle),
-            CategoryItem(sheet: .basicCare, icon: "checkmark", title: "Daily Check", subtitle: basicCareSubtitle),
-            CategoryItem(sheet: .caution, icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle),
-            CategoryItem(sheet: .medical, icon: "cross.case", title: "Medical", subtitle: medicalSubtitle),
-            CategoryItem(sheet: .notes, icon: "doc.text", title: "Additions", subtitle: notesSubtitle),
+            CategoryItem(sheet: .personality, icon: "pawprint", title: "Personality", subtitle: personalitySubtitle, count: personalityCount),
+            CategoryItem(sheet: .routine, icon: "clock", title: "Routine", subtitle: routineSubtitle, count: routineCount),
+            CategoryItem(sheet: .basicCare, icon: "checkmark", title: "Daily Check", subtitle: basicCareSubtitle, count: basicCareCount),
+            CategoryItem(sheet: .caution, icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle, count: cautionCount),
+            CategoryItem(sheet: .medical, icon: "cross.case", title: "Medical", subtitle: medicalSubtitle, count: medicalCount),
+            CategoryItem(sheet: .notes, icon: "doc.text", title: "Additions", subtitle: notesSubtitle, count: noteCount)
         ]
     }
-
+    
     // What's still empty for this cat — drives the setup hint (mirrors Home.vue).
     private var missingSections: [MissingSection] {
         guard let cat else { return [] }
@@ -78,7 +105,7 @@ struct HomeView: View {
         if cat.noteCount == 0    { out.append(.init(title: "Additions", sheet: .notes)) }
         return out
     }
-
+    
     // Soft, dismissible banner of the sections still to fill in. Tapping a pill
     // opens that section's editor.
     private var setupHint: some View {
@@ -89,7 +116,7 @@ struct HomeView: View {
                     .foregroundStyle(Color(.text).opacity(0.7))
             }
             .padding(.trailing, 28)
-
+            
             FlowLayout(spacing: 8) {
                 ForEach(missingSections) { section in
                     Button { Haptics.tap(); activeSheet = section.sheet } label: {
@@ -124,7 +151,7 @@ struct HomeView: View {
         }
         .padding(.horizontal, 20)
     }
-
+    
     var body: some View {
         NavigationStack {
             // Using a ScrollView so the grid can scroll on smaller screens
@@ -152,7 +179,7 @@ struct HomeView: View {
                                     .font(.headline)
                                     .foregroundColor(.white)
                                     .shadow(color: .black.opacity(0.3), radius: 3)
-
+                                
                                 if !catSubtitle.isEmpty {
                                     Text(catSubtitle)
                                         .font(.subheadline)
@@ -176,7 +203,7 @@ struct HomeView: View {
                             .accessibilityLabel("Edit profile")
                             .padding(12)
                         }
-                        // The whole hero opens the cat's profile, like the grid cards.
+                    // The whole hero opens the cat's profile, like the grid cards.
                         .contentShape(RoundedRectangle(cornerRadius: 30))
                         .onTapGesture { Haptics.tap(); activeSheet = .editCat }
                         .padding(.horizontal, 20)
@@ -197,12 +224,12 @@ struct HomeView: View {
                         .background(Color(.saveBg), in: RoundedRectangle(cornerRadius: 20))
                     }
                     .padding(.horizontal, 20)
-
+                    
                     // MARK: - Setup hint — sections still to fill in
                     if !hintDismissed && !missingSections.isEmpty {
                         setupHint
                     }
-
+                    
                     // MARK: - Care guide header + view toggle
                     HStack {
                         SectionLabel("Care guide")
@@ -227,7 +254,7 @@ struct HomeView: View {
                         .accessibilityLabel(expandedLayout ? "Switch to card view" : "Switch to guide view")
                     }
                     .padding(.horizontal, 20)
-
+                    
                     // MARK: - Categories — compact cards, or the full expanded guide
                     if expandedLayout {
                         ExpandedHomeView(cat: cat) { activeSheet = $0 }
@@ -236,7 +263,7 @@ struct HomeView: View {
                     } else {
                         LazyVGrid(columns: columns, spacing: 16) {
                             ForEach(categories) { item in
-                                GridCard(icon: item.icon, title: item.title, subtitle: item.subtitle) {
+                                GridCard(icon: item.icon, title: item.title, subtitle: item.subtitle, count:item.count) {
                                     activeSheet = item.sheet
                                 }
                             }
@@ -333,13 +360,14 @@ private struct CategoryItem: Identifiable {
     let icon: String
     let title: String
     let subtitle: String
+    let count: Int
 }
 
 // MARK: - Expanded guide variant — every section's content inline (vs. cards)
 private struct ExpandedHomeView: View {
     let cat: Cat?
     let onOpen: (HomeSheet) -> Void
-
+    
     var body: some View {
         VStack(spacing: 16) {
             personality
@@ -350,7 +378,7 @@ private struct ExpandedHomeView: View {
             additions
         }
     }
-
+    
     // A section card: a tappable header (opens the editor) plus its content.
     @ViewBuilder
     private func section<Content: View>(_ icon: String, _ title: String, _ sheet: HomeSheet,
@@ -374,7 +402,7 @@ private struct ExpandedHomeView: View {
                         .font(.system(size: 14))
                         .foregroundStyle(Color(.text).opacity(0.35))
                 }
-
+                
                 content()
             }
             .padding(16)
@@ -388,14 +416,14 @@ private struct ExpandedHomeView: View {
         }
         .buttonStyle(.plain)
     }
-
+    
     private func emptyHint(_ text: String) -> some View {
         Text(text)
             .font(.subheadline)
             .foregroundStyle(Color(.text).opacity(0.4))
             .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     private var personality: some View {
         section("pawprint", "Personality", .personality) {
             let traits = cat?.personality ?? []
@@ -427,7 +455,7 @@ private struct ExpandedHomeView: View {
             }
         }
     }
-
+    
     private var routine: some View {
         section("clock", "Routine", .routine) {
             let items = cat?.feedingRoutine ?? []
@@ -458,7 +486,7 @@ private struct ExpandedHomeView: View {
             }
         }
     }
-
+    
     private var dailyCheck: some View {
         section("checkmark", "Daily Check", .basicCare) {
             let checks = cat?.checks ?? []
@@ -480,7 +508,7 @@ private struct ExpandedHomeView: View {
             }
         }
     }
-
+    
     private var caution: some View {
         section("exclamationmark.triangle", "Caution", .caution) {
             let cautions = (cat?.notes ?? []).filter { $0.urgent == true }
@@ -503,7 +531,7 @@ private struct ExpandedHomeView: View {
             }
         }
     }
-
+    
     private var medical: some View {
         section("cross.case", "Medical", .medical) {
             let med = cat?.medical
@@ -549,7 +577,7 @@ private struct ExpandedHomeView: View {
             }
         }
     }
-
+    
     private var additions: some View {
         section("doc.text", "Additions", .notes) {
             let adds = (cat?.notes ?? []).filter { $0.urgent != true }
@@ -580,8 +608,9 @@ struct GridCard: View {
     let icon: String
     let title: String
     let subtitle: String
+    let count: Int
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: { Haptics.tap(); action() }) {
             VStack(alignment: .leading) {
@@ -592,14 +621,14 @@ struct GridCard: View {
                     .clipShape(Circle())
                     .overlay(Circle().stroke(Color(.bubbleBorder), lineWidth: 1))
                     .foregroundStyle(Color(.text))
-
+                
                 Spacer(minLength: 20)
-
+                
                 Text(title)
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundStyle(Color(.text))
-
+                
                 Text(subtitle)
                     .font(.subheadline)
                     .foregroundStyle(Color(.text).opacity(0.6))
@@ -607,7 +636,8 @@ struct GridCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
+            
+            .background(count != 0 ? Color(.bubbleBg) : Color(.bubbleBorder), in: RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(Color(.bubbleBorder), lineWidth: 1)
@@ -620,5 +650,4 @@ struct GridCard: View {
 #Preview {
     HomeView(onSignOut: {})
         .environment(AuthManager())
-        .preferredColorScheme(.dark)
 }

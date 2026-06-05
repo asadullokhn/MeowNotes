@@ -610,7 +610,7 @@ struct GridCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(count != 0 ? Color(.bubbleBg) : Color(.bubbleBorder), in: RoundedRectangle(cornerRadius: 20))
+            .background(count != 0 ? Color(.bubbleBg) : Color(.noData), in: RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(Color(.bubbleBorder), lineWidth: 1)

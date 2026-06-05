@@ -16,7 +16,6 @@ struct AccountView: View {
     // Inline profile editing (name + phone), right here in Settings.
     @State private var name = ""
     @State private var phone = ""
-    @State private var savingProfile = false
     @State private var profileError = ""
     @State private var loadedProfile = false
     @State private var saveTask: Task<Void, Never>?
@@ -292,36 +291,44 @@ struct AccountView: View {
     }
 
     // Auto-save after a short pause so we don't PATCH on every keystroke. Each
-    // edit cancels and reschedules the pending save.
+    // edit cancels and reschedules the pending wait — only the wait, never an
+    // in-flight PATCH.
     private func scheduleSave() {
         saveTask?.cancel()
         guard canSaveProfile, profileChanged else { return }
         saveTask = Task {
             try? await Task.sleep(nanoseconds: 1_200_000_000)
             if Task.isCancelled { return }
-            await saveProfileNow()
+            saveProfile()
         }
     }
 
     // Save immediately (on Return, or when leaving the screen) — skip the wait.
     private func flushSave() {
         saveTask?.cancel()
-        Task { await saveProfileNow() }
+        saveProfile()
     }
 
-    private func saveProfileNow() async {
-        guard canSaveProfile, profileChanged, !savingProfile else { return }
+    // Persist the current name/phone. The network call runs on its own task,
+    // detached from `saveTask`, so cancelling the debounce — a new keystroke or
+    // leaving the screen — can't abort an in-flight PATCH. If it could, the
+    // server would update but `auth.user` wouldn't, and the next visit to
+    // Settings (which reloads from `auth.user`) would show the old name/phone.
+    // Values are snapshotted here so the task never reads torn-down @State.
+    private func saveProfile() {
+        let newName = name.trimmingCharacters(in: .whitespaces)
+        let newPhone = phone.trimmingCharacters(in: .whitespaces)
+        guard !newName.isEmpty,
+              newName != (auth.user?.name ?? "") || newPhone != (auth.user?.phone ?? "")
+        else { return }
         profileError = ""
-        savingProfile = true
-        do {
-            try await auth.updateProfile(
-                name: name.trimmingCharacters(in: .whitespaces),
-                phone: phone.trimmingCharacters(in: .whitespaces)
-            )
-        } catch {
-            profileError = error.localizedDescription
+        Task {
+            do {
+                try await auth.updateProfile(name: newName, phone: newPhone)
+            } catch {
+                profileError = error.localizedDescription
+            }
         }
-        savingProfile = false
     }
 
     private func row(icon: String, title: String, tint: Color = Color("TextColor"),

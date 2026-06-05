@@ -1,6 +1,6 @@
 //
 //  EditCatProfileView.swift
-//  MeowNotes
+//  MENG
 //
 //  Modal editor for a cat's basics (name, photo, breed, age). Ported from
 //  MochiApp's EditBasicsSheet.vue. Save persists via PATCH /api/cats and only

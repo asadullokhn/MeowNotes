@@ -7,7 +7,7 @@ name: Signing guard
 on:
   pull_request:
     paths:
-      - "MeowNotes.xcodeproj/project.pbxproj"
+      - "MENG.xcodeproj/project.pbxproj"
   push:
     branches: [main]
 
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Reject hardcoded signing in project.pbxproj
         run: |
-          pbxproj="MeowNotes.xcodeproj/project.pbxproj"
+          pbxproj="MENG.xcodeproj/project.pbxproj"
           if grep -nE 'DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER|MeowRy' "$pbxproj"; then
             echo "::error::Hardcoded signing found in $pbxproj. Move DEVELOPMENT_TEAM / PRODUCT_BUNDLE_IDENTIFIER to Signing.xcconfig (or Local.xcconfig) and remove these lines."
             exit 1

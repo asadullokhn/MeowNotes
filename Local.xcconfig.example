@@ -7,8 +7,8 @@
 // Simulator builds work without it.
 
 // Use your own reverse-DNS identifier — Apple won't let two free accounts
-// share a bundle ID. Pattern: com.<yourname>.MeowNotes
-PRODUCT_BUNDLE_IDENTIFIER = com.YOURNAME.MeowNotes
+// share a bundle ID. Pattern: com.<yourname>.meng
+PRODUCT_BUNDLE_IDENTIFIER = com.YOURNAME.meng
 
 // Find this in Xcode: Settings ▸ Accounts ▸ select your Apple ID ▸ Manage Certificates.
 // The 10-char string in parentheses next to "Personal Team" is your team ID.

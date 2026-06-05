@@ -2,7 +2,7 @@
 // Every teammate uses these unless they create their own Local.xcconfig.
 // Simulator builds work with just these defaults.
 
-PRODUCT_BUNDLE_IDENTIFIER = com.adap.MeowNotes
+PRODUCT_BUNDLE_IDENTIFIER = com.adap.meng
 DEVELOPMENT_TEAM =
 CODE_SIGN_STYLE = Automatic
 

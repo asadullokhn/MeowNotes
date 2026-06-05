@@ -1,4 +1,4 @@
-# MeowNotes
+# MENG!
 
 A simple iOS notes app built by a learning team.
 
@@ -14,7 +14,7 @@ A simple iOS notes app built by a learning team.
 ```bash
 git clone <repo-url>
 cd MeowNotes_CH3
-open MeowNotes.xcodeproj
+open MENG.xcodeproj
 ```
 
 In Xcode: pick an iPhone simulator (e.g. **iPhone 17**) from the device selector at the top, press **⌘R**. You should see a notes list with two seed entries.
@@ -33,15 +33,15 @@ MeowNotes_CH3/
 ├── README.md                 ← this file
 ├── Signing.xcconfig          ← shared signing defaults (see §7)
 ├── Local.xcconfig.example    ← copy → Local.xcconfig for personal device builds
-├── MeowNotes.xcodeproj/      ← Xcode project, committed
-└── MeowNotes/                ← Synchronized Folder — all source code lives here
-    ├── MeowNotesApp.swift    ← app entry point (@main)
+├── MENG.xcodeproj/      ← Xcode project, committed
+└── MENG/                ← Synchronized Folder — all source code lives here
+    ├── MENGApp.swift    ← app entry point (@main)
     ├── ContentView.swift     ← root view
     ├── Assets.xcassets/      ← images, colors, app icon
     └── Preview Content/      ← SwiftUI preview-only assets
 ```
 
-Add new `.swift` files under `MeowNotes/` and they appear in Xcode automatically (see §3).
+Add new `.swift` files under `MENG/` and they appear in Xcode automatically (see §3).
 
 ---
 
@@ -49,11 +49,11 @@ Add new `.swift` files under `MeowNotes/` and they appear in Xcode automatically
 
 The classic Xcode team pain: two people add a file at the same time → `project.pbxproj` conflicts → nobody can build.
 
-**Xcode 16+ fixed this with Synchronized Folders.** The `MeowNotes` group is configured as a synchronized root group — Xcode reads its contents from disk automatically. Adding/removing files doesn't edit `project.pbxproj`, so no merge conflicts.
+**Xcode 16+ fixed this with Synchronized Folders.** The `MENG` group is configured as a synchronized root group — Xcode reads its contents from disk automatically. Adding/removing files doesn't edit `project.pbxproj`, so no merge conflicts.
 
 **How to add new code:**
 
-- Just create new `.swift` files inside `MeowNotes/` (or any subfolder) from Finder, your terminal, or Xcode's *File ▸ New ▸ File…* dialog. They show up in the navigator immediately.
+- Just create new `.swift` files inside `MENG/` (or any subfolder) from Finder, your terminal, or Xcode's *File ▸ New ▸ File…* dialog. They show up in the navigator immediately.
 - New subfolders also appear automatically.
 - **You do NOT need to drag files into the project** like in old Xcode tutorials.
 
@@ -111,7 +111,7 @@ If you ever see one of these in `git status`, double-check your `.gitignore`.
 1. Don't panic. `.gitattributes` is set with `merge=union` so most conflicts auto-resolve.
 2. If you still see one:
    ```bash
-   git checkout --theirs MeowNotes.xcodeproj/project.pbxproj
+   git checkout --theirs MENG.xcodeproj/project.pbxproj
    ```
 3. Build (⌘B). If it builds, commit. If not, ask the team.
 
@@ -128,9 +128,9 @@ Apple won't let two free Apple IDs use the same bundle identifier, so each teamm
    cp Local.xcconfig.example Local.xcconfig
    ```
 2. Open `Local.xcconfig` and edit two values:
-   - `PRODUCT_BUNDLE_IDENTIFIER` — pick something unique, e.g. `com.lenny.MeowNotes`
+   - `PRODUCT_BUNDLE_IDENTIFIER` — pick something unique, e.g. `com.lenny.meng`
    - `DEVELOPMENT_TEAM` — find it in Xcode: *Settings ▸ Accounts ▸ Manage Certificates* → the 10-character string next to "Personal Team"
-3. In Xcode: project → target **MeowNotes** → **Signing & Capabilities** → **Team:** *Add an Account…* and log in with your personal Apple ID.
+3. In Xcode: project → target **MENG** → **Signing & Capabilities** → **Team:** *Add an Account…* and log in with your personal Apple ID.
 4. Plug in your iPhone, trust the computer, select it as the run target.
 5. ⌘R → on the phone: **Settings ▸ General ▸ VPN & Device Management** → trust your Apple ID.
 6. App runs for **7 days**; re-run from Xcode to extend.
@@ -157,8 +157,8 @@ Short, imperative, no emojis:
 To check the project builds without opening Xcode:
 
 ```bash
-xcodebuild -project MeowNotes.xcodeproj \
-  -scheme MeowNotes \
+xcodebuild -project MENG.xcodeproj \
+  -scheme MENG \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
   -configuration Debug build
 ```
@@ -169,7 +169,7 @@ You should see `** BUILD SUCCEEDED **` at the end.
 
 ## 10. Who owns which view
 
-Every view is a separate file under `MeowNotes/Views/` so two people can never edit the same file at the same time. Pick one, write your name on the `Owner:` comment at the top of the file, and you own it.
+Every view is a separate file under `MENG/Views/` so two people can never edit the same file at the same time. Pick one, write your name on the `Owner:` comment at the top of the file, and you own it.
 
 **Navigation is already wired** — you don't need to touch `ContentView.swift` or `HomeView.swift`. Just open the file with your name on it, replace the placeholder body, and your view will be reachable from the home screen.
 
@@ -177,24 +177,24 @@ Every view is a separate file under `MeowNotes/Views/` so two people can never e
 
 | View | File | Owner |
 |---|---|---|
-| Home dashboard | [MeowNotes/Views/HomeView.swift](MeowNotes/Views/HomeView.swift) | TBD |
-| Login | [MeowNotes/Views/LoginView.swift](MeowNotes/Views/LoginView.swift) | TBD |
-| Account / profile | [MeowNotes/Views/AccountView.swift](MeowNotes/Views/AccountView.swift) | TBD |
-| Sitter Guide (public) | [MeowNotes/Views/GuideView.swift](MeowNotes/Views/GuideView.swift) | TBD |
+| Home dashboard | [MENG/Views/HomeView.swift](MENG/Views/HomeView.swift) | TBD |
+| Login | [MENG/Views/LoginView.swift](MENG/Views/LoginView.swift) | TBD |
+| Account / profile | [MENG/Views/AccountView.swift](MENG/Views/AccountView.swift) | TBD |
+| Sitter Guide (public) | [MENG/Views/GuideView.swift](MENG/Views/GuideView.swift) | TBD |
 
 ### Modal edit sheets (opened from Home)
 
 | Sheet | File | Owner |
 |---|---|---|
-| Personality | [MeowNotes/Views/Sheets/EditPersonalityView.swift](MeowNotes/Views/Sheets/EditPersonalityView.swift) | TBD |
-| Routine | [MeowNotes/Views/Sheets/EditRoutineView.swift](MeowNotes/Views/Sheets/EditRoutineView.swift) | TBD |
-| Basic Care | [MeowNotes/Views/Sheets/EditBasicCareView.swift](MeowNotes/Views/Sheets/EditBasicCareView.swift) | TBD |
-| Preferences | [MeowNotes/Views/Sheets/EditPreferencesView.swift](MeowNotes/Views/Sheets/EditPreferencesView.swift) | TBD |
-| Caution | [MeowNotes/Views/Sheets/EditCautionView.swift](MeowNotes/Views/Sheets/EditCautionView.swift) | TBD |
-| Medical | [MeowNotes/Views/Sheets/EditMedicalView.swift](MeowNotes/Views/Sheets/EditMedicalView.swift) | TBD |
-| Notes | [MeowNotes/Views/Sheets/EditNotesView.swift](MeowNotes/Views/Sheets/EditNotesView.swift) | TBD |
-| New Cat | [MeowNotes/Views/Sheets/NewCatView.swift](MeowNotes/Views/Sheets/NewCatView.swift) | TBD |
-| Share | [MeowNotes/Views/Sheets/ShareView.swift](MeowNotes/Views/Sheets/ShareView.swift) | TBD |
+| Personality | [MENG/Views/Sheets/EditPersonalityView.swift](MENG/Views/Sheets/EditPersonalityView.swift) | TBD |
+| Routine | [MENG/Views/Sheets/EditRoutineView.swift](MENG/Views/Sheets/EditRoutineView.swift) | TBD |
+| Basic Care | [MENG/Views/Sheets/EditBasicCareView.swift](MENG/Views/Sheets/EditBasicCareView.swift) | TBD |
+| Preferences | [MENG/Views/Sheets/EditPreferencesView.swift](MENG/Views/Sheets/EditPreferencesView.swift) | TBD |
+| Caution | [MENG/Views/Sheets/EditCautionView.swift](MENG/Views/Sheets/EditCautionView.swift) | TBD |
+| Medical | [MENG/Views/Sheets/EditMedicalView.swift](MENG/Views/Sheets/EditMedicalView.swift) | TBD |
+| Notes | [MENG/Views/Sheets/EditNotesView.swift](MENG/Views/Sheets/EditNotesView.swift) | TBD |
+| New Cat | [MENG/Views/Sheets/NewCatView.swift](MENG/Views/Sheets/NewCatView.swift) | TBD |
+| Share | [MENG/Views/Sheets/ShareView.swift](MENG/Views/Sheets/ShareView.swift) | TBD |
 
 ### Rules
 

@@ -71,7 +71,6 @@ struct LoginView: View {
                     Text(isRegister ? "Have an account? Sign in" : "New here? Create an account")
                         .font(.footnote.weight(.semibold))
                         .foregroundColor(Color("XBtnBg"))
-                        .underline()
                         .frame(maxWidth: .infinity)
                 }
                 .padding(.top, 16)
@@ -80,7 +79,6 @@ struct LoginView: View {
                     Button("Forgot password?") { showForgot = true }
                         .font(.footnote.weight(.semibold))
                         .foregroundColor(Color("XBtnBg"))
-                        .underline()
                         .frame(maxWidth: .infinity)
                         .padding(.top, 10)
                 }

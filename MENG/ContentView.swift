@@ -53,11 +53,10 @@ struct SessionBootView: View {
         ZStack {
             Color("AppBg").ignoresSafeArea()
             VStack(spacing: 16) {
-                Image(systemName: "pawprint.fill")
-                    .font(.system(size: 28))
-                    .foregroundColor(Color("AppBg"))
+                Image("AppLogo")
+                    .resizable()
+                    .scaledToFill()
                     .frame(width: 56, height: 56)
-                    .background(Color("SaveBg"))
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                 ProgressView().tint(Color("TextColor"))
             }

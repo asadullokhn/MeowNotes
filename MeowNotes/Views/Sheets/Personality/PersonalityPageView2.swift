@@ -42,7 +42,7 @@ struct PersonalityPageView2: View {
                                 .multilineTextAlignment(.leading)
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
-                                .foregroundStyle(Color("TextColor"))
+                                .foregroundStyle(Color("TitleColor"))
                                 .accessibilityAddTraits(.isHeader)
                             Text("Written from the traits you picked. Tweak the wording, or generate a fresh take.")
                                 .font(.subheadline)

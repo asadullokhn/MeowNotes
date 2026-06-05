@@ -50,7 +50,7 @@ struct EditRoutineView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .fixedSize(horizontal: false, vertical: true)
-                            .foregroundStyle(Color("TextColor"))
+                            .foregroundStyle(Color("TitleColor"))
                             .accessibilityAddTraits(.isHeader)
                         Text("Add the regular things — food, play, litter. Sitters will follow this as today's checklist.")
                             .font(.subheadline)

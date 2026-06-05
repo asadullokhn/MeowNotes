@@ -46,7 +46,7 @@ struct EditBasicCareView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .fixedSize(horizontal: false, vertical: true)
-                            .foregroundStyle(Color("TextColor"))
+                            .foregroundStyle(Color("TitleColor"))
                             .accessibilityAddTraits(.isHeader)
                         Text("Cat-care tasks with no fixed time. Your sitter ticks these off in their guide — you just list them here.")
                             .font(.subheadline)

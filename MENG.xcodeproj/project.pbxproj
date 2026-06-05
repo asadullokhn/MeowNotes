@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		11111111111111111111A001 /* MeowNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeowNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		11111111111111111111A001 /* MENG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MENG.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		11111111111111111111B001 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		11111111111111111111A002 /* MeowNotes */ = {
+		11111111111111111111A002 /* MENG */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MeowNotes;
+			path = MENG;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -34,7 +34,7 @@
 			isa = PBXGroup;
 			children = (
 				11111111111111111111B001 /* Signing.xcconfig */,
-				11111111111111111111A002 /* MeowNotes */,
+				11111111111111111111A002 /* MENG */,
 				11111111111111111111A005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -42,7 +42,7 @@
 		11111111111111111111A005 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				11111111111111111111A001 /* MeowNotes.app */,
+				11111111111111111111A001 /* MENG.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -50,9 +50,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		11111111111111111111A006 /* MeowNotes */ = {
+		11111111111111111111A006 /* MENG */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 11111111111111111111A007 /* Build configuration list for PBXNativeTarget "MeowNotes" */;
+			buildConfigurationList = 11111111111111111111A007 /* Build configuration list for PBXNativeTarget "MENG" */;
 			buildPhases = (
 				11111111111111111111A008 /* Sources */,
 				11111111111111111111A003 /* Frameworks */,
@@ -63,13 +63,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				11111111111111111111A002 /* MeowNotes */,
+				11111111111111111111A002 /* MENG */,
 			);
-			name = MeowNotes;
+			name = MENG;
 			packageProductDependencies = (
 			);
-			productName = MeowNotes;
-			productReference = 11111111111111111111A001 /* MeowNotes.app */;
+			productName = MENG;
+			productReference = 11111111111111111111A001 /* MENG.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -86,7 +86,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 11111111111111111111A00B /* Build configuration list for PBXProject "MeowNotes" */;
+			buildConfigurationList = 11111111111111111111A00B /* Build configuration list for PBXProject "MENG" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -100,7 +100,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				11111111111111111111A006 /* MeowNotes */,
+				11111111111111111111A006 /* MENG */,
 			);
 		};
 /* End PBXProject section */
@@ -133,7 +133,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"MeowNotes/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"MENG/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo of your cat for their profile.";
@@ -147,6 +147,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				INFOPLIST_KEY_CFBundleDisplayName = "MENG!";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -163,7 +165,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"MeowNotes/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"MENG/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo of your cat for their profile.";
@@ -177,6 +179,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				INFOPLIST_KEY_CFBundleDisplayName = "MENG!";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -310,7 +314,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		11111111111111111111A007 /* Build configuration list for PBXNativeTarget "MeowNotes" */ = {
+		11111111111111111111A007 /* Build configuration list for PBXNativeTarget "MENG" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				11111111111111111111A00C /* Debug */,
@@ -319,7 +323,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		11111111111111111111A00B /* Build configuration list for PBXProject "MeowNotes" */ = {
+		11111111111111111111A00B /* Build configuration list for PBXProject "MENG" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				11111111111111111111A00E /* Debug */,

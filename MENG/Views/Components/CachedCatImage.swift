@@ -1,6 +1,6 @@
 //
 //  CachedCatImage.swift
-//  MeowNotes
+//  MENG
 //
 //  Drop-in replacement for AsyncImage for cat photos. AsyncImage re-fetches the
 //  remote URL (or re-decodes the base64 data URL) on every launch, so the hero

@@ -105,7 +105,7 @@ struct LoginView: View {
                 .frame(width: 44, height: 44)
                 .background(Color("SaveBg"))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
-            Text("MeowNotes")
+            Text("MENG!")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(Color("TextColor"))

@@ -153,7 +153,7 @@ struct ShareView: View {
                             .fill(Color.white.opacity(colorScheme == .dark ? 1 : 0.7)))
 
                         // OPEN THE GUIDE IN AN IN-APP BROWSER (preview what the
-                        // sitter sees, without leaving MeowNotes).
+                        // sitter sees, without leaving MENG).
                         Button {
                             Haptics.tap()
                             showPreview = true

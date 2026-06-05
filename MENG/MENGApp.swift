@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct MeowNotesApp: App {
+struct MENGApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

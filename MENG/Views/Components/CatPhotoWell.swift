@@ -1,6 +1,6 @@
 //
 //  CatPhotoWell.swift
-//  MeowNotes
+//  MENG
 //
 //  Tappable photo picker used by the New Cat and Basics editors. Owns the
 //  PhotosPicker so its label is built inline (no main-actor computed properties

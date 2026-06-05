@@ -1,7 +1,7 @@
 // Owner: TBD (claim by editing this line)
 //
 // Thin SwiftUI wrapper around SFSafariViewController so we can show a web page
-// (the shared sitter guide) in an in-app browser without leaving MeowNotes.
+// (the shared sitter guide) in an in-app browser without leaving MENG.
 // The controller brings its own Done button and an "Open in Safari" handoff.
 
 import SwiftUI

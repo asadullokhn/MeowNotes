@@ -36,7 +36,7 @@ struct EditCautionView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .fixedSize(horizontal: false, vertical: true)
-                            .foregroundStyle(Color("TextColor"))
+                            .foregroundStyle(Color("TitleColor"))
                             .accessibilityAddTraits(.isHeader)
                         Text("The must-reads — foods your cat can't eat, warnings, medication. Sitters see these pinned to the top of the guide.")
                             .font(.subheadline)

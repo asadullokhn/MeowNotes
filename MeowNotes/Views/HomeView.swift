@@ -601,7 +601,7 @@ struct GridCard: View {
                 Text(title)
                     .font(.headline)
                     .fontWeight(.bold)
-                    .foregroundStyle(Color(.text))
+                    .foregroundStyle(Color("TitleColor"))
 
                 Text(subtitle)
                     .font(.subheadline)

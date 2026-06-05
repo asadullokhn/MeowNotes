@@ -69,7 +69,7 @@ struct EditMedicalView: View {
                         Text("Health & vet.")
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                            .foregroundStyle(Color(.text))
+                            .foregroundStyle(Color("TitleColor"))
                             .accessibilityAddTraits(.isHeader)
 
                         Text("Tap a row to fill it in — one thing at a time.")

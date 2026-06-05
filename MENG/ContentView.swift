@@ -43,6 +43,13 @@ struct ContentView: View {
         .environment(auth)
         .preferredColorScheme(AppAppearance(rawValue: appearance)?.colorScheme)
         .task { await auth.boot() }
+        // Once signed in, ask for notification permission (first time) and
+        // register this device's APNs token with the backend.
+        .task(id: auth.isAuthenticated) {
+            if auth.isAuthenticated {
+                await PushManager.shared.syncRegistration(auth: auth)
+            }
+        }
     }
 }
 

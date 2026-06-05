@@ -53,16 +53,17 @@ struct HomeView: View {
         let n = cat?.noteCount ?? 0
         return n > 0 ? "\(n) note\(n == 1 ? "" : "s")" : "Not set yet"
     }
-
-    // The six categories, shared by both the grid and list layouts.
+    // The six categories, shared by both the grid and list layouts. `count` is
+    // each section's own item count (0 = not set yet), driving the card's
+    // not-set background.
     private var categories: [CategoryItem] {
         [
-            CategoryItem(sheet: .personality, icon: "pawprint", title: "Personality", subtitle: personalitySubtitle),
-            CategoryItem(sheet: .routine, icon: "clock", title: "Routine", subtitle: routineSubtitle),
-            CategoryItem(sheet: .basicCare, icon: "checkmark", title: "Daily Check", subtitle: basicCareSubtitle),
-            CategoryItem(sheet: .caution, icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle),
-            CategoryItem(sheet: .medical, icon: "cross.case", title: "Medical", subtitle: medicalSubtitle),
-            CategoryItem(sheet: .notes, icon: "doc.text", title: "Additions", subtitle: notesSubtitle),
+            CategoryItem(sheet: .personality, icon: "pawprint", title: "Personality", subtitle: personalitySubtitle, count: cat?.traitCount ?? 0),
+            CategoryItem(sheet: .routine, icon: "clock", title: "Routine", subtitle: routineSubtitle, count: cat?.routineCount ?? 0),
+            CategoryItem(sheet: .basicCare, icon: "checkmark", title: "Daily Check", subtitle: basicCareSubtitle, count: cat?.checkCount ?? 0),
+            CategoryItem(sheet: .caution, icon: "exclamationmark.triangle", title: "Caution", subtitle: cautionSubtitle, count: cat?.cautionCount ?? 0),
+            CategoryItem(sheet: .medical, icon: "cross.case", title: "Medical", subtitle: medicalSubtitle, count: cat?.vetName != nil ? 1 : 0),
+            CategoryItem(sheet: .notes, icon: "doc.text", title: "Additions", subtitle: notesSubtitle, count: cat?.noteCount ?? 0)
         ]
     }
 
@@ -180,7 +181,7 @@ struct HomeView: View {
                         .contentShape(RoundedRectangle(cornerRadius: 30))
                         .onTapGesture { Haptics.tap(); activeSheet = .editCat }
                         .padding(.horizontal, 20)
-                    
+
                     // MARK: - Share Banner
                     Button(action: { Haptics.tap(.medium); activeSheet = .share }) {
                         HStack(spacing: 10) {
@@ -236,7 +237,7 @@ struct HomeView: View {
                     } else {
                         LazyVGrid(columns: columns, spacing: 16) {
                             ForEach(categories) { item in
-                                GridCard(icon: item.icon, title: item.title, subtitle: item.subtitle) {
+                                GridCard(icon: item.icon, title: item.title, subtitle: item.subtitle, count: item.count) {
                                     activeSheet = item.sheet
                                 }
                             }
@@ -333,6 +334,7 @@ private struct CategoryItem: Identifiable {
     let icon: String
     let title: String
     let subtitle: String
+    let count: Int
 }
 
 // MARK: - Expanded guide variant — every section's content inline (vs. cards)
@@ -580,6 +582,7 @@ struct GridCard: View {
     let icon: String
     let title: String
     let subtitle: String
+    let count: Int
     let action: () -> Void
 
     var body: some View {
@@ -607,7 +610,7 @@ struct GridCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.bubbleBg), in: RoundedRectangle(cornerRadius: 20))
+            .background(count != 0 ? Color(.bubbleBg) : Color(.bubbleBorder), in: RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(Color(.bubbleBorder), lineWidth: 1)
@@ -620,5 +623,4 @@ struct GridCard: View {
 #Preview {
     HomeView(onSignOut: {})
         .environment(AuthManager())
-        .preferredColorScheme(.dark)
 }

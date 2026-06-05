@@ -24,7 +24,7 @@ struct SectionLabel: View {
 
 #Preview {
     VStack(alignment: .leading, spacing: 12) {
-        SectionLabel("Common ones")
+        SectionLabel("TAP TO ADD")
         SectionLabel("Name", dimmed: true)
     }
     .padding()

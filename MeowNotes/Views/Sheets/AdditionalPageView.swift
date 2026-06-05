@@ -69,7 +69,7 @@ struct AdditionalPageView: View {
                     let nudges = vm.availableTags.filter { tag in !vm.selectedTags.contains { $0.text == tag } }
                     if !nudges.isEmpty || !vm.customAvailableTags.isEmpty {
                         VStack(alignment: .leading, spacing: 14) {
-                            SectionLabel("Need a nudge?")
+                            SectionLabel("TAP TO ADD")
                             ForEach(nudges, id: \.self) { tag in
                                 AddBubble(text: tag) {
                                     vm.addTag(tag)

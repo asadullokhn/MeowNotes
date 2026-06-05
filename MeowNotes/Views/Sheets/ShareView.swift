@@ -8,12 +8,22 @@ import CoreImage.CIFilterBuiltins
 
 struct ShareView: View {
     @Environment(AuthManager.self) private var auth
+    @Environment(\.colorScheme) private var colorScheme
+    @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
 
     @State private var copied = false
+    @State private var showPreview = false
+    // Natural height of the header + content, measured so the sheet hugs its
+    // content instead of stretching to a half-empty .large detent.
+    @State private var sheetHeight: CGFloat = 0
     // Token fetched/created on appear. A brand-new cat (every guest's first cat)
     // has no share row yet, so we lazily create one via the API.
     @State private var fetchedToken: String?
     @State private var loadingLink = false
+
+    // Measured height + a buffer for the home-indicator safe area; a sensible
+    // default seeds the first frame before measurement lands.
+    private var resolvedSheetHeight: CGFloat { sheetHeight > 0 ? sheetHeight + 40 : 600 }
 
     private var cat: Cat? { auth.currentCat }
     private var catName: String { cat?.name ?? "Your cat" }
@@ -28,6 +38,23 @@ struct ShareView: View {
     private var shareURL: URL? { URL(string: shareURLString) }
     private var shareDisplayURL: String { shareURLString.replacingOccurrences(of: "https://", with: "") }
     private var shareMessage: String { "Here's \(catName)'s care guide: \(shareURLString)" }
+
+    // The app's effective light/dark, resolving "system" to the current scheme.
+    private var previewTheme: String {
+        switch AppAppearance(rawValue: appearance) {
+        case .light: return "light"
+        case .dark:  return "dark"
+        default:     return colorScheme == .dark ? "dark" : "light"
+        }
+    }
+
+    // In-app preview only: seed the guide's theme to match the owner's app via
+    // ?theme= (read by the web guide's hash router as route.query.theme). Kept
+    // off the shared/QR/copied link so each sitter still gets their own theme.
+    private var previewURL: URL? {
+        guard token != nil else { return nil }
+        return URL(string: "\(shareURLString)?theme=\(previewTheme)")
+    }
 
     private func qrImage(from string: String) -> UIImage? {
         let filter = CIFilter.qrCodeGenerator()
@@ -69,6 +96,7 @@ struct ShareView: View {
                     .padding(.horizontal)
                     .padding(.top, 24)
                     .padding(.bottom, 8)
+                    .background(heightReader)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
@@ -119,7 +147,31 @@ struct ShareView: View {
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
-                        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.7)))
+                        // Solid white in dark mode (0.7 reads gray there); keep the
+                        // softer translucent white in light mode.
+                        .background(RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.white.opacity(colorScheme == .dark ? 1 : 0.7)))
+
+                        // OPEN THE GUIDE IN AN IN-APP BROWSER (preview what the
+                        // sitter sees, without leaving MeowNotes).
+                        Button {
+                            Haptics.tap()
+                            showPreview = true
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "eye")
+                                Text("Open preview")
+                            }
+                            .font(.headline)
+                            .foregroundStyle(Color(.saveBg))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 54)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color(.saveBg), lineWidth: 1.5)
+                            )
+                        }
+                        .disabled(!hasLink)
 
                         // ONE NATIVE SHARE BUTTON
                         ShareLink(item: shareURL ?? URL(string: "https://meownotes.teztun.uz")!,
@@ -166,13 +218,35 @@ struct ShareView: View {
                         }
                     }
                     .padding()
+                    .background(heightReader)
                 }
                 .presentationBackground(Color(.background))
-                .presentationDetents([.medium, .large])
+                .presentationDetents([.height(resolvedSheetHeight)])
                 .presentationDragIndicator(.visible)
             }
+            .onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }
         }
         .task { await ensureLink() }
+        .fullScreenCover(isPresented: $showPreview) {
+            if let previewURL {
+                SafariView(url: previewURL).ignoresSafeArea()
+            }
+        }
+    }
+
+    // Reports its container's height into SheetHeightKey; the key sums every
+    // reader (header + content) so the sheet detent can match the total.
+    private var heightReader: some View {
+        GeometryReader { proxy in
+            Color.clear.preference(key: SheetHeightKey.self, value: proxy.size.height)
+        }
+    }
+}
+
+private struct SheetHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value += nextValue()
     }
 }
 

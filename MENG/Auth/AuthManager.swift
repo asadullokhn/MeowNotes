@@ -127,6 +127,29 @@ final class AuthManager {
         let phone: String
     }
 
+    // POST /api/devices — register this device's APNs token so the backend can
+    // push to the signed-in user. The server upserts by token (a token moves to
+    // whoever last registered it). `environment` must match the build's APNs
+    // environment: debug builds get sandbox tokens, TestFlight/App Store get
+    // production ones.
+    func registerDevice(token: String) async throws {
+        #if DEBUG
+        let environment = "sandbox"
+        #else
+        let environment = "production"
+        #endif
+        let _: Empty = try await API.post(
+            "/api/devices",
+            DeviceRegistration(token: token, platform: "ios", environment: environment)
+        )
+    }
+
+    private struct DeviceRegistration: Encodable {
+        let token: String
+        let platform: String
+        let environment: String
+    }
+
     // DELETE /api/me — permanently remove the account and everything it owns
     // (cats + share links). Works for guests and registered users. Drops the
     // local session afterward so the app returns to the unauthenticated state.

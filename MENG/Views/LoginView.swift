@@ -99,11 +99,10 @@ struct LoginView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Image(systemName: "pawprint.fill")
-                .font(.system(size: 22))
-                .foregroundColor(Color("AppBg"))
+            Image("AppLogo")
+                .resizable()
+                .scaledToFill()
                 .frame(width: 44, height: 44)
-                .background(Color("SaveBg"))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             Text("MENG!")
                 .font(.title2)

@@ -6,8 +6,10 @@ PRODUCT_BUNDLE_IDENTIFIER = com.adap.meng
 DEVELOPMENT_TEAM =
 CODE_SIGN_STYLE = Automatic
 
-// Push Notifications capability (aps-environment lives here).
-CODE_SIGN_ENTITLEMENTS = MENG.entitlements
+// Push Notifications needs a PAID Apple Developer Program (free/personal teams
+// can't provision aps-environment). Re-enable when on a paid account by adding
+// back MENG.entitlements and:
+// CODE_SIGN_ENTITLEMENTS = MENG.entitlements
 
 // Optional per-developer overrides. Local.xcconfig is gitignored.
 // The "?" means Xcode won't error if the file doesn't exist.

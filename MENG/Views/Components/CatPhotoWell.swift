@@ -154,24 +154,31 @@ private struct PhotoWellLabel: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            // The photo fills the well as an OVERLAY on the background colour, not
+            // as a ZStack sibling. scaledToFill reports a layout size larger than
+            // the frame for a wide photo (width = height × aspect); as a sibling
+            // that oversized width balloons the ZStack and drags the whole sheet
+            // wider than the screen (clipShape only clips drawing, not layout).
+            // An overlay never grows its host, so the well stays its frame size.
             Color(.bubbleSectionBg)
-
-            if let preview {
-                preview.resizable().scaledToFill()
-            } else if !existingPhotoURL.isEmpty {
-                CachedCatImage(existingPhotoURL) { image in
-                    image.resizable().scaledToFill()
-                } placeholder: {
-                    Color.clear
+                .overlay {
+                    if let preview {
+                        preview.resizable().scaledToFill()
+                    } else if !existingPhotoURL.isEmpty {
+                        CachedCatImage(existingPhotoURL) { image in
+                            image.resizable().scaledToFill()
+                        } placeholder: {
+                            Color.clear
+                        }
+                    } else {
+                        VStack(spacing: 4) {
+                            Image(systemName: "camera.fill").font(.system(size: 18))
+                            Text("PHOTO").font(.system(size: 9, weight: .semibold)).tracking(0.5)
+                        }
+                        .foregroundStyle(Color(.text).opacity(0.6))
+                    }
                 }
-            } else {
-                VStack(spacing: 4) {
-                    Image(systemName: "camera.fill").font(.system(size: 18))
-                    Text("PHOTO").font(.system(size: 9, weight: .semibold)).tracking(0.5)
-                }
-                .foregroundStyle(Color(.text).opacity(0.6))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
+                .clipped()
 
             if showActionLabel {
                 // A solid pill so the hint stays legible over any photo (a faint

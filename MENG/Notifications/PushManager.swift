@@ -13,10 +13,18 @@ final class PushManager: NSObject, UNUserNotificationCenterDelegate {
     private weak var auth: AuthManager?
     private override init() { super.init() }
 
+    // Push needs a PAID Apple Developer account — free/personal teams can't
+    // provision the aps-environment entitlement. While this is false we skip the
+    // permission prompt and registration entirely (no dead prompt on a free
+    // build). To re-enable on a paid account: restore MENG.entitlements +
+    // CODE_SIGN_ENTITLEMENTS, then flip this to true.
+    static let isEnabled = false
+
     // Called once we're authenticated. Asks for permission the first time, then
     // (re)registers so the backend always has a fresh token for the signed-in
     // user. Re-registering on each launch is cheap and keeps the token current.
     func syncRegistration(auth: AuthManager) async {
+        guard Self.isEnabled else { return }   // no paid account → no push, no prompt
         self.auth = auth
         let center = UNUserNotificationCenter.current()
         center.delegate = self

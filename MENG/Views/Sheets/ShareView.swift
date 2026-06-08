@@ -31,9 +31,9 @@ struct ShareView: View {
     private var hasLink: Bool { token != nil }
     private var shareURLString: String {
         if let token {
-            return "https://meownotes.teztun.uz/#/g/\(token)"
+            return "https://meng.teztun.uz/#/g/\(token)"
         }
-        return "https://meownotes.teztun.uz"
+        return "https://meng.teztun.uz"
     }
     private var shareURL: URL? { URL(string: shareURLString) }
     private var shareDisplayURL: String { shareURLString.replacingOccurrences(of: "https://", with: "") }
@@ -174,7 +174,7 @@ struct ShareView: View {
                         .disabled(!hasLink)
 
                         // ONE NATIVE SHARE BUTTON
-                        ShareLink(item: shareURL ?? URL(string: "https://meownotes.teztun.uz")!,
+                        ShareLink(item: shareURL ?? URL(string: "https://meng.teztun.uz")!,
                                   message: Text(shareMessage)) {
                             HStack(spacing: 10) {
                                 Image(systemName: "square.and.arrow.up")

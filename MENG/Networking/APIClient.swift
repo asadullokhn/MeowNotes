@@ -3,7 +3,7 @@ import Foundation
 // Mirrors src/lib/api.js — a thin fetch wrapper that attaches the JWT and
 // surfaces the server's `{ error }` message.
 enum API {
-    static let baseURL = URL(string: "https://meownotes.teztun.uz")!
+    static let baseURL = URL(string: "https://meng.teztun.uz")!
 
     // Gates anonymous guest sign-in. Ships in the binary; the server keeps the
     // matching value in its env.
